@@ -11,3 +11,6 @@ pylint
 pytest
 black
 wikipedia
+textblob
+fire
+pytest-cov

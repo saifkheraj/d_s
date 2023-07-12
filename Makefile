@@ -17,7 +17,7 @@ lint:
 	pylint --disable=R,C *.py
 
 format:
-	black *.py
+	black *.py mylib
 
 test:
 	python -m pytest -vv --cov=hello test_*.py
