@@ -19,6 +19,7 @@ A data loader helps you prepare and load data. Frameworks such as PyTorch have a
 When creating dataloader, we need to pass dataset, batch size (each batch contain samples) and we can optionally set shuffe=True or False . Shuffle=True makes sure that data is randomly shuffled before distributing in batches.
 
  Transformation on Input Text data:
+ 
   1. Tokenizing
   2. Numerical
   3. Resizing
@@ -27,7 +28,9 @@ When creating dataloader, we need to pass dataset, batch size (each batch contai
 We can use tokenizer to tokenize the data. To ensure all sequences follow the same length, we use padding to match the length of the longest sequence. Padding value = 0 for value to use for padding. We also have BatchFirst argument
 
  BatchFirst
+ 
   When BatchFirst is set to True and if we have 2 sentences. For example: Dog is jumping and cat slept
+  
    [<BOS>, dog, is, jumping, <EOS> ]
    [<BOS>, cat, slept,<EOS>,<PAD>  ]
   We added PAD to match the length.
