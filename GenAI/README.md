@@ -31,8 +31,10 @@ We can use tokenizer to tokenize the data. To ensure all sequences follow the sa
  
   When BatchFirst is set to True and if we have 2 sentences. For example: Dog is jumping and cat slept
   
-   [<BOS>, dog, is, jumping, <EOS> ]
-   [<BOS>, cat, slept,<EOS>,<PAD>  ]
+   [.<BOS>, dog, is, jumping, .<EOS> ]
+   
+   [.<BOS>, cat, slept,.<EOS>,.<PAD>  ]
+   
   We added PAD to match the length.
 
   When BatchFirst is set to False, the first dimension in the output tensor will represent the sequence size and the batch size will become the second dimension.
