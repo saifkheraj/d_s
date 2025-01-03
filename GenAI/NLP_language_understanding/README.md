@@ -174,6 +174,10 @@ i_like_cats = embedding_bag(index[0], offsets=torch.tensor([0]))
 print(i_like_cats)
 ```
 
+In tasks like text classification or sentiment analysis, where we care about the overall meaning of the input (not the order of tokens), we can aggregate the embeddings of all tokens into a single fixed-size vector.
+nn.EmbeddingBag combines the embeddings (using mean or sum) for a set of tokens into a single vector, reducing computational complexity.
+
+In tasks like sequence-to-sequence models, language modeling, or machine translation, where the order of tokens matters, we need embeddings for individual tokens at each time step.
 
 
 
