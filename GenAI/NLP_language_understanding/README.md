@@ -1,4 +1,4 @@
-
+<img width="860" alt="image" src="https://github.com/user-attachments/assets/9aaf36c3-52f7-4b2b-9f54-739221706141" />
 It is essential to convert words to numerical features so that machine learning models can process the text. 
 
 One-hot encoding is a method used to convert categorical data into feature vectors that a neural network can understand. 
@@ -86,6 +86,21 @@ Divide the data set into batches
 Perform gradient descent
 
 Update the loss after each batch is processed
+
+**Bigrams**
+Bigram Model
+
+A bigram model predicts the next word based on only the immediate previous word.
+It uses a context size of 1 word.
+
+Trigram Model
+
+A trigram model improves upon the bigram model by considering two previous words to predict the next word.
+
+N-Gram Model
+
+An n-gram model generalizes the bigram and trigram models by considering an arbitrary context size of  n−1 previous words.
+It uses a context size of 2 words.
 
 
 
