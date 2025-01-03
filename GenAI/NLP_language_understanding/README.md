@@ -115,9 +115,66 @@ EmbeddingBag is a class that aggregates embeddings using mean or sum operations.
 
 Example:
 
+Step 1: Dataset
+
 ```python 
 dataset = ["I like cats", "I hate dogs", "I'm impartial to hippos"]
 ```
+Step 2: Tokenize and Build Vocabulary
+
+```python 
+from torchtext.data.utils import get_tokenizer
+from torchtext.vocab import build_vocab_from_iterator
+
+# Initialize tokenizer
+tokenizer = get_tokenizer('spacy', language='en_core_web_sm')
+
+# Generate tokens and build vocabulary
+def yield_tokens(data_iter):
+    for data_sample in data_iter:
+        yield tokenizer(data_sample)
+
+vocab = build_vocab_from_iterator(yield_tokens(dataset))
+
+```
+Step 3: Convert Sentences to Token Indices
+
+```python 
+import torch
+
+# Function to convert sentences to token indices
+input_ids = lambda x: [torch.tensor(vocab(tokenizer(data_sample))) for data_sample in dataset]
+index = input_ids(dataset)
+
+print(index)  # Example output: [tensor([0, 7, 2]), tensor([0, 4, 3]), tensor([0, 1, 6, 8, 5])]
+```
+
+Step 4: Initialize and Apply Embedding Layer
+```python 
+import torch.nn as nn
+
+embedding_dim = 3  # Embedding vector size
+n_embedding = len(vocab)  # Number of unique tokens
+
+# Initialize embedding layer
+embeds = nn.Embedding(n_embedding, embedding_dim)
+
+# Apply embedding layer to first sentence ("I like cats")
+i_like_cats = embeds(index[0])
+print(i_like_cats)
+```
+
+Step 5: Initialize and Apply Embedding Layer
+```python 
+# Initialize embedding bag layer
+embedding_bag = nn.EmbeddingBag(n_embedding, embedding_dim)
+
+# Apply embedding bag to first sentence
+i_like_cats = embedding_bag(index[0], offsets=torch.tensor([0]))
+print(i_like_cats)
+```
+
+
 
 
 
