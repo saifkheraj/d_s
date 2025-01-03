@@ -11,7 +11,9 @@ The weights in an embedding layer are designed to represent the semantic and syn
 
 For example, one hot encoder vector represents = [1,0,0,0,0] ( 1 x V)
 The weight matrix of the embedding layer is of size V x D. So when we perform matrix multiplication of hot encoded vector with weight matrix, we will get embedding vector for that word. (It is just like lookup table)
+
 So first row of the weight matrix contains embedding for word 1, second row for word 2 so goes on. 
+
 xW therefore represents resulting embedding vector for that word.
 
 In terms of Neuron and intuitive understanding from neural network perspective:
@@ -25,14 +27,15 @@ h5 = w15
 Thus the output of the embedding layer is [w11,w12,w13,w14,w15]
 
 The embedding weights are combined to form an embedding matrix. 
+
 The number of columns is the embedding dimension. 
+
 Each row represents a word. Embedding vectors generally have a lower dimensionality compared to one-hot encoded vectors. 
 Reducing the dimensionality simplifies the computational requirements for the model. 
 
-Embedding vs Embedding Bag
 
 
-Summary:
+<h1> Short Summary: </h1>
 
 One-hot encoding converts categorical data into feature vectors. 
 
@@ -86,7 +89,8 @@ Perform gradient descent
 
 Update the loss after each batch is processed
 
-**Bigrams**
+<h1>Bigrams</h1>
+
 Bigram Model
 
 A bigram model predicts the next word based on only the immediate previous word.
@@ -100,6 +104,23 @@ N-Gram Model
 
 An n-gram model generalizes the bigram and trigram models by considering an arbitrary context size of  n−1 previous words.
 It uses a context size of 2 words.
+
+<h1>Important terms</h1>
+
+<h2> PyTorch Embedding and EmbeddingBag </h2>
+
+Embedding: It accepts token indices and produces embedding vectors.
+
+EmbeddingBag is a class that aggregates embeddings using mean or sum operations. Embedding and EmbeddingBag are part of the torch.nn module
+
+Example:
+
+```python 
+dataset = ["I like cats", "I hate dogs", "I'm impartial to hippos"]
+```
+
+
+
 
 
 
