@@ -179,10 +179,37 @@ nn.EmbeddingBag combines the embeddings (using mean or sum) for a set of tokens 
 
 In tasks like sequence-to-sequence models, language modeling, or machine translation, where the order of tokens matters, we need embeddings for individual tokens at each time step.
 
+<h2> Batch function </h2>
+Prepare batches of data for training a CBOW model by generating:
 
+target_list: Indices of target words.
+context_list: Concatenated indices of context words.
+offsets: Starting positions of each context in context_list.
 
+Steps
+Initialize empty lists for target_list, context_list, and offsets.
+Loop through the batch:
+Convert the target word to an index and append it to target_list.
+Tokenize and process the context, convert it to a tensor, and append it to context_list.
+Add the length of the processed context to offsets.
+Convert target_list and offsets to tensors.
+Concatenate all context tensors in context_list.
+Return the tensors (target_list, context_list, offsets) moved to the device.
 
-
-
+```python 
+def collate_batch(batch):
+target_list, context_list, offsets = [], [], [0]
+for _context, _target in batch:
+target_list.append(vocab[_target]) 
+processed_context = torch.tensor(text_pipeline(_context), dtype=torch.int64)
+context_list.append(processed_context)
+offsets.append(processed_context.size(0))
+target_list = torch.tensor(target_list, dtype=torch.int64)
+offsets = torch.tensor(offsets[:-1]).cumsum(dim=0)
+context_list = torch.cat(context_list)
+return target_list.to(device), context_list.to(device), offsets.to(device)
+BATCH_SIZE = 64 # batch size for training
+dataloader_cbow = DataLoader(cobw_data, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_batch)
+```
 
 
