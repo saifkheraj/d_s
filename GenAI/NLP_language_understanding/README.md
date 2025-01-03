@@ -301,6 +301,15 @@ The context (surrounding words) is used to predict the target word.
 **Skip-Gram:**
 The target word is used to predict the context (surrounding words).
 
+**Sequence-to-sequence models and RNN network difficulty**
 
+Sequence-to-sequence models
+
+Sequence-to-sequence (Seq2Seq) models, such as those used in machine translation and text summarization, are generally more difficult to train compared to simple recurrent neural networks (RNNs). This is because Seq2Seq models require learning complex relationships between input and output sequences, often with varying lengths.
+Seq2Seq models typically involve an encoder-decoder architecture, which adds complexity.
+
+Cross-entropy loss
+
+In Seq2Seq models, the cross-entropy loss is commonly used to compare the predicted output sequence with the true target sequence. The goal is to minimize this loss during training to improve the accuracy of the model’s predictions.
 
 
