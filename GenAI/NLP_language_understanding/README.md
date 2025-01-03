@@ -272,3 +272,27 @@ for line in lines:
     max_length = max(max_length, len(tokenized_line))
 ```
 
+<h2> Special tokens in PyTorch: pad </h2>
+
+pad token to ensure all sentences have the same length.
+
+<h2> collate_fn </h2>
+
+Processes the list of samples to form a batch. The batch argument is a list of all your samples.
+
+```python 
+def collate_fn(batch):
+    target_list, context_list = [], []
+    for _context, _target in batch:
+        target_list.append(vocab[_target])
+        context_list.append(vocab[_context])
+        target_list = torch.tensor(target_list, dtype=torch.int64)
+        context_list = torch.tensor(context_list, dtype=torch.int64)
+    return target_list.to(device), context_list.to(device)
+```
+
+
+
+
+
+
