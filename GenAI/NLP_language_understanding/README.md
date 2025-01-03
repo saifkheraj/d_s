@@ -120,6 +120,7 @@ Step 1: Dataset
 ```python 
 dataset = ["I like cats", "I hate dogs", "I'm impartial to hippos"]
 ```
+
 Step 2: Tokenize and Build Vocabulary
 
 ```python 
@@ -211,5 +212,63 @@ return target_list.to(device), context_list.to(device), offsets.to(device)
 BATCH_SIZE = 64 # batch size for training
 dataloader_cbow = DataLoader(cobw_data, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collate_batch)
 ```
+<h2> Glove </h2>
 
+https://miro.medium.com/v2/resize:fit:1354/format:webp/1*JZ4w_OxwGkt_W-814LB9Xw.png![image](https://github.com/user-attachments/assets/561b1954-c6c3-4b57-981b-573f2f64db46)
+
+Leverages large-scale data for word embeddings. It can be integrated into PyTorch for improved NLP tasks such as classification.
+
+Pre-trained Word Embeddings:
+
+GloVe provides pre-trained word embeddings, meaning each word is already mapped to a dense vector representation based on a large corpus (Wikipedia + Gigaword, in the case of 6B).
+
+1. Creating a Vocabulary:
+
+The GloVe embeddings contain a set of known words and their corresponding indices (via stoi). By using this mapping, a vocab object is created, which:
+
+2. Maps words to indices (via stoi).
+
+Maps indices to words (via itos, implicit in PyTorch’s vocab object).
+
+Can handle special tokens like '<unk>' (unknown) and '<pad>' (padding).
+
+3. Handling Unknown Words:
+
+Since GloVe embeddings don’t cover every possible word (only the ones in the training corpus), any word outside this set is treated as 
+unknown. 
+
+<h2> vocab </h2>
+
+vocab maps tokens (words) to their indices using a pre-trained GloVe vocabulary.
+If a word is not found in the vocabulary, it is replaced with the index of '<unk>'.
+This mapping is essential for converting tokenized text into numerical input for machine learning models.
+
+vocab is part of the PyTorch Text library (torchtext).
+
+<h2> Special tokens in PyTorch: eos and bos </h2>
+
+For Sequence Models:
+
+Models like RNNs, LSTMs, and Transformers process sequences token by token. The <bos> token tells the model explicitly when the sequence starts, and the <eos> token signals when it should stop predicting.
+
+For Consistent Input Handling:
+
+During training, having a clear start (<bos>) and end (<eos>) helps the model learn better by providing structure to the input 
+sequences.
+
+For Decoding (Inference Time):
+
+In tasks like machine translation or text generation, the model generates one token at a time until it predicts the <eos> token, which tells it to stop generating further tokens.
+
+
+```python 
+tokenizer_en = get_tokenizer('spacy', language='en_core_web_sm')
+tokens = []
+max_length = 0
+for line in lines:
+    tokenized_line = tokenizer_en(line)
+    tokenized_line = ['<bos>'] + tokenized_line + ['<eos>']
+    tokens.append(tokenized_line)
+    max_length = max(max_length, len(tokenized_line))
+```
 
