@@ -1,4 +1,3 @@
-<img width="860" alt="image" src="https://github.com/user-attachments/assets/9aaf36c3-52f7-4b2b-9f54-739221706141" />
 It is essential to convert words to numerical features so that machine learning models can process the text. 
 
 One-hot encoding is a method used to convert categorical data into feature vectors that a neural network can understand. 
