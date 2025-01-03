@@ -7,7 +7,7 @@ Concept of Embedding Weights:
 
 The weights in an embedding layer are designed to represent the semantic and syntactic properties of each word in the vocabulary.
 
-Embedding Vector:
+<h1> Embedding Vector:</h1>
 
 For example, one hot encoder vector represents = [1,0,0,0,0] ( 1 x V)
 The weight matrix of the embedding layer is of size V x D. So when we perform matrix multiplication of hot encoded vector with weight matrix, we will get embedding vector for that word. (It is just like lookup table)
