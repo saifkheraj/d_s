@@ -291,7 +291,15 @@ def collate_fn(batch):
     return target_list.to(device), context_list.to(device)
 ```
 
+<h2> Word2vec</h2>
+In the Word2Vec model, there are two main approaches:
 
+**Continuous Bag of Words (CBOW):**
+
+The context (surrounding words) is used to predict the target word.
+
+**Skip-Gram:**
+The target word is used to predict the context (surrounding words).
 
 
 
