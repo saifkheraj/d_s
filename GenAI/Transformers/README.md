@@ -51,4 +51,28 @@ Adding Word Embedding + Positional Encoding: For each word, we add the word embe
 
 Now, each word not only has its meaning (from word embedding) but also its position in the sentence (from positional encoding).
 
+#### Why This Helps the Model?
+
+If we change the order of the words:
+
+"Cats love she"
+
+Even though the words are the same, their positional encoding will be different, so the model will know it’s a different sentence because the position tags will have changed.
+
+For example:
+
+"Cats" will now have the position tag for the 1st word.
+
+"Love" will have the position tag for the 2nd word.
+
+"She" will have the position tag for the 3rd word.
+
+This way, the model understands both the words and their correct order, which is crucial for tasks like language translation or text summarization.
+
+Summary (in Simple Words)
+
+ - Word embeddings tell the model what each word means.
+ - Positional encoding tells the model where each word is in the sentence.
+ - Together, they help the model understand both the meaning and order of the words, which is essential for processing natural language.
+
 
