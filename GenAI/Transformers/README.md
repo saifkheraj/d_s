@@ -145,6 +145,7 @@ The resulting vector is then multiplied by the value matrix (V).
 
 Since only the third element is non-zero, the product will retrieve the third row of V, which is [0, 0, 1, 0].
 
+
 This corresponds to the English word "under".
 
 The above is a simple illustration of how attention works. In real-world applications, instead of using one-hot vectors, word embeddings are used, and the process involves additional steps like applying a softmax function to focus on the most relevant key-value pairs.
