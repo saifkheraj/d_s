@@ -77,75 +77,57 @@ Summary (in Simple Words)
 
 ## Query Key and Value
 
-### Identical Query and Key Vectors
 
-In this simplified setup, query vectors (Q) are identical to key vectors (K).
+### Key Steps in the Attention Mechanism
 
-Both the query vectors and key vectors are represented as one-hot encoded vectors:
+### Input Processing:
 
-A one-hot encoded vector is a vector where only one element is 1, and the rest are 0. Each word has a unique one-hot vector.
-For example, the French word "chat" might be represented by the vector [1, 0, 0, 0], and the word "sous" by [0, 0, 1, 0].
+An input sentence (e.g., "The bank of the river was flooded") is fed into the model.
 
-#### Key Matrix
-```
-K = [
-    [1, 0, 0, 0],  # "chat"
-    [0, 1, 0, 0],  # "est"
-    [0, 0, 1, 0]   # "sous"
-]
+Each word in the sentence is tokenized and converted into an embedding vector.
 
-```
-Since the query vectors are identical to the key vectors, the query matrix (Q) will look the same as the key matrix.
+For each word (or token), three vectors are created by multiplying the embedding vector with three learned matrices:
 
-#### Value Matrix (V)
+Query vector (Q)
 
-The value vectors represent the English translations of the French words, also using one-hot encoded vectors.
+Key vector (K)
 
-The value vectors represent the English translations of the French words, also using one-hot encoded vectors.
+Value vector (V)
 
-Each row in the value matrix (V) corresponds to the one-hot encoded English word
+### Generating Attention Scores:
 
-```
-V = [
-    [1, 0, 0, 0],  # "cat"
-    [0, 1, 0, 0],  # "is"
-    [0, 0, 1, 0]   # "under"
-]
-```
+To determine how much attention each word should pay to other words, the model:
 
-####  Aligning Keys and Values
+Takes the query vector of the current word (e.g., "bank").
 
-The key matrix K and the value matrix V are arranged so that the same row in both matrices corresponds to the same word pair (French-English translation).
+Multiplies it with the key vectors of all other words in the sentence using a dot product to compute attention scores.
 
-For example:
- - The first row of K corresponds to "chat" and aligns with the first row of V, which corresponds to "cat".
- - The second row of K corresponds to "est" and aligns with the second row of V, which corresponds to "is".
- - The third row of K corresponds to "sous" and aligns with the third row of V, which corresponds to "under".
+A high attention score indicates that a word is highly relevant in the given context (e.g., "river" and "flooded" are highly relevant to "bank" in this example).
 
+Using Attention Scores:
 
-#### How Translation Works
+The attention scores are used to weigh the value vectors of the corresponding words.
 
-Input the Query (French Word):
+The model combines the weighted value vectors to produce a context-aware representation of the current word.
 
-Suppose we want to translate the French word "sous".
+For example, in the sentence "The bank of the river was flooded," the attention mechanism helps the model understand that "bank" refers to a river bank and not a financial institution, based on its relationship with "river" and "flooded."
 
-The query vector for "sous" is [0, 0, 1, 0].
+Understanding Query, Key, and Value Matrices
 
-Compute the Dot Product:
+### Key Matrix (K):
+Learns distinguishing features of each word, helping the model compare words and identify relevant ones.
 
-The query vector is multiplied by the transposed key matrix (Kᵀ).
+### Query Matrix (Q):
+Learns parameters that, when multiplied with key vectors, produce meaningful attention scores.
 
-Since the vectors are one-hot encoded, the dot product will result in a vector where all elements are 0 except for the element corresponding to the matching key.
+### Value Matrix (V):
+Stores foundational knowledge about each word (e.g., meanings of "bank") and is refined by attention scores to produce context-aware word representations.
 
-For "sous", the dot product will result in [0, 0, 1, 0], indicating that the third row is the relevant key.
+### Purpose of the Attention Mechanism
 
-Select the Corresponding Value:
+The attention mechanism allows the model to create a context-aware representation of each word in the sentence.
 
-The resulting vector is then multiplied by the value matrix (V).
+This helps the model disambiguate words with multiple meanings (like "bank") by focusing on other relevant words in the context.
 
-Since only the third element is non-zero, the product will retrieve the third row of V, which is [0, 0, 1, 0].
+The final output is a set of refined, context-aware vectors for each word, which the model uses for further tasks like translation or text generation.
 
-
-This corresponds to the English word "under".
-
-The above is a simple illustration of how attention works. In real-world applications, instead of using one-hot vectors, word embeddings are used, and the process involves additional steps like applying a softmax function to focus on the most relevant key-value pairs.
