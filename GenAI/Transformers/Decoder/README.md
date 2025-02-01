@@ -1,3 +1,143 @@
+📌 Understanding Transformer Architecture for Language Translation 🚀
+
+🔹 1️⃣ Why Are Transformers Used for Language Translation?
+
+Problems with Older Models (RNNs & LSTMs)
+
+Sequential Processing → Translates word by word, making it slow.
+
+Loss of Long-Range Context → Struggles with long sentences.
+
+Advantages of Transformers
+
+✅ Processes the entire sequence at once → Faster and more accurate.
+
+✅ Captures long-range dependencies → Translates more contextually.
+
+✅ Uses Self-Attention → Focuses on important words, not just nearby words.
+
+
+🔹 2️⃣ How Does a Transformer Work?
+
+A Transformer Model consists of two main parts:
+
+1️⃣ Encoder → Processes the source sentence (input language).
+
+2️⃣ Decoder → Generates the translated sentence (output language).
+
+📌 Translation Flow:
+
+Input Sentence → Encoder → Memory → Decoder → Output Sentence
+
+🔹 3️⃣ Step-by-Step: Encoder Process
+
+📌 Goal: Convert input text into a rich contextual representation (memory).
+
+✅ Step 1: Tokenization
+
+Converts words into tokens (numbers).
+
+✅ Step 2: Word Embeddings
+
+Tokens are mapped to word embeddings (vector representations).
+
+✅ Step 3: Positional Encoding
+
+Since transformers don’t process words sequentially, positional encoding helps them understand word order.
+
+✅ Step 4: Multi-Head Attention
+
+Allows BERT to focus on different words in a sentence simultaneously.
+
+Example: "He went to Paris. It is beautiful."
+
+The model learns that "It" refers to "Paris".
+
+✅ Step 5: Normalization & Feedforward Layer
+
+Normalization stabilizes training, and the feedforward layer refines the word representations.
+
+✅ Step 6: Memory Output
+
+The final contextual embeddings (memory) are passed to the decoder.
+
+🔹 4️⃣ Step-by-Step: Decoder Process
+
+📌 Goal: Use memory from the encoder to generate the translated sentence.
+
+✅ Step 1: Start with [BOS] (Beginning of Sentence) Token
+
+The decoder starts with a special token [BOS], representing the start of the translation.
+
+✅ Step 2: Embeddings & Positional Encoding
+
+The [BOS] token is converted into an embedding, just like in the encoder.
+
+✅ Step 3: Masked Self-Attention
+
+The model only attends to previous words while predicting the next word (to prevent "cheating").
+
+✅ Step 4: Cross-Attention (Important!)
+
+The decoder attends to the encoder’s memory output, learning which parts of the input sentence are relevant.
+
+Example: If translating "Hello, how are you?" into French:
+
+"Hello" → "Bonjour" (Decoder attends to "Hello" in the input)
+
+"how are" → "comment allez" (Decoder attends to "how are")
+
+✅ Step 5: Linear Layer & Softmax
+
+The final context vector is mapped to a probability distribution over vocabulary words.
+
+The model selects the most probable next word.
+
+✅ Step 6: Recursive Translation
+
+The predicted word is fed back into the decoder, and the process repeats until the [EOS] (End of Sentence) token is reached.
+
+📌 Example Translation Process:
+
+Input:   "How are you?"
+
+Step 1:  [BOS] → "Comment"
+
+Step 2:  "Comment" → "allez"
+
+Step 3:  "Comment allez" → "vous"
+
+Step 4:  "Comment allez vous" → [EOS]
+
+Output:  "Comment allez-vous?"
+
+🔹 5️⃣ Role of Attention in Translation
+
+✅ Self-Attention (Encoder & Decoder)
+
+Helps understand word relationships (e.g., "he" refers to "John").
+
+✅ Cross-Attention (Decoder)
+
+Connects input & output → Ensures accurate translation alignment.
+
+📌 Example: How Cross-Attention Helps in Translation
+
+Input: "I go to school."
+
+Output: "Je vais à l'école."
+
+Cross-attention links "I" → "Je", "go" → "vais", "to school" → "à l'école".
+
+
+
+
+
+
+
+### Output of Decoder:
+
+
 1️⃣ What is Top-K Sampling?
 
 🔹 "Keep the K most probable words and ignore the rest"
