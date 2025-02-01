@@ -197,6 +197,174 @@ Final Architecture
 
 ![Uploading image.png…]()
 
+** Detailed BERT **
+
+1️⃣ Understanding Tokenization in BERT
+
+Before feeding text into BERT, the input must be tokenized.
+
+BERT uses WordPiece Tokenization, which splits words into subwords and adds special markers (##) to reduce vocabulary size.
+The BERT vocabulary size is limited to 30,000 tokens, making processing more efficient.
+
+📌 Example of WordPiece Tokenization:
+
+Original Word	Tokenized Form
+
+"playing"	["play", "##ing"]
+
+"running"	["run", "##ning"]
+
+"unhappiness"	["un", "##happiness"]
+
+🔹 Why does BERT do this?
+
+If BERT stored separate embeddings for every word variation (play, playing, played), the vocabulary size would be too large.
+
+Instead, it splits words into smaller pieces, reducing memory usage and making the model generalize better.
+
+2️⃣ Special Tokens Used in BERT
+BERT adds special tokens to process sentences correctly:
+
+Special Token	Purpose
+
+[CLS]	Marks the start of the sentence. Helps in classification tasks.
+
+[SEP]	Separates two sentences in Next Sentence Prediction (NSP).
+
+[MASK]	Used during Masked Language Modeling (MLM).
+
+📌 Example:
+
+For two input sentences:
+
+"My dog is cute." and "He likes playing."
+
+After tokenization, BERT transforms it into:
+
+[CLS] My dog is cute [SEP] He likes play ##ing [SEP]
+
+3️⃣ Types of Embeddings in BERT
+
+Once the input is tokenized, BERT transforms it into embeddings using three types of embeddings:
+
+Embedding Type	Purpose
+ - Token Embedding	Converts each token into a vector.
+ - Segment Embedding	Tells the model whether a token belongs to sentence A or sentence B.
+ - Positional Embedding	Helps the model understand word order and position in the sentence.
+ - These embeddings are added together to form a final embedding for each word.
+   
+4️⃣ Token Embeddings: Converting Words into Vectors
+
+ - Each token is converted into a fixed-size vector representation using pre-trained embeddings.
+ - In BERT-base, the embedding size is 768, and in BERT-large, it is 1024.
+ - Token embeddings are learned during training and capture semantic meaning.
+
+📌 Example of Token Embeddings (BERT-base, 768-dimensions)
+
+"My"      → [0.12, 0.45, ..., 0.78] (768 values)
+
+"dog"     → [0.23, 0.56, ..., 0.89]
+
+"is"      → [0.34, 0.67, ..., 0.91]
+
+"cute"    → [0.41, 0.78, ..., 0.94]
+
+5️⃣ Segment Embeddings: Differentiating Sentences
+
+BERT can process two sentences at once (useful for Next Sentence Prediction tasks).
+Segment embeddings help BERT understand which tokens belong to which sentence.
+
+Sentence A gets Segment ID = 0
+
+Sentence B gets Segment ID = 1
+
+📌 Example:
+
+[CLS] My dog is cute [SEP] He likes play ##ing [SEP]
+
+  (0)  0   0   0   0   0   (1)  1   1     1     1   (1)
+
+All tokens from the first sentence = 0
+
+All tokens from the second sentence = 1
+
+🔹 Why are segment embeddings useful?
+
+They allow BERT to distinguish between two different sentences, which is critical for Next Sentence Prediction tasks.
+
+6️⃣ Positional Embeddings: Understanding Word Order
+
+Unlike RNNs, transformers don’t have a built-in sense of word order.
+
+BERT adds positional embeddings to give a sense of word position.
+
+These embeddings are trainable and have the same size as token embeddings (768 for BERT-base).
+📌 Example:
+
+"My"      → Position 0
+
+"dog"     → Position 1
+
+"is"      → Position 2
+
+"cute"    → Position 3
+
+"[SEP]"   → Position 4
+
+"He"      → Position 5
+
+"likes"   → Position 6
+
+"playing" → Position 7
+
+Each position has a unique embedding.
+
+This helps BERT understand that "My dog" is different from "dog My".
+
+🔹 Why are positional embeddings useful?
+
+They help the model understand sentence structure and grammar.
+
+7️⃣ Final Embedding Calculation
+
+Each token’s final embedding is calculated by adding:
+
+✅ Token Embedding
+
+✅ Segment Embedding
+
+✅ Positional Embedding
+
+📌 Formula for Final Embedding
+
+Final Embedding = Token Embedding + Segment Embedding + Positional Embedding
+
+9️⃣ Summary: How BERT Prepares Input
+
+1️⃣ Tokenization: Splits words using WordPiece Tokenizer.
+
+2️⃣ Add Special Tokens: [CLS] at the beginning, [SEP] at sentence boundaries.
+
+3️⃣ Convert Tokens to Embeddings: Generate Token Embeddings, Segment Embeddings, and Positional Embeddings.
+
+4️⃣ Sum All Embeddings: Final embedding = Token Embedding + Segment Embedding + Positional Embedding.
+
+5️⃣ Pass to Transformer Encoder: The processed input is now ready for BERT’s multi-head attention layers.
+
+🔹 Final Takeaway
+
+✅ BERT uses WordPiece Tokenization to handle vocabulary efficiently.
+
+✅ Token, Segment, and Positional Embeddings are combined to form final embeddings.
+
+✅ Segment Embeddings help distinguish between two sentences.
+
+✅ Positional Embeddings help BERT understand word order.
+
+✅ Final embeddings are passed into the Transformer Encoder for further processing.
+
+📌 These embeddings are the foundation of BERT’s ability to understand text deeply.
+
 
 
 ## Positional Encoding
