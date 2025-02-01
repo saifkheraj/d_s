@@ -193,6 +193,12 @@ The classification head consists of:
 ✅ A Softmax Activation Function (to compute probabilities).
 
 
+Final Architecture
+
+![Uploading image.png…]()
+
+
+
 ## Positional Encoding
 
 Without positional encoding, the Transformer would treat the sentence "I like cats" the same as "cats like I", since it processes all tokens in parallel and lacks the sequential nature of RNNs. By adding positional encodings, the model can learn the relative or absolute position of tokens in a sequence, which is crucial for understanding language.
@@ -323,6 +329,10 @@ Stores foundational knowledge about each word (e.g., meanings of "bank") and is 
 The attention mechanism allows the model to create a context-aware representation of each word in the sentence.
 
 This helps the model disambiguate words with multiple meanings (like "bank") by focusing on other relevant words in the context.
+
+
+
+
 
 The final output is a set of refined, context-aware vectors for each word, which the model uses for further tasks like translation or text generation.
 
