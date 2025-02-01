@@ -1,3 +1,117 @@
+## Bert
+
+Summary: Understanding BERT and Masked Language Modeling (MLM)
+
+1️⃣ Introduction to BERT
+
+BERT (Bidirectional Encoder Representations from Transformers) was developed by Google and has revolutionized NLP by providing deep contextual understanding of text.
+It is pre-trained using self-supervised learning on large text datasets.
+Unlike GPT (which is a decoder-only model), BERT is an encoder-only model.
+It is not designed for text generation but excels at language understanding tasks like:
+
+✅ Text Summarization
+
+✅ Question Answering
+
+✅ Sentiment Analysis
+
+2️⃣ BERT’s Encoder-Only Architecture
+
+BERT processes entire sequences of text simultaneously rather than in an autoregressive manner like GPT.
+This allows BERT to understand the full context of a sentence, making it more effective for tasks requiring deep comprehension.
+Unlike GPT, which can only consider the words that came before a given token, BERT looks at both past and future words, making it bi-directional.
+
+🔹 Example:
+
+For the sentence:
+
+📝 "The farmers cultivate the ___ to grow crops."
+
+A decoder model (like GPT) would only see: "The farmers cultivate the"
+BERT sees the full sentence, helping it make a better guess.
+
+3️⃣ Masked Language Modeling (MLM) - How BERT Learns
+BERT is trained using Masked Language Modeling (MLM), where random words in a sentence are replaced with a special [MASK] token.
+The model then tries to predict the masked words using surrounding context.
+
+🔹 Example:
+
+Input: "IBM [MASK] me BERT."
+
+BERT Prediction: "IBM taught me BERT."
+
+Unlike decoder models, which only have access to past words, BERT uses both left and right context to make better predictions.
+
+4️⃣ Why MLM Uses a Mix of Masking, Randomization, and Retention
+
+If BERT only used the [MASK] token during training, it might struggle during fine-tuning since [MASK] doesn't appear in real-world tasks.
+To reduce this gap, during training:
+
+✅ 80% of selected words are replaced with [MASK]
+
+✅ 10% are replaced with a random word
+
+✅ 10% remain unchanged
+
+🔹 Example (Training Data Handling)
+
+Given sentence:
+
+📝 "The cat sat on the mat."
+
+85% of words remain unchanged
+
+For the other 15%:
+
+✅ 80% → Replace with [MASK] ("The [MASK] sat on the mat.")
+
+✅ 10% → Replace with random word ("The dog sat on the mat.")
+
+✅ 10% → Keep unchanged for prediction
+
+📌 This ensures BERT learns robust word relationships rather than just memorizing [MASK].
+
+
+5️⃣ BERT’s Prediction Process
+
+1️⃣ BERT encodes the input and generates contextual embeddings for each word.
+
+2️⃣ These embeddings pass through a final layer to generate logits (numerical values representing predicted words).
+
+3️⃣ The masked word is identified by selecting the word with the highest logit value.
+
+
+🔹 Example:
+
+Input: "She is a [MASK] engineer."
+
+Prediction based on logits: "She is a software engineer."
+
+This method allows BERT to deeply understand language structure and word relationships.
+
+Applications of BERT
+
+✅ Text Classification (Sentiment Analysis, Spam Detection, etc.)
+
+✅ Named Entity Recognition (NER) for extracting names, places, organizations
+
+✅ Question Answering (e.g., powering search engines and chatbots)
+
+✅ Machine Reading Comprehension (Summarization, Context Extraction)
+
+✅ Semantic Similarity & Search (Used in Google Search algorithms)
+
+🔹 Final Recap
+
+BERT is an encoder-only model, meaning it processes entire text sequences at once.
+It uses Masked Language Modeling (MLM), where words are randomly masked and predicted.
+Unlike GPT, BERT is bi-directional, meaning it considers both past and future words for context.
+MLM training uses a mix of masking, randomization, and unchanged words to improve performance.
+BERT is best suited for tasks like classification, sentiment analysis, and question answering, but not text generation.
+
+✅ BERT revolutionized NLP by providing deep contextual understanding, making it a foundation for many modern AI applications! 🚀
+
+
 ## Positional Encoding
 
 Without positional encoding, the Transformer would treat the sentence "I like cats" the same as "cats like I", since it processes all tokens in parallel and lacks the sequential nature of RNNs. By adding positional encodings, the model can learn the relative or absolute position of tokens in a sequence, which is crucial for understanding language.
