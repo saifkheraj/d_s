@@ -1,5 +1,8 @@
 ## Bert
 
+<img width="164" alt="image" src="https://github.com/user-attachments/assets/d8ffe8d8-a3c0-4600-b18a-002b867e52c0" />
+
+
 Summary: Understanding BERT and Masked Language Modeling (MLM)
 
 1️⃣ Introduction to BERT
