@@ -18,6 +18,8 @@ It is not designed for text generation but excels at language understanding task
 
 ✅ Sentiment Analysis
 
+
+
 2️⃣ BERT’s Encoder-Only Architecture
 
 BERT processes entire sequences of text simultaneously rather than in an autoregressive manner like GPT.
@@ -34,7 +36,9 @@ A decoder model (like GPT) would only see: "The farmers cultivate the"
 BERT sees the full sentence, helping it make a better guess.
 
 3️⃣ Masked Language Modeling (MLM) - How BERT Learns
+
 BERT is trained using Masked Language Modeling (MLM), where random words in a sentence are replaced with a special [MASK] token.
+
 The model then tries to predict the masked words using surrounding context.
 
 🔹 Example:
@@ -48,6 +52,7 @@ Unlike decoder models, which only have access to past words, BERT uses both left
 4️⃣ Why MLM Uses a Mix of Masking, Randomization, and Retention
 
 If BERT only used the [MASK] token during training, it might struggle during fine-tuning since [MASK] doesn't appear in real-world tasks.
+
 To reduce this gap, during training:
 
 ✅ 80% of selected words are replaced with [MASK]
@@ -197,7 +202,7 @@ Final Architecture
 
 ![Uploading image.png…]()
 
-** Detailed BERT **
+### Detailed BERT Part 1
 
 1️⃣ Understanding Tokenization in BERT
 
@@ -364,6 +369,176 @@ Final Embedding = Token Embedding + Segment Embedding + Positional Embedding
 ✅ Final embeddings are passed into the Transformer Encoder for further processing.
 
 📌 These embeddings are the foundation of BERT’s ability to understand text deeply.
+
+### Detailed BERT Part 2
+
+1️⃣ How Input is Processed in BERT?
+
+Before we look at the output, let's quickly recap how input is prepared:
+
+✅ WordPiece Tokenization: Splits words into smaller subwords (e.g., "playing" → ["play", "##ing"]).
+
+✅ Embeddings: Three embeddings are added together to form a final embedding:
+
+Token Embeddings (word representation)
+
+Segment Embeddings (distinguish between two sentences)
+
+Positional Embeddings (capture word position)
+
+📌 Example of Input Processing:
+
+[CLS] My dog is cute [SEP] He likes play ##ing [SEP]
+
+[CLS]: Classification token (used for sentence classification tasks)
+
+[SEP]: Separator token (used to distinguish different sentences in Next Sentence Prediction)
+
+
+2️⃣ Understanding BERT's Output (Context Vectors)
+
+After processing through multi-head attention layers, BERT outputs contextual word vectors.
+These vectors represent the meaning of each word in the given context.
+Instead of word vectors, we call these "context vectors" because they incorporate surrounding words’ meaning.
+
+📌 Example (BERT-base, 768-dimensional embeddings)
+
+For the sentence "My dog is cute", BERT outputs:
+
+"My"      → [0.12, 0.45, ..., 0.78] (768 values)
+
+"dog"     → [0.23, 0.56, ..., 0.89]
+
+"is"      → [0.34, 0.67, ..., 0.91]
+
+"cute"    → [0.41, 0.78, ..., 0.94]
+
+Each word now has a meaning that depends on the sentence (e.g., "bank" in "river bank" vs. "money bank").
+
+🔹 Special Context Vector: [CLS] Token
+
+The [CLS] token's vector represents the meaning of the entire sentence.
+
+This is used in classification tasks (e.g., Sentiment Analysis, Next Sentence Prediction).
+
+3️⃣ Predicting Masked Words (Masked Language Modeling - MLM)
+
+BERT is trained using Masked Language Modeling (MLM), where it predicts missing words in a sentence.
+
+📌 Example of MLM Task:
+
+📝 Original Sentence: "Rome is the capital of Italy."
+
+📝 Training Input: "Rome is the [MASK] of Italy."
+
+📝 BERT’s Prediction: "capital"
+
+How MLM Works Internally
+
+1️⃣ The input goes through BERT → Generates context vectors for each token.
+
+2️⃣ A classification head (fully connected layer + Softmax) is applied on the masked token position.
+
+3️⃣ Softmax generates probabilities over 30,000 words in BERT's vocabulary.
+
+4️⃣ The word with the highest probability is selected as the predicted word.
+
+📌 Example:
+
+For [MASK] in "Rome is the [MASK] of Italy.", BERT predicts:
+
+Word	Probability
+
+capital	87% ✅
+
+city	5% ❌
+
+government	3% ❌
+
+republic	1% ❌
+
+BERT chooses "capital" because it has the highest probability.
+
+4️⃣ Next Sentence Prediction (NSP)
+
+In NSP tasks, BERT determines if two sentences logically follow each other.
+
+Uses [CLS] token’s context vector for prediction.
+
+📌 Example of NSP Task:
+
+Sentence A	Sentence B	Label
+
+"I love football."	"It is a great sport."	Next Sentence (✓)
+
+"I love football."	"The sky is blue today."	Not Next Sentence (✗)
+
+How NSP Works Internally
+
+1️⃣ The [CLS] token’s vector is used for classification.
+
+2️⃣ A classification head applies a softmax layer with 2 output neurons:
+
+"Is Next" (1)
+"Not Next" (0)
+
+3️⃣ The neuron with the highest probability is selected.
+
+📌 Example:
+
+For "I love football." → "It is a great sport.", BERT predicts:
+
+Label	Probability
+
+Next Sentence (✓)	92% ✅
+
+Not Next Sentence (✗)	8% ❌
+
+5️⃣ Understanding BERT's Loss Functions
+
+BERT is trained using two different loss functions, depending on the task:
+
+🔹 Cross-Entropy Loss for MLM
+Since MLM is a multi-class classification (choosing 1 word from 30,000), BERT uses Cross-Entropy Loss.
+
+If the masked word is "capital", the true label vector is:
+[0, 0, 1, 0, 0, ...]  (One-hot encoding)
+
+If BERT predicts "capital" with 87% confidence, the loss is small.
+
+If it predicts "city" (5% confidence), the loss is high, leading to weight updates through backpropagation.
+
+🔹 Binary Cross-Entropy for NSP
+
+Since NSP is a binary classification task (Next / Not Next Sentence), BERT uses Binary Cross-Entropy Loss.
+
+6️⃣ Summary of BERT’s Output Processing
+
+📌 How BERT Processes Output
+
+1️⃣ Generates contextual word vectors → 768-dim vectors (BERT-base).
+
+2️⃣ For MLM (Masked Words) → Applies Softmax over 30,000 words and predicts the missing word.
+
+3️⃣ For NSP (Sentence Matching) → Uses the [CLS] token’s vector to classify if two sentences are related.
+
+4️⃣ Uses Cross-Entropy Loss for MLM and Binary Cross-Entropy for NSP to fine-tune the model.
+
+5️⃣ Backpropagation updates weights, improving predictions over time.
+
+📌 Key Takeaways
+
+✅ BERT’s output consists of contextual word vectors, not raw words.
+
+✅ MLM predicts missing words by applying a classification head + Softmax.
+
+✅ NSP uses the [CLS] token’s vector to classify sentence relationships.
+
+✅ Cross-Entropy Loss is used for MLM, Binary Cross-Entropy for NSP.
+
+✅ Weight updates are done through backpropagation, improving BERT’s understanding of language.
+
+🚀 This completes the detailed explanation of BERT’s output processing!
 
 
 
