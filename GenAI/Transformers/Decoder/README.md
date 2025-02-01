@@ -86,9 +86,13 @@ They can be used together (Encoder-Decoder Models) or separately as standalone c
 Examples:
 
 ✅ BERT (Bidirectional Encoder Representations from Transformers)
+
 ✅ XLNet
+
 ✅ ALBERT
+
 ✅ ELECTRA
+
 ✅ DistilBERT
 
 Applications:
