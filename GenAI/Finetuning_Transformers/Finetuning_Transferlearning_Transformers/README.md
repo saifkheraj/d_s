@@ -58,6 +58,8 @@ Example: For sentiment analysis, each sentence is labeled as "positive" or "nega
  - Reinforcement Learning from Human Feedback (RLHF): Humans provide feedback on model outputs, and the model learns to improve based on this feedback.
 Example: Humans score chatbot responses, and the model learns to provide better responses over time.
 
+We can use hybrid finetuning that combines all three.
+
 #### Direct Preference Optimization (DPO):
 
 What is DPO?
