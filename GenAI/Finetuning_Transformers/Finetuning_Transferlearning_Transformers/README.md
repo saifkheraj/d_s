@@ -60,7 +60,9 @@ Example: Humans score chatbot responses, and the model learns to provide better 
 
 We can use hybrid finetuning that combines all three.
 
-#### Direct Preference Optimization (DPO):
+
+
+#### Direct Preference Optimization (DPO) - Based on Human preferences:
 
 What is DPO?
 
