@@ -68,3 +68,31 @@ Since full fine-tuning is too expensive and selective fine-tuning is ineffective
  - LoRA (Low-Rank Adaptation) – Adds low-rank matrices to modify key layers while keeping most weights frozen.
  - Adapters – Inserts small trainable layers between transformer blocks to specialize knowledge.
  - Prompt Tuning – Uses learnable embeddings instead of modifying weights.
+
+
+## 2. Additive Fine-Tuning
+### Concept
+Instead of modifying the original model, we add new task-specific layers to it. The pre-trained parameters remain unchanged, which means we don’t disturb the model’s general knowledge.
+
+### Example
+Imagine you want to train a pre-trained chatbot (like ChatGPT) to specialize in legal advice.
+
+Instead of changing the existing model, you add new layers on top of it and train only those layers on legal text.
+
+### How It Works
+A common technique in transformers is Adapters:
+
+ - Adapters are small neural network layers inserted between transformer layers.
+ - Only adapter layers are trained, while the original model remains frozen.
+ - These layers contain down-projection → transformation → up-projection, which makes them memory-efficient.
+ - Advantages
+ - Saves memory since only adapters are stored.
+ - Can be used for multiple tasks (each task gets its own adapter without affecting others).
+
+### Original Transformer
+<img width="365" alt="image" src="https://github.com/user-attachments/assets/6718b917-30d6-4a69-9e64-6feb9ee28dd8" />
+
+### With Adapter Module 
+
+<img width="362" alt="image" src="https://github.com/user-attachments/assets/e73aec3d-f339-43f3-88d2-0a6766530095" />
+
