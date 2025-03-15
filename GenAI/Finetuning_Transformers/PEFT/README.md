@@ -96,3 +96,7 @@ A common technique in transformers is Adapters:
 
 <img width="362" alt="image" src="https://github.com/user-attachments/assets/e73aec3d-f339-43f3-88d2-0a6766530095" />
 
+🔹 Adapters act like mini-autoencoders inside a transformer.
+🔹 They "compress" and "reconstruct" task-specific information efficiently.
+🔹 This allows models to be fine-tuned efficiently, saving time, memory, and computation.
+
