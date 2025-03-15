@@ -20,6 +20,13 @@ PEFT methods can be classified into three main categories:
 
 ## 1. Selective Fine-Tuning
 
+[Layer 1] - Frozen
+[Layer 2] - Frozen
+[Layer 3] - Frozen
+[Layer 4] - Trainable (Updated)
+[Layer 5] - Trainable (Updated)
+
+
 ### Concept
 Instead of updating all the parameters of the model, we update only a small subset of layers or specific parameters. This method saves memory and training time.
 
