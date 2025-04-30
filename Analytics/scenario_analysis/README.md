@@ -157,32 +157,76 @@ This represents the **area under the PDF curve** between `a` and `b`.
 
 ## 9. 🌟 Comparing Distributions Using Stochastic Dominance
 
-In simulation, we often compare different forecast distributions to decide which outcome is better.
+![image](https://github.com/user-attachments/assets/20728273-4cc7-4429-bc82-cc6034d0856e)
+![image](https://github.com/user-attachments/assets/a88ebb07-17ff-4feb-9dff-f6ef3d5e7664)
 
-### 🏛 First-Order Stochastic Dominance (FSD)
 
-- **Definition**: A's CDF is always **below or equal to** B's CDF
-- **Preference**: All decision-makers prefer A (if A has higher return or lower cost)
+# 📊 Stochastic Dominance: Portfolio Comparison with Visuals
 
-### 📈 Second-Order Stochastic Dominance (SSD)
+This README explains **stochastic dominance** using 5 simulated investment portfolios. Each portfolio is modeled as a **normal distribution** defined by its mean (expected return) and standard deviation (risk).
 
-- **Definition**: A's CDF **crosses once** from below and A has **lower risk** and **equal or better mean**
-- **Preference**: Risk-averse people prefer A
-
-### ❌ No Dominance
-
-- CDFs cross multiple times, or trade-offs exist between mean and risk
-- Use **utility functions** to decide
-
-### 📃 Summary Table
-
-| Scenario        | Mean(μ) | SD(σ) | CDF Crossing | Dominance Type | Who Prefers A?          |
-|----------------|------------|----------|---------------|----------------|--------------------------|
-| Higher μ, Same σ | A > B      | Same     | Never          | FSD            | Everyone                 |
-| Higher μ, Lower σ| A > B      | Lower    | Cross Once     | SSD            | Risk-averse only         |
-| Higher μ, Higher σ| A > B      | Higher   | Multiple        | None           | Depends on risk profile  |
+We’ll use both **Probability Density Function (PDF)** and **Cumulative Distribution Function (CDF)** plots to determine which portfolio is preferred under different decision-making criteria.
 
 ---
 
-📁 In the next section: We will combine **utility theory**, **decision trees**, and **stochastic models** to make robust decisions under uncertainty.
+## 📘 Portfolios Overview
+
+| Portfolio    | Mean Return (%) | Std. Deviation (%) | Comment                          |
+|--------------|------------------|---------------------|----------------------------------|
+| Portfolio 1  | 10               | 5                   | Baseline                         |
+| Portfolio 2  | 7                | 5                   | Lower return, same risk          |
+| Portfolio 3  | 8                | 2                   | Lower return, less risk          |
+| Portfolio 4  | 10               | 10                  | Same return, higher risk         |
+| Portfolio 5  | 12               | 12                  | Higher return, much higher risk  |
+
+---
+
+## 📈 Probability Density Functions (PDF)
+
+This shows how the probability mass is distributed across return outcomes:
+
+![PDF Plot](pdf_plot.png)
+
+---
+
+## 📊 Cumulative Distribution Functions (CDF)
+
+This is used to determine **stochastic dominance** by comparing the full probability spread up to each point:
+
+![CDF Plot](cdf_plot.png)
+
+---
+
+## 🔍 Analysis Using CDF
+
+| Comparison   | Dominance Type | Who Prefers It?       | Reason                                    |
+|--------------|----------------|------------------------|-------------------------------------------|
+| P1 vs P2     | FSD            | Everyone               | Same risk, P1 has higher return           |
+| P1 vs P3     | FSD            | Everyone               | P1’s CDF always below P3                  |
+| P1 vs P4     | SSD            | Risk-averse people     | P1 has lower risk, same return            |
+| P1 vs P5     | ❌ None         | Depends on preference  | P5 has higher return, but higher risk     |
+
+---
+
+## 🧠 Stochastic Dominance Rules
+
+### ✅ First-Order Stochastic Dominance (FSD)
+- A’s CDF is always below B’s CDF
+- Everyone prefers A
+
+### ✅ Second-Order Stochastic Dominance (SSD)
+- A’s CDF crosses B’s once from below
+- Risk-averse people prefer A
+
+### ❌ No Dominance
+- CDFs cross multiple times
+- Preference depends on utility functions
+
+---
+
+## 📦 Conclusion
+
+Stochastic dominance helps in choosing optimal options under uncertainty by considering **both return and risk**. Use CDF plots and rules to make decisions aligned with different types of decision-makers.
+
+---
 
