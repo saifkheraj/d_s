@@ -14,6 +14,7 @@ Welcome to our **Statistics Mini-Series**, the foundation of simulation modeling
 6. [Normal Distribution (with Excel & Real-World Example)](#6-normal-distribution-with-excel--real-world-example)
 7. [Interval Probability](#7-interval-probability)
 8. [Key Properties Summary](#8-key-properties-summary)
+9. [Comparing Distributions Using Stochastic Dominance](#9-comparing-distributions-using-stochastic-dominance)
 
 ---
 
@@ -81,31 +82,107 @@ Used with **continuous variables** like height or time.
 
 ---
 
-## 6. Normal Distribution (with Excel & Real-World Example)
+## 6. 🔔 Normal Distribution (with Excel & Real-World Example)
 
-The **Normal Distribution**, or bell curve, is the most common continuous probability distribution. It appears frequently in nature, business, and data science.
+The **normal distribution**, or bell curve, is the most widely used continuous probability distribution in statistics, business, and science.
 
-### 🚴 Real-Life Example: Delivery Ride Times
+### 🎯 Real-Life Example: Food Delivery Times
 
-Let’s say you’re a data scientist working at a logistics company, and you’re interested in analyzing delivery times for food orders.
+Imagine you're a data scientist working at a food delivery company. You collect delivery time data from 1,000 completed orders.
 
-- You track **delivery times** for 100 rides.
-- You notice most deliveries fall around **30 minutes**, with fewer deliveries taking very short or very long times.
-- You group times into buckets: 0–10, 10–20, ..., 60–70 mins.
-- As you plot the histogram, it begins to resemble a **bell-shaped curve**, centered around 30 mins.
+- Most deliveries take **around 30 minutes**
+- Fewer deliveries take **very short (<10 min)** or **very long (>50 min)** times
 
-If you collected 1000 or more samples, you’d likely find:
-- Most delivery times fall within 20 to 40 minutes
-- Very few take less than 10 or more than 50 minutes
+When you plot a histogram of these delivery times, you notice a **symmetric, bell-shaped curve** forming — this is a hallmark of the **normal distribution**.
 
-### 🔍 Theoretical Insight
+### 📊 Characteristics of the Normal Distribution
 
-This is the essence of the **normal distribution**:  
-A symmetric distribution where:
-- Mean = 30 mins  
-- Standard Deviation (SD) = 5 mins  
-- Shape is defined fully by these two parameters
+| Feature               | Description                                                |
+|-----------------------|------------------------------------------------------------|
+| Shape                | Bell-shaped, symmetric around the mean                     |
+| Mean (μ)             | Location of the center (peak of the curve)                |
+| Standard Deviation (σ)| Spread of the curve — wider means more variability        |
+| Total Area           | Equals **1** under the curve (i.e., total probability)     |
+| Tails                | Extend to ±∞ but rapidly approach zero probability density |
 
-**Mathematically**, the normal distribution is expressed as:  
+### 📃 Formula
+
 ```math
-f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \cdot e^{-(x-\mu)^2 / (2\sigma^2)}
+f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \cdot \exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right)
+```
+
+### 📘 Excel Implementation
+
+- Use `=NORM.DIST(x, mean, std_dev, FALSE)` for PDF
+- Use `=NORM.DIST(x, mean, std_dev, TRUE)` for CDF
+
+### ⚙ Changing Parameters
+
+| Curve | Mean (μ) | Std. Dev. (σ) | Shape Insight                        |
+|-------|----------|---------------|--------------------------------------|
+| A     | 30       | 5             | Centered at 30, moderately narrow    |
+| B     | 30       | 10            | Same center, but wider               |
+| C     | 40       | 5             | Shifted right                        |
+
+### 🛡 Confidence Interval (95%) in Excel
+
+```excel
+=NORM.INV(0.025, 30, 5)  // Lower Bound
+=NORM.INV(0.975, 30, 5)  // Upper Bound
+```
+
+---
+
+## 7. Interval Probability
+
+For **continuous variables**:
+```text
+P(a < X < b) = CDF(b) - CDF(a)
+```
+This represents the **area under the PDF curve** between `a` and `b`.
+
+---
+
+## 8. Key Properties Summary
+
+| Concept | Applies To | Description                             |
+|---------|------------|-----------------------------------------|
+| PMF     | Discrete   | Probability of each outcome             |
+| PDF     | Continuous | Density function (not exact probability)|
+| CDF     | Both       | Cumulative probability ≤ x             |
+| Area    | Continuous | Represents probability between values   |
+| Total   | All        | Must always sum to 1                    |
+
+---
+
+## 9. 🌟 Comparing Distributions Using Stochastic Dominance
+
+In simulation, we often compare different forecast distributions to decide which outcome is better.
+
+### 🏛 First-Order Stochastic Dominance (FSD)
+
+- **Definition**: A's CDF is always **below or equal to** B's CDF
+- **Preference**: All decision-makers prefer A (if A has higher return or lower cost)
+
+### 📈 Second-Order Stochastic Dominance (SSD)
+
+- **Definition**: A's CDF **crosses once** from below and A has **lower risk** and **equal or better mean**
+- **Preference**: Risk-averse people prefer A
+
+### ❌ No Dominance
+
+- CDFs cross multiple times, or trade-offs exist between mean and risk
+- Use **utility functions** to decide
+
+### 📃 Summary Table
+
+| Scenario        | Mean(μ) | SD(σ) | CDF Crossing | Dominance Type | Who Prefers A?          |
+|----------------|------------|----------|---------------|----------------|--------------------------|
+| Higher μ, Same σ | A > B      | Same     | Never          | FSD            | Everyone                 |
+| Higher μ, Lower σ| A > B      | Lower    | Cross Once     | SSD            | Risk-averse only         |
+| Higher μ, Higher σ| A > B      | Higher   | Multiple        | None           | Depends on risk profile  |
+
+---
+
+📁 In the next section: We will combine **utility theory**, **decision trees**, and **stochastic models** to make robust decisions under uncertainty.
+
