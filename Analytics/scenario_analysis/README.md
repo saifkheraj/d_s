@@ -1,4 +1,4 @@
-# 📊 Statistics Mini-Series: Understanding Probability Distributions (CAP Prep)
+# 📊 Statistics Mini-Series: Understanding Probability Distributions 
 
 Welcome to our **Statistics Mini-Series**, the foundation of simulation modeling for data-driven decision-making. This class is the **core building block** of everything that follows — especially probability, uncertainty modeling, and simulation analysis in CAP.
 
