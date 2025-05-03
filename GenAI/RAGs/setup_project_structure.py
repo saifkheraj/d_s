@@ -23,10 +23,10 @@ files = [
     "project/streamlit_app/requirements.txt",
     "project/streamlit_app/utils/retriever.py",
     "project/notebooks/RAG_prototype.ipynb",
-    "Makefile",
-    "Dockerfile",
-    "docker-compose.yml",
-    "README.md",
+    "project/Makefile",
+    "project/Dockerfile",
+    "project/docker-compose.yml",
+    "project/README.md",
     ".gitignore"
 ]
 
