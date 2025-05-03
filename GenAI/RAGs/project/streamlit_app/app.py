@@ -47,7 +47,8 @@ if question:
     _, top_indices = search(index, q_embedding)
 
     # Retrieve the top matching paragraph (context) based on similarity
-    top_context = paragraphs[top_indices[0]]
+    top_contexts = [paragraphs[i] for i in top_indices]  # Extract all top-k contexts
+    top_context = " ".join(top_contexts)  # Combine them into a single string for generation
     st.subheader("Retrieved Context")
     st.write(top_context)
 

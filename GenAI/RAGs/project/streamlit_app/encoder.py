@@ -33,8 +33,12 @@ def encode_paragraphs(paragraphs):
         with torch.no_grad():
             outputs = ctx_encoder(**inputs)
         
-        # Collect the [CLS] token output from pooler
-        embeddings.append(outputs.pooler_output)
+        # Get [CLS] token embedding and normalize it
+        embedding = outputs.pooler_output  # shape: (1, 768)
+        embedding = embedding / embedding.norm(dim=1, keepdim=True)
+        
+        # Append normalized embedding
+        embeddings.append(embedding)
 
     # Concatenate all paragraph embeddings into a single numpy array
     return torch.cat(embeddings).cpu().numpy()
@@ -51,10 +55,9 @@ def encode_question(question):
     """
     # Tokenize the question
     inputs = q_tokenizer(question, return_tensors='pt')
-
-    # Disable gradients for inference
     with torch.no_grad():
         outputs = q_encoder(**inputs)
+    embedding = outputs.pooler_output
+    embedding = embedding / embedding.norm(dim=1, keepdim=True)
+    return embedding.cpu().numpy()
 
-    # Return the [CLS] token embedding
-    return outputs.pooler_output.cpu().numpy()
