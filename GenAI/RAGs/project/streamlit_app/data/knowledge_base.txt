@@ -1,5 +1,20 @@
-The use of alcohol or drugs on company property is strictly forbidden.
-Employees are expected to adhere to the company's working hours.
-Remote work is allowed for up to two days a week with manager approval.
-All leave requests must be submitted two weeks in advance.
-Discrimination or harassment of any kind will not be tolerated.
+Employees must clock in and out using the biometric attendance system at the beginning and end of each shift.
+All forklifts must be inspected at the start of every shift and any defects must be reported immediately to the maintenance supervisor.
+Only authorized personnel are allowed to access chemical storage areas. Proper signage and documentation are mandatory for entry.
+Preventive maintenance schedules must be followed strictly. Missed maintenance windows should be escalated to the engineering manager.
+In the event of a fire, employees must follow the emergency evacuation plan and proceed to the designated assembly area.
+Suppliers must deliver goods with proper labeling, including batch numbers, production dates, and compliance certifications.
+Line managers are responsible for briefing their teams on daily production goals during the pre-shift meeting.
+No loose clothing, jewelry, or untied hair is permitted in zones with rotating machinery or conveyor belts.
+All finished goods must be quality-checked and signed off before moving to final packaging and shipment areas.
+Non-compliance with safety protocols may result in verbal warnings, written notices, or termination based on severity.
+All workplace injuries, however minor, must be reported to the HR department and logged within 24 hours.
+All pallets stored above 5 feet must be shrink-wrapped to prevent shifting or falling during movement.
+Staff assigned to night shifts will receive a 10% shift differential pay on top of base wages.
+Monthly fire drills and safety drills are mandatory for all employees, with attendance tracked for compliance reporting.
+Operators are prohibited from bypassing machine safety interlocks or override systems under any circumstances.
+Contract workers must be inducted using the same safety orientation process as full-time employees before entering the factory floor.
+The use of personal devices (phones, tablets) is not allowed during shift hours unless in designated break zones.
+Factory equipment must be cleaned and sanitized at the end of each shift in accordance with GMP (Good Manufacturing Practice) standards.
+Environmental Health & Safety (EHS) audits will be conducted quarterly. Any non-conformances must be resolved within 7 working days.
+Unauthorized absence from work for more than 3 consecutive days without notice will lead to a formal disciplinary inquiry.

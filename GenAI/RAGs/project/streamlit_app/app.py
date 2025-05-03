@@ -19,7 +19,8 @@ if not paragraphs:
     st.stop()
 
 
-# Load or build FAISS index
+# Load existing FAISS index if available; otherwise encode paragraphs using DPR,
+# build a new FAISS index from their embeddings, and save it for future use.
 if os.path.exists(FAISS_INDEX_PATH):
     index = load_faiss_index()
     st.sidebar.success("FAISS index loaded from file.")
@@ -31,7 +32,7 @@ else:
     st.sidebar.success("FAISS index built and saved.")
 
 # Streamlit UI
-st.title("🧠 Streamlit RAG: Company Policy Assistant")
+st.title("RAG: Manufacturing Assistant")
 st.markdown("Ask a question and get answers from your company policies knowledge base.")
 
 question = st.text_input("❓ Your Question")
@@ -39,13 +40,18 @@ question = st.text_input("❓ Your Question")
 model_choice = st.selectbox("Select Answering Model", ["gpt2", "bart"])
 
 if question:
+    # Encode the user’s question using DPR question encoder
     q_embedding = encode_question(question)
+
+    # Perform similarity search in FAISS index to get top matching paragraph(s)
     _, top_indices = search(index, q_embedding)
 
+    # Retrieve the top matching paragraph (context) based on similarity
     top_context = paragraphs[top_indices[0]]
-    st.subheader("🔎 Retrieved Context")
+    st.subheader("Retrieved Context")
     st.write(top_context)
 
-    st.subheader("💬 Answer")
+    # Generate a natural-language answer using the selected model (GPT-2 or BART)
+    st.subheader("Answer")
     answer = generate_answer(question, top_context, model_type=model_choice)
     st.write(answer)
