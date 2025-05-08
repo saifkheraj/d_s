@@ -57,3 +57,126 @@ This strategy is fast and works well in many practical cases, even though it doe
 
 ---
 
+# 🎒 Modeling the Knapsack Problem – Discrete Optimization
+
+This document explains how to **mathematically model the knapsack problem** using binary decision variables, constraints, and an objective function. This forms the basis for solving many real-world optimization problems efficiently.
+
+---
+
+## 📦 Problem Description
+
+Given:
+- A set of items `I = {1, 2, ..., n}`.
+- Each item `i` has:
+  - A **value** `v_i`
+  - A **weight** `w_i`
+- A **knapsack** with a weight capacity `W`.
+
+### 🎯 Objective:
+Select a subset of items to:
+- **Maximize the total value**,
+- Without exceeding the **total weight capacity** of the knapsack.
+
+---
+
+## 🔧 Step-by-Step Mathematical Modeling
+
+### 1. ✅ Decision Variables
+
+For each item `i`, define a binary variable:
+
+
+x_i = 1 → item i is selected
+
+x_i = 0 → item i is not selected
+
+
+This represents the yes/no decision for each item.
+
+---
+
+### 2. 📏 Constraints
+
+Ensure the **total weight** of selected items does not exceed the knapsack capacity `W`:
+
+∑ (w_i * x_i) ≤ W
+
+
+Only selected items (where `x_i = 1`) contribute to the total weight.
+
+---
+
+### 3. 📈 Objective Function
+
+We want to **maximize the total value** of the selected items:
+
+
+Maximize ∑ (v_i * x_i)
+
+
+
+This tells us the "goodness" of any selection of items.
+
+---
+
+## 🧮 Final Optimization Model
+
+
+Maximize: ∑ v_i * x_i
+Subject to: ∑ w_i * x_i ≤ W
+x_i ∈ {0, 1} for all i in I
+
+
+
+This is a **0-1 Integer Linear Programming** (ILP) model.
+
+---
+
+## 🌌 Search Space and Feasibility
+
+Each item has two possibilities: selected (1) or not (0).
+
+- For `n` items, total possible combinations = `2^n`
+- This set of all combinations is called the **search space**
+- Only those combinations that satisfy the weight constraint are **feasible solutions**
+
+### 🚫 Why Brute Force Fails
+
+If it takes **1 millisecond** to check a single configuration:
+
+- For 50 items → `2^50 ≈ 1.1 × 10^15` combinations
+- Total time needed: **millions of centuries**
+
+💡 Brute force is not feasible for large `n`.
+
+---
+
+## 🚀 What’s Next?
+
+To solve the problem efficiently for large instances, we use advanced techniques like:
+
+- **Constraint Programming**
+- **Mixed Integer Programming (MIP)**
+- **Local Search**
+- **Heuristics & Metaheuristics**
+
+These methods help us:
+- Find **optimal or near-optimal** solutions
+- **Quickly**, even when the search space is massive
+
+---
+
+## 🧠 Summary
+
+| Concept               | Description                                                  |
+|-----------------------|--------------------------------------------------------------|
+| Decision Variables    | `x_i` = 0 or 1 (select or not select item `i`)              |
+| Constraints           | Total weight must not exceed knapsack capacity              |
+| Objective Function    | Maximize total value of selected items                      |
+| Search Space          | `2^n` combinations (very large for big `n`)                 |
+| Brute Force Limitation| Too slow for practical use → need smarter algorithms        |
+
+---
+
+> ✨ Good modeling is the foundation of good optimization. Before solving a problem, **define it clearly**!
+
