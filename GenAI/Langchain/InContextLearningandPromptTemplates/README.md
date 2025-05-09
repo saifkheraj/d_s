@@ -32,6 +32,7 @@ from langchain_community.llms import HuggingFacePipeline
 pipe = pipeline("text2text-generation", model="google/flan-t5-base")
 llm = HuggingFacePipeline(pipeline=pipe)
 
+```
 
 # 🧠 LangChain + Hugging Face Tutorial Summary
 
