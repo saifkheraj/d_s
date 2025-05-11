@@ -17,7 +17,68 @@ LangChain includes several primary components:
 
 ---
 
-## 1. Language Models
+## 1. Documents
+
+Documents in LangChain represent structured information sources, such as text files, web pages, PDFs, or other textual data used as inputs for language models.
+
+### Example: Loading Text Document
+
+```python
+from langchain.document_loaders import TextLoader
+
+loader = TextLoader("example.txt")
+document = loader.load()
+print(document)
+```
+
+---
+
+## 2. Chains
+
+Chains link multiple LangChain components, enabling sequential or parallel execution to complete complex tasks.
+
+### Example: Simple Sequential Chain
+
+```python
+from langchain.chains import SequentialChain
+
+chain_1 = lambda x: f"Hello {x}"
+chain_2 = lambda x: f"{x}, Welcome to LangChain!"
+
+seq_chain = SequentialChain(chains=[chain_1, chain_2])
+output = seq_chain.run("Developer")
+
+print(output)
+```
+
+---
+
+## 3. Agents
+
+Agents in LangChain autonomously decide on the next action based on the current context and available tools, such as APIs, databases, or other LLMs.
+
+### Example: Basic Agent with Tools
+
+```python
+from langchain.agents import initialize_agent, Tool
+from langchain.llms import OpenAI
+
+# Define available tools
+tools = [
+    Tool(name="search", func=lambda x: f"Searching for {x}", description="Searches for information")
+]
+
+# Initialize Agent
+agent = initialize_agent(tools, OpenAI(api_key="your-api-key"), agent_type="zero-shot-react-description")
+
+# Agent action
+response = agent.run("Find the latest LangChain updates")
+print(response)
+```
+
+---
+
+## 4. Language Models
 
 Language models in LangChain process textual inputs to produce meaningful textual outputs. They are pivotal for tasks like text generation, summarization, and question-answering.
 
@@ -38,7 +99,7 @@ print(response)
 
 ---
 
-## 2. Chat Models
+## 5. Chat Models
 
 Chat models are specialized versions of language models designed for conversational interactions, generating contextually relevant, human-like responses.
 
@@ -54,7 +115,7 @@ print(chat_response)
 
 ---
 
-## 3. Chat Messages
+## 6. Chat Messages
 
 Chat models utilize various message types to handle dynamic conversational flows effectively:
 
@@ -84,16 +145,9 @@ print(new_response)
 
 ---
 
-## 4. Prompt Templates
+## 7. Prompt Templates
 
 Prompt Templates convert user inputs into structured instructions for the language model, enhancing response coherence and flexibility.
-
-**Types of Prompt Templates:**
-
-* **String Prompt Templates**: For single-string formatting.
-* **Chat Prompt Templates**: For structured message lists.
-* **Message Prompt Templates**: Allow specifying roles flexibly.
-* **View Shot Prompt Templates**: Provide specific examples (shots) to guide model outputs.
 
 ### Example: Chat Prompt Template
 
@@ -113,7 +167,7 @@ print(formatted_prompt)
 
 ---
 
-## 5. Example Selectors
+## 8. Example Selectors
 
 Example Selectors optimize View Shot Prompt Templates by selecting relevant examples to include based on semantic similarity, diversity, and textual overlap.
 
@@ -135,7 +189,7 @@ print(selected_examples)
 
 ---
 
-## 6. Output Parsers
+## 9. Output Parsers
 
 Output Parsers format LLM responses into structured data, supporting various formats like JSON, XML, CSV, and Pandas DataFrames.
 
@@ -155,4 +209,4 @@ print(parsed_response)
 
 ## Recap
 
-In summary, LangChain provides a comprehensive and structured way to integrate and utilize language models effectively. Its core components enable efficient management of conversations, message structuring, and output parsing, making it a powerful tool for developing sophisticated NLP applications.
+LangChain offers comprehensive tools to integrate language models efficiently, enhancing NLP application development.
