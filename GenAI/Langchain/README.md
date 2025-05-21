@@ -4,6 +4,7 @@
 
 LangChain provides an environment to build and integrate large language model (LLM) applications with external data sources and workflows. It simplifies connecting models like GPT-4 into natural language processing (NLP) solutions for developers.
 
+
 ## 2. Core Components
 
 * **Chains:** A sequence of calls where each step’s output feeds the next.
