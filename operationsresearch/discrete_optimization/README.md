@@ -6,6 +6,7 @@ The **Knapsack Problem** is a classic optimization challenge in computer science
 Given a set of items, each with a **weight** and **value**, and a bag (knapsack) with a **maximum weight capacity**,  
 the goal is to **maximize the total value of items selected** without exceeding the knapsack's weight limit.
 
+
 ---
 
 ## ⚖️ What is "Value per Weight"?
