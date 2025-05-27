@@ -353,13 +353,14 @@ CLT isn't just theory — it's a practical, powerful engine behind almost every 
 ---
 
 
-# README: Understanding Probability Distributions in Simulations
+#  Understanding Probability Distributions in Simulations
 
 This guide is your final checkpoint before diving into real-world simulations. Think of this as loading your GPS and charting the route. To run simulations effectively, we must understand the types of **probability distributions** that describe random variables.
 
 ---
 
-![Uploading image.png…]()
+
+![output (2)](https://github.com/user-attachments/assets/ffa40ed5-fc8f-4c65-a783-39964c3ec47e)
 
 
 ## 1. **Types of Distributions**
