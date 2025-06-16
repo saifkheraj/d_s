@@ -94,7 +94,6 @@ By default, Chroma returns the top 4 most relevant results (`k=4`), but you can 
 Using Chroma DB, developers can build powerful, intelligent applications that retrieve relevant information efficiently and accurately.
 
 ---
-
 # 📘 LangChain Advanced Retrievers - Part 1: Vector Store-Based Retriever
 
 ## 🔍 What is a LangChain Retriever?
@@ -206,7 +205,7 @@ retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 3})
 4. Query with and without MMR.
 5. Compare the output.
 
-🔗In Part 2, we'll cover **hybrid and self-query retrievers** for smarter retrieval!
+🔗  we'll cover **hybrid and self-query retrievers** for smarter retrieval!
 
 
 
