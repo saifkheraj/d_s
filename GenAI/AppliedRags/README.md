@@ -205,7 +205,165 @@ retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 3})
 4. Query with and without MMR.
 5. Compare the output.
 
-🔗  we'll cover **hybrid and self-query retrievers** for smarter retrieval!
+🔗  we'll now cover **hybrid and self-query retrievers** for smarter retrieval!
+
+# 📘 LangChain Advanced Retrievers - Part 2: Multi-Query, Self-Query, and Parent Document Retrievers
+
+LangChain retrievers go beyond simple similarity search. In this guide, we’ll explore **three advanced retrievers** that solve specific challenges in retrieval:
+
+* Multi-Query Retriever
+* Self-Query Retriever
+* Parent Document Retriever
+
+---
+
+## 🔄 1. Multi-Query Retriever
+
+### 💡 What It Does
+
+The **Multi-Query Retriever** uses an **LLM to generate multiple variations of a user query**. This is useful when embeddings don't capture all the semantic richness or when the wording of the query might miss relevant documents.
+
+### 🧠 Why It’s Useful
+
+* Retrieves a **broader and more diverse** set of relevant documents.
+* Helps mitigate query sensitivity and embedding limitations.
+
+### 🧱 How It Works
+
+1. Accepts a base retriever (e.g., vector store or MMR).
+2. Uses an LLM to generate alternative phrasings of the input query.
+3. Retrieves results for each variation.
+4. Takes the **union** of all results, removing duplicates.
+
+### 📌 Code Example
+
+```python
+from langchain.retrievers.multi_query import MultiQueryRetriever
+from langchain.chat_models import ChatOpenAI
+
+llm = ChatOpenAI()
+retriever = vectorstore.as_retriever()
+
+multi_query_retriever = MultiQueryRetriever.from_llm(
+    retriever=retriever,
+    llm=llm
+)
+
+results = multi_query_retriever.get_relevant_documents("email policy")
+```
+
+---
+
+## 🧠 2. Self-Query Retriever
+
+### 💡 What It Does
+
+The **Self-Query Retriever** uses an LLM to convert a query into:
+
+* A semantic search query
+* A **metadata filter**
+
+This allows **filtering documents** not just by content, but also by their **metadata**, such as date, author, tags, etc.
+
+### 📦 Use Case
+
+Retrieving documents like:
+
+> “Find movies directed by Nolan after 2015 with a rating above 8.5.”
+
+### 🧱 How It Works
+
+1. Documents are stored in a vector store with metadata.
+2. Metadata fields are defined and described.
+3. The LLM understands these descriptions.
+4. The retriever uses both semantic lookup and metadata filtering.
+
+### 📌 Code Example
+
+```python
+from langchain.retrievers import SelfQueryRetriever
+from langchain.chains.query_constructor.base import AttributeInfo
+
+metadata_field_info = [
+    AttributeInfo(name="year", description="Year released", type="integer"),
+    AttributeInfo(name="rating", description="IMDB rating", type="float")
+]
+
+retriever = SelfQueryRetriever.from_llm(
+    llm=llm,
+    vectorstore=vectorstore,
+    document_contents="Brief description of the movie",
+    metadata_field_info=metadata_field_info
+)
+
+results = retriever.get_relevant_documents("I want to watch a movie rated higher than 8.5")
+```
+
+---
+
+## 🧱 3. Parent Document Retriever
+
+### 💡 What It Does
+
+Balances between **chunking for embedding** and **retrieving long documents**. It:
+
+* Chunks text into **small segments** for embedding (child splitter)
+* Maintains **large parent documents** for context (parent splitter)
+
+### ⚖️ Why It’s Useful
+
+* Embedding requires small, focused text chunks.
+* But retrieval often needs **full context** (i.e., a whole section or page).
+
+### 🧱 How It Works
+
+1. Split documents into small chunks (child splitter).
+2. Also split into larger chunks (parent splitter).
+3. Store child chunks in vector DB.
+4. When a match is found, **retrieve the parent document** it came from.
+
+### 📌 Code Example
+
+```python
+from langchain.retrievers import ParentDocumentRetriever
+
+parent_splitter = RecursiveCharacterTextSplitter(chunk_size=1000)
+child_splitter = RecursiveCharacterTextSplitter(chunk_size=200)
+
+retriever = ParentDocumentRetriever(
+    vectorstore=vectorstore,
+    docstore=parent_docstore,
+    child_splitter=child_splitter,
+    parent_splitter=parent_splitter
+)
+
+retriever.add_documents(docs)
+results = retriever.get_relevant_documents("smoking policy")
+```
+
+📝 In this case, the retrieved content will be from the **parent chunk**, offering better context.
+
+---
+
+## ✅ Recap
+
+| Retriever Type            | Purpose                     | Requires LLM | Key Feature                         |
+| ------------------------- | --------------------------- | ------------ | ----------------------------------- |
+| Multi-Query Retriever     | Improve recall              | ✅            | Generates alternate phrasings       |
+| Self-Query Retriever      | Use metadata filters        | ✅            | Parses query into semantic + filter |
+| Parent Document Retriever | Balance chunking vs context | ❌            | Retrieves full parent docs          |
+
+Each retriever solves a different retrieval challenge:
+
+* **Multi-query** helps when your query may miss relevant phrases.
+* **Self-query** enables advanced filtering by metadata.
+* **Parent-doc** ensures context-rich responses.
+
+---
+
+we’ll explore **contextual compression** and **ensemble retrievers** for even more powerful hybrid approaches!
+
+
 
 
 
