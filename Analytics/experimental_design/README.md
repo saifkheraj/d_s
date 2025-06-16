@@ -307,4 +307,219 @@ plt.show()
 * [Pandas Documentation](https://pandas.pydata.org/)
 * [Seaborn Displot](https://seaborn.pydata.org/generated/seaborn.displot.html)
 
-Let me know if you want this exported to a Jupyter Notebook or used in a Streamlit demo.
+
+
+# Understanding Normal Data in Experimental Design
+
+## 🎯 Objective
+
+This document provides a comprehensive explanation of **normal data** and how it plays a critical role in experimental design and hypothesis testing. You'll learn about:
+
+* The concept of normal distribution
+* Its connection to z-scores and alpha
+* Visual and statistical tests for assessing normality
+
+---
+
+## 1. 📈 What is Normal Data?
+
+Normal data refers to data drawn from a **normal distribution**, also known as the **Gaussian distribution**. It has the classic "bell-shaped" curve, which is symmetric around the mean.
+
+### Features:
+
+* Mean (μ) at the center
+* Standard deviation (σ) determines spread
+* 68% of values fall within ±1σ, 95% within ±2σ, and 99.7% within ±3σ
+
+### Why It Matters:
+
+Many statistical methods (called **parametric tests**) assume that the data is normally distributed. Examples include:
+
+* t-tests
+* ANOVA
+* Linear regression
+
+If the data isn’t normal, these tests might give misleading results.
+
+---
+
+## 2. 📐 Z-Scores and the Normal Distribution
+
+A **z-score** standardizes any data point based on the population mean and standard deviation:
+
+```math
+z = (x - μ) / σ
+```
+
+This allows us to:
+
+* Understand how extreme a value is
+* Compare across datasets with different units
+
+### Standard Normal Distribution
+
+* Mean = 0
+* Std dev = 1
+
+It’s used to calculate **p-values** and assess **statistical significance** in hypothesis testing.
+
+---
+
+## 3. 🔬 Hypothesis Testing and Alpha
+
+In hypothesis testing:
+
+* **Null Hypothesis (H₀):** The data is normal (or no effect)
+* **Alternative Hypothesis (H₁):** The data is not normal (or there is an effect)
+
+### Significance Level (α)
+
+* Common alpha = 0.05
+* Represents 5% chance of making a **Type I error** (false positive)
+* In a two-tailed test, 2.5% lies in each tail of the normal curve
+
+You compare the **p-value** (from test) to **alpha**:
+
+* If **p < α** → reject H₀
+* If **p ≥ α** → fail to reject H₀
+
+---
+
+## 4. 📊 Visual Tests for Normality
+
+### KDE Plot (Kernel Density Estimate)
+
+Use Seaborn’s `displot()` with `kind='kde'`:
+
+```python
+import seaborn as sns
+sns.displot(df['salary'], kind='kde')
+```
+
+If the curve is smooth and symmetric like a bell, the data is likely normal.
+
+---
+
+## 5. 📉 QQ Plot (Quantile-Quantile)
+
+Plots the quantiles of your data against the quantiles of a normal distribution:
+
+```python
+import statsmodels.api as sm
+import scipy.stats as stats
+import matplotlib.pyplot as plt
+
+sm.qqplot(df['salary'], line='45', dist=stats.norm)
+plt.show()
+```
+
+* If points lie on the 45° line → normal
+* If points bow outward or inward → non-normal
+
+---
+
+## 6. 🧪 Statistical Tests for Normality
+
+### 1. Shapiro-Wilk Test
+
+* Good for small datasets
+* Tests whether sample comes from normal distribution
+
+```python
+from scipy.stats import shapiro
+stat, p = shapiro(df['salary'])
+```
+
+* If **p > 0.05** → data is normal
+
+### 2. D'Agostino and Pearson’s Test (K²)
+
+* Tests skewness and kurtosis
+* Good for medium-large samples
+
+```python
+from scipy.stats import normaltest
+stat, p = normaltest(df['salary'])
+```
+
+### 3. Anderson-Darling Test
+
+* Provides critical values for multiple alpha levels
+
+```python
+from scipy.stats import anderson
+result = anderson(df['salary'], dist='norm')
+```
+
+* Compare result.statistic to result.critical\_values
+* If statistic < critical → data is normal
+
+---
+
+## 7. ✅ Example: Shapiro-Wilk Test
+
+```python
+from scipy.stats import shapiro
+stat, p = shapiro(df['salary'])
+alpha = 0.05
+if p > alpha:
+    print("Data looks normal (fail to reject H₀)")
+else:
+    print("Data not normal (reject H₀)")
+```
+
+### Output:
+
+```
+Test Statistic: 0.985
+p-value: 0.184
+```
+
+✅ Since p > 0.05, we **fail to reject** the null → the data is likely normal.
+
+---
+
+## 8. ✅ Example: Anderson-Darling Test
+
+```python
+from scipy.stats import anderson
+result = anderson(df['salary'], dist='norm')
+print(f"Statistic: {result.statistic}")
+for i in range(len(result.critical_values)):
+    sl, cv = result.significance_level[i], result.critical_values[i]
+    print(f"At {sl:.1f}%: critical={cv:.3f}, {'Fail to reject' if result.statistic < cv else 'Reject'}")
+```
+
+### Output:
+
+```
+Statistic: 0.2748
+At 15.0%: critical=0.563, Fail to reject
+At 10.0%: critical=0.642, Fail to reject
+At 5.0%: critical=0.762, Fail to reject
+At 2.5%: critical=0.873, Fail to reject
+At 1.0%: critical=1.035, Fail to reject
+```
+
+✅ Since the statistic is **less than all critical values**, we **fail to reject** the null hypothesis at all alpha levels → the data is likely normal.
+
+---
+
+## 🔁 Summary
+
+| Test                 | Best For      | Output         | Decision Rule (α=0.05)   |
+| -------------------- | ------------- | -------------- | ------------------------ |
+| **Shapiro-Wilk**     | Small samples | stat, p-value  | p > α = normal           |
+| **D’Agostino K²**    | Large samples | stat, p-value  | p > α = normal           |
+| **Anderson-Darling** | All sizes     | stat, critical | stat < critical = normal |
+
+---
+
+## 📌 Conclusion
+
+* Check normality **before using parametric tests**
+* Use **visual + statistical methods** together
+* Choose the test based on **sample size** and **interpretation needs**
+
+Let me know if you want a Jupyter Notebook version for practice!
+
