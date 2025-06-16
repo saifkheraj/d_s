@@ -444,6 +444,10 @@ from scipy.stats import normaltest
 stat, p = normaltest(df['salary'])
 ```
 
+if p > 0.05 → Data appears normal
+
+if p ≤ 0.05 → Data likely not normal
+
 ### 3. Anderson-Darling Test
 
 * Provides critical values for multiple alpha levels
@@ -455,6 +459,45 @@ result = anderson(df['salary'], dist='norm')
 
 * Compare result.statistic to result.critical\_values
 * If statistic < critical → data is normal
+
+## 🤔 Why Does Anderson-Darling Give Many Alphas?
+
+### Because:
+
+* It **does not give a p-value**.
+* Instead, it gives you a **test number** (called the "statistic") and a **table with critical values** for different alpha levels.
+
+---
+
+## ✅ What Do You Do With It?
+
+You **look at your test number** and **compare** it to each alpha's **critical value**.
+
+| Alpha | Critical Value | Is your test statistic smaller? | Then...                              |
+| ----- | -------------- | ------------------------------- | ------------------------------------ |
+| 15%   | 0.574          | Yes                             | ✅ Data is probably normal            |
+| 5%    | 0.784          | Yes                             | ✅ Still normal at stricter level     |
+| 1%    | 1.088          | Yes                             | ✅ Even very strict check says normal |
+
+---
+
+## 🎯 Why This Is Helpful:
+
+* It tells you **how strong your evidence** is for normality.
+* You can choose the **alpha level** that fits your situation:
+
+  * Casual test? → **10%**
+  * Serious test? → **1%**
+
+---
+
+## 🧠 Simple Summary
+
+| Think of it like...         | Why it's useful                               |
+| --------------------------- | --------------------------------------------- |
+| A report card with 5 grades | Shows how confident we are the data is normal |
+| One test, many cutoffs      | You choose how strict you want to be          |
+
 
 ---
 
