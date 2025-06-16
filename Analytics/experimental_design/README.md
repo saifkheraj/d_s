@@ -402,6 +402,8 @@ If the curve is smooth and symmetric like a bell, the data is likely normal.
 
 ## 5. 📉 QQ Plot (Quantile-Quantile)
 
+![alt text](<output (3).png>)
+
 Plots the quantiles of your data against the quantiles of a normal distribution:
 
 ```python
