@@ -558,6 +558,31 @@ At 1.0%: critical=1.035, Fail to reject
 | **D’Agostino K²**    | Large samples | stat, p-value  | p > α = normal           |
 | **Anderson-Darling** | All sizes     | stat, critical | stat < critical = normal |
 
+🔍 Two Common Approaches in Hypothesis Testing:
+
+1. Tests Using p-values (e.g., t-test, Shapiro-Wilk, KS test):
+You get a p-value.
+
+You compare the p-value to alpha (significance level, e.g., 0.05):
+
+If p-value < α → Reject the null hypothesis.
+
+If p-value ≥ α → Fail to reject the null hypothesis.
+
+2. Anderson-Darling Test (and some others):
+   
+You do not get a p-value.
+
+Instead, you get a test statistic and a set of critical values at various significance levels.
+
+You compare the test statistic directly to the critical values:
+
+If statistic > critical value → Reject the null hypothesis at that alpha level.
+
+If statistic < critical value → Fail to reject the null hypothesis at that alpha level.
+
+✅ So yes, it’s not about p-values here — you just compare the statistic to critical values.
+
 ---
 
 ## 📌 Conclusion
