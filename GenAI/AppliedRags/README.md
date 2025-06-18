@@ -209,139 +209,248 @@ retriever = vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 3})
 
 # 📘 LangChain Advanced Retrievers - Part 2: Multi-Query, Self-Query, and Parent Document Retrievers
 
-LangChain retrievers go beyond simple similarity search. In this guide, we’ll explore **three advanced retrievers** that solve specific challenges in retrieval:
+# 📘 LangChain Advanced Retrievers - Full Guide with Clear Examples
 
-* Multi-Query Retriever
-* Self-Query Retriever
-* Parent Document Retriever
+In this guide, you’ll deeply understand **advanced LangChain retrievers** — with practical, teacher-style examples so you know exactly *how they work* and *why to use them*.
 
 ---
 
-## 🔄 1. Multi-Query Retriever
+## What is a Retriever?
 
-### 💡 What It Does
+A retriever is an interface that takes a **free-text query** → returns a list of relevant documents or chunks.
 
-The **Multi-Query Retriever** uses an **LLM to generate multiple variations of a user query**. This is useful when embeddings don't capture all the semantic richness or when the wording of the query might miss relevant documents.
+Retriever ≠ LLM response → it only *fetches documents*, which can later be passed to an LLM if needed.
 
-### 🧠 Why It’s Useful
+---
 
-* Retrieves a **broader and more diverse** set of relevant documents.
-* Helps mitigate query sensitivity and embedding limitations.
+# 🚀 Retriever Types in LangChain
 
-### 🧱 How It Works
+| Retriever Type                   | Purpose                          | Requires LLM | Example Use Case              |
+| -------------------------------- | -------------------------------- | ------------ | ----------------------------- |
+| Vector Store Retriever           | Basic similarity search          | ❌            | Search document database      |
+| MMR Retriever                    | Balances relevance + diversity   | ❌            | Avoid duplicate results       |
+| Multi-Query Retriever            | Generates alternative queries    | ✅            | Query phrasing sensitivity    |
+| Self-Query Retriever             | Uses metadata filters            | ✅            | Filter movies by rating, date |
+| Parent Document Retriever        | Returns full parent docs         | ❌            | Retrieve full sections        |
+| Time-Weighted Retriever          | Time-aware memory                | ❌            | Chatbots with recent memory   |
+| Contextual Compression Retriever | Summarizes/reduces result tokens | ✅            | Token-limited models          |
+| Ensemble Retriever               | Combines multiple retrievers     | ❌            | Hybrid search                 |
 
-1. Accepts a base retriever (e.g., vector store or MMR).
-2. Uses an LLM to generate alternative phrasings of the input query.
-3. Retrieves results for each variation.
-4. Takes the **union** of all results, removing duplicates.
+---
 
-### 📌 Code Example
+# 🔍 Vector Store Retriever
+
+**Simplest retriever.**
+
+How it works:
+
+1. Store documents as embeddings in vector DB (FAISS, Pinecone, Chroma)
+2. Embed query
+3. Return top-K similar chunks
+
+Use when:
+
+* You want basic keyword/semantic search
+
+---
+
+# 🔄 Multi-Query Retriever
+
+### What It Does
+
+LLM generates **multiple versions of your query** → retrieves for each → merges results.
+
+### Why Use It?
+
+* Embeddings can be sensitive to wording → this solves that.
+* Query: "email policy" → LLM generates variations:
+
+  * "rules for using email"
+  * "company email guidelines"
+  * "corporate communication policy"
+
+### How It Works:
+
+1. LLM takes your query → outputs N variations.
+2. Each variation is run through base retriever.
+3. Final results are union of all runs.
+
+### Example:
 
 ```python
 from langchain.retrievers.multi_query import MultiQueryRetriever
-from langchain.chat_models import ChatOpenAI
-
-llm = ChatOpenAI()
-retriever = vectorstore.as_retriever()
 
 multi_query_retriever = MultiQueryRetriever.from_llm(
-    retriever=retriever,
-    llm=llm
+    retriever=vectorstore.as_retriever(),
+    llm=ChatOpenAI()
 )
-
 results = multi_query_retriever.get_relevant_documents("email policy")
 ```
 
 ---
 
-## 🧠 2. Self-Query Retriever
+# 🎭 Self-Query Retriever
 
-### 💡 What It Does
+### What It Does
 
-The **Self-Query Retriever** uses an LLM to convert a query into:
+Parses query → splits into **semantic query + metadata filter**.
 
-* A semantic search query
-* A **metadata filter**
+### Why Use It?
 
-This allows **filtering documents** not just by content, but also by their **metadata**, such as date, author, tags, etc.
+* If your documents have metadata — year, author, rating — this allows **filtering**.
+* Query: "Find movies directed by Nolan after 2015 with rating > 8.5"
 
-### 📦 Use Case
+### How It Works:
 
-Retrieving documents like:
+1. LLM parses query →
 
-> “Find movies directed by Nolan after 2015 with a rating above 8.5.”
+   * Semantic part
+   * Metadata filter
+2. Vector search + filter → accurate results
 
-### 🧱 How It Works
-
-1. Documents are stored in a vector store with metadata.
-2. Metadata fields are defined and described.
-3. The LLM understands these descriptions.
-4. The retriever uses both semantic lookup and metadata filtering.
-
-### 📌 Code Example
+### Example:
 
 ```python
-from langchain.retrievers import SelfQueryRetriever
-from langchain.chains.query_constructor.base import AttributeInfo
-
-metadata_field_info = [
-    AttributeInfo(name="year", description="Year released", type="integer"),
-    AttributeInfo(name="rating", description="IMDB rating", type="float")
-]
-
 retriever = SelfQueryRetriever.from_llm(
     llm=llm,
     vectorstore=vectorstore,
-    document_contents="Brief description of the movie",
+    document_contents="Brief movie description",
     metadata_field_info=metadata_field_info
 )
 
-results = retriever.get_relevant_documents("I want to watch a movie rated higher than 8.5")
+results = retriever.get_relevant_documents("movies rated above 8.5")
 ```
 
 ---
 
-## 🧱 3. Parent Document Retriever
+# 🏛️ Parent Document Retriever
 
-### 💡 What It Does
+### What It Does
 
-Balances between **chunking for embedding** and **retrieving long documents**. It:
+Returns **whole section** instead of small chunks.
 
-* Chunks text into **small segments** for embedding (child splitter)
-* Maintains **large parent documents** for context (parent splitter)
+### Why Use It?
 
-### ⚖️ Why It’s Useful
+* You embedded small chunks for retrieval.
+* But users want to read full section — not fragment.
 
-* Embedding requires small, focused text chunks.
-* But retrieval often needs **full context** (i.e., a whole section or page).
+### How It Works:
 
-### 🧱 How It Works
+1. Parent splitter: big chunks
+2. Child splitter: small embeddings
+3. When user asks "smoking policy", retrieves **parent section**
 
-1. Split documents into small chunks (child splitter).
-2. Also split into larger chunks (parent splitter).
-3. Store child chunks in vector DB.
-4. When a match is found, **retrieve the parent document** it came from.
-
-### 📌 Code Example
+### Example:
 
 ```python
-from langchain.retrievers import ParentDocumentRetriever
-
-parent_splitter = RecursiveCharacterTextSplitter(chunk_size=1000)
-child_splitter = RecursiveCharacterTextSplitter(chunk_size=200)
-
 retriever = ParentDocumentRetriever(
     vectorstore=vectorstore,
     docstore=parent_docstore,
     child_splitter=child_splitter,
     parent_splitter=parent_splitter
 )
-
-retriever.add_documents(docs)
 results = retriever.get_relevant_documents("smoking policy")
 ```
 
-📝 In this case, the retrieved content will be from the **parent chunk**, offering better context.
+---
+
+# ⏳ Time-Weighted Retriever
+
+### What It Does
+
+Prioritizes **recent documents**.
+
+### Why Use It?
+
+* Agents / Chatbots with recency → "What happened last week?"
+
+### How It Works:
+
+* Adds timestamp / decay factor → boosts recent docs.
+
+### Example:
+
+```python
+retriever = TimeWeightedVectorStoreRetriever(
+    vectorstore=vectorstore,
+    decay_rate=0.01,
+    k=5
+)
+```
+
+---
+
+# 🗜️ Contextual Compression Retriever
+
+### What It Does
+
+Uses LLM to **compress** results.
+
+### Why Use It?
+
+* You hit token limit — want **shorter**, more informative documents.
+
+### How It Works:
+
+1. Retrieve docs
+2. LLM compresses → summarizes → returns only needed info
+
+### Example:
+
+```python
+retriever = ContextualCompressionRetriever(
+    base_retriever=vectorstore.as_retriever(),
+    compressor=LLMCompressor(llm=ChatOpenAI())
+)
+```
+
+---
+
+# 🧬 Ensemble Retriever
+
+### What It Does
+
+Combines **multiple retrievers** (e.g. keyword + vector).
+
+### Why Use It?
+
+* Hybrid search often beats pure vector.
+
+### How It Works:
+
+* Runs each retriever
+* Merges results
+
+### Example:
+
+```python
+retriever = EnsembleRetriever(
+    retrievers=[vector_retriever, keyword_retriever],
+    weights=[0.7, 0.3]
+)
+```
+
+---
+
+# Final Recap
+
+| Retriever              | Solves Problem                      |
+| ---------------------- | ----------------------------------- |
+| VectorStore / MMR      | Basic or diverse similarity search  |
+| Multi-Query            | Wording sensitivity, broader recall |
+| Self-Query             | Filter by metadata                  |
+| Parent Document        | Full section, not fragments         |
+| Time-Weighted          | Prioritize recent knowledge         |
+| Contextual Compression | Token-efficient retrieval           |
+| Ensemble               | Hybrid retrieval                    |
+
+---
+
+If you want, I can next write for you:
+1️⃣ Real-world project template using these retrievers
+2️⃣ Which retrievers to combine for **best RAG systems**
+3️⃣ Examples from companies (Netflix, Spotify)
+
 
 ---
 
