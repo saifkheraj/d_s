@@ -585,6 +585,22 @@ If statistic < critical value → Fail to reject the null hypothesis at that alp
 
 ---
 
+
+# Randomized Block Design
+
+![image](https://github.com/user-attachments/assets/f4c76d2a-ffb0-445a-a50f-554ec9c7c229)
+
+Goal: To measure each exercise’s true effect on muscle gain by removing the influence of athletes’ starting fitness level.
+
+Group similar athletes into blocks (Beginner, Intermediate, Advanced).
+
+Randomly assign all treatments (Cardio, Strength, Yoga) within each block so every block sees each exercise.
+
+Use replicates (multiple athletes per block–treatment) to capture natural variability.
+
+Perform ANOVA to test treatment differences while accounting for block (fitness) effects.
+
+
 ## 📌 Conclusion
 
 * Check normality **before using parametric tests**
