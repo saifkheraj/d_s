@@ -626,6 +626,12 @@ Let me know if you want a Jupyter Notebook version for practice!
 10. [Common Pitfalls](#common-pitfalls)
 
 ---
+Key Points:
+
+ - Never remove the treatment variable - that's what you're studying!
+ - Include covariates that matter - variables that affect your outcome
+ - Remove covariates that don't help - variables that are irrelevant or non-significant
+
 
 ## What is OLS?
 
