@@ -1,0 +1,9 @@
+langchain
+langchain_community
+langchain_openai
+faiss-cpu
+sentence-transformers
+transformers
+gradio
+pypdf
+tiktoken
