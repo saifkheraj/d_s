@@ -3,7 +3,7 @@
 This guide provides a comprehensive overview of how to store embeddings using a vector database, specifically focusing on **Chroma DB**, an open-source vector store supported by **LangChain**. It covers the process of storing, retrieving, and performing similarity search operations on vector embeddings to enable efficient and relevant information retrieval.
 
 ---
-
+ 
 ## Why Use a Vector Database?
 
 When working with unstructured data like text, images, or audio, embeddings are used to represent this data as numerical vectors in a high-dimensional space. These vectors capture semantic relationships, making it easier to search and retrieve related content. However, traditional databases (e.g., SQL) are not optimized for handling such data. Vector databases solve this problem by:
