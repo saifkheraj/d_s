@@ -115,3 +115,5 @@ For more details, visit the [Gradio documentation](https://gradio.app/docs/).
 Steps
 - pip install gradio
 
+![alt text](image.png)
+
