@@ -111,3 +111,7 @@ iface.launch()
 * You can create interfaces with text inputs, numbers, and file uploads.
 
 For more details, visit the [Gradio documentation](https://gradio.app/docs/).
+
+Steps
+- pip install gradio
+
