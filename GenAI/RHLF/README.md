@@ -1,195 +1,65 @@
-# 📚 Instruction Tuning — A Practical README
+Instruction Tuning Overview
+Introduction
+This repository provides an overview of Instruction Tuning (also known as Supervised Fine-Tuning or SFT), a critical process for enhancing the performance of pre-trained language models. Instruction tuning trains models on expert-curated datasets containing instructions, inputs (optional), and outputs to improve task-specific accuracy and reliability. This document summarizes the process, components, special symbols, and instruction masking techniques involved in instruction tuning.
+What is Instruction Tuning?
+Instruction tuning is a fine-tuning method that improves a model's ability to follow specific instructions and generate accurate outputs. It is typically applied after pre-training and before advanced optimization techniques like Reinforcement Learning from Human Feedback (RLHF) or Direct Preference Optimization (DPO).
 
-## Table of Contents
+Purpose: Aligns the model with human-like task execution.
+Key Benefit: Enables models to handle diverse tasks such as question answering, text generation, translation, and code writing.
 
-1. [What Is Instruction Tuning?](#what-is-instruction-tuning)
-2. [Where It Fits in the LLM Training Pipeline](#where-it-fits-in-the-llm-training-pipeline)
-3. [Dataset Anatomy 📑](#dataset-anatomy)
-4. [Prompt & Special‑Token Formats](#prompt--special-token-formats)
-5. [Instruction Masking 🎯](#instruction-masking)
-6. [Key Design Considerations](#key-design-considerations)
-7. [End‑to‑End Example](#end-to-end-example)
-8. [Typical Use Cases](#typical-use-cases)
-9. [Further Reading & Resources](#further-reading--resources)
+Training Process
+The training of a GPT-like model involves three main stages:
 
----
+Pre-Training: The model learns general language patterns by predicting the next word in a sequence using a large corpus of text.
+Instruction Tuning: The model is fine-tuned on expert-labeled datasets with instructions, inputs (optional), and outputs.
+RLHF/DPO: Further optimization aligns the model with human preferences or specific objectives.
 
-## What Is Instruction Tuning?
+Components of Instruction Tuning
+Instruction tuning datasets consist of three components:
 
-**Instruction tuning** (aka **Supervised Fine‑Tuning — SFT**) means retraining a *pre‑trained* language model on a curated set of ***instruction–response*** pairs written by experts. The fresh supervision teaches the model *how* to follow natural‑language commands rather than just predicting the next token.
+Instructions: Commands that define the task (e.g., "Answer the question" or "Write a Python function").
+Input (optional): Contextual data required for the task (e.g., a question like "Which is the largest ocean?").
+Output: The expected result (e.g., "The Pacific Ocean").
 
-> 🔑 **Goal** → Improve alignment, task‑specific accuracy, and safety *before* applying preference‑based methods such as RLHF or Direct Preference Optimisation (DPO).
+The model is trained to generate the entire sequence (instruction + input + output) as a single unit.
+Special Symbols in Instruction Tuning
+Special symbols (or tokens) are used to structure the input and output, ensuring the model correctly interprets the sequence. Examples include:
 
----
+###instruction###: Marks the start of the instruction.
+###response###: Marks the start of the output.
+###human### and ###assistant###: Used in some datasets to denote human input and assistant response.
 
-## Where It Fits in the LLM Training Pipeline
+These tokens must align with the model's tokenizer to ensure compatibility. For example:
+###instruction### Which is the largest ocean? ###response### The Pacific Ocean ###
 
-| Stage                            | Objective                            | Data                             | Typical Loss                                        |
-| -------------------------------- | ------------------------------------ | -------------------------------- | --------------------------------------------------- |
-| 1️⃣ **Pre‑training**             | General language knowledge           | 100 B+ tokens (web, books, code) | Next‑token, unmasked                                |
-| 2️⃣ **Instruction tuning (SFT)** | Teach the model to *follow commands* | ≤1 M high‑quality triples        | Cross‑entropy on answer tokens (masked or unmasked) |
-| 3️⃣ **RLHF / DPO**               | Align outputs with human preferences | Human comparison data            | Policy‑gradient / K‑L‑regularised loss              |
+Instruction Masking
+Instruction masking focuses the loss calculation on specific output tokens, ignoring instructions and special tokens. This improves efficiency and ensures the model prioritizes learning the correct response.
 
----
+How It Works: The loss (e.g., cross-entropy) is computed only for output tokens (e.g., "The Pacific Ocean") in the shifted sequence, masking tokens like ###instruction###.
+Considerations:
+Unmasked instructions may improve performance for smaller datasets.
+Libraries like Hugging Face's transformers provide tools like DataCollatorForCompletionOnlyLM to configure masking.
 
-## Dataset Anatomy 📑
 
-Each record usually contains **three** parts:
 
-```yaml
-instruction:    "Translate to French."
-input:          "Good morning!"     # optional
-output:         "Bonjour !"
-```
+Example
+Task: Train a model to answer "Which is the largest ocean?"Dataset Entry:
+###instruction### Answer the question: Which is the largest ocean? ###response### The Pacific Ocean ###
 
-* `instruction` → Describes the task.
-* `input` → Context the model must process. May be empty.
-* `output` → Ground‑truth answer.
+Training: The model learns to predict the output tokens ("The Pacific Ocean ###") while masking the instruction tokens.
+Key Takeaways
 
-Some public corpora (e.g. **Self‑Instruct**, **Flan**) omit `input` for simpler commands.
+Instruction tuning enhances a model's ability to interpret and execute tasks accurately.
+Special tokens ensure structured data processing.
+Instruction masking optimizes learning by focusing on critical output tokens.
+Prompt formats must align with the model's tokenizer for compatibility.
 
----
+Resources
 
-## Prompt & Special‑Token Formats
+Hugging Face Transformers: Tools for instruction tuning and masking.
+Facebook OPT Models: Example models that use specific token formats.
 
-LLMs rely on *special tokens* so the decoder can distinguish instructions from answers.
-Popular templates include:
-
-### 1. Triple‑Hash Blocks (Flan‑T5)
-
-````text
-### Instruction:
-Create a Python function that squares numbers.
-
-### Response:
-```python
-def f(x):
-    return x**2
-````
-
-````
-
-### 2. Chat‑Style Roles (Llama / Vicuna)
-```text
-### Human:
-What is the capital of Japan?
-
-### Assistant:
-Tokyo.
-````
-
-### 3. Explicit `<|prompt|>` Tokens (GPT‑J‑Tuned)
-
-```text
-<|instruction|> Summarise: "The food was awesome!" <|response|> The review is positive.
-```
-
-💡 *Why bother?* Using reserved IDs prevents the tokenizer from splitting the tags, ensuring deterministic boundary detection during training and inference.
-
-> **Whitespace matters!** Even an invisible `\n` may shift every token position. Always verify with `tokenizer.encode_plus()`.
-
----
-
-## Instruction Masking 🎯
-
-During SFT we **don’t** always want to back‑propagate through *every* generated token. *Instruction masking* restricts the loss to the answer span:
-
-```mermaid
-sequenceDiagram
-    participant T as Tokens
-    Note right of T: "### Instruction" — no loss
-    T->>T: Question tokens — no loss
-    T->>T: "### Response" — no loss
-    T->>T: ✅ Answer tokens (loss)
-    T->>T: ✅ <EOS> (loss)
-```
-
-### Why Mask?
-
-* Prevents the model from overfitting to the literal wording of instructions.
-* Reduces compute — fewer tokens in `CrossEntropyLoss`.
-* Empirically boosts performance on smaller, high‑quality datasets.
-
-### Implementation Snippet (🤗 Transformers ≥ 4.39)
-
-```python
-from transformers import AutoTokenizer, DataCollatorForCompletionOnlyLM
-
-collator = DataCollatorForCompletionOnlyLM(
-    tokenizer=tok,
-    response_template="### Response:",   # text right before the answer
-)
-```
-
-*Special tokens (e.g. `<bos>`, `<eos>`) are automatically ignored.*
-
-> ⚖️ *Unmasked vs Masked?* Recent papers show that **unmasked** loss can help when your dataset is tiny (<5 k examples) because every gradient counts. Try both.
-
----
-
-## Key Design Considerations
-
-1. **Data quality ≫ Data size**: 5 k pristine tasks often beat 500 k noisy ones.
-2. **Domain match**: For specialised LLMs (medical, legal, education) craft domain‑specific instructions.
-3. **Token budget**: Longer prompts → higher training cost. Use concise yet explicit instructions.
-4. **Catastrophic forgetting**: Over‑fine‑tuning can erase skills learnt during pre‑training. Use smaller learning rates (1 – 2 × 10⁻⁵) and early stopping.
-5. **Evaluation**: Probe *follow‑ability* (e.g. HELM, MT‑Bench) rather than perplexity alone.
-
----
-
-## End‑to‑End Example
-
-### Task
-
-> **Instruction**: "Answer the question."
->
-> **Input**: "Which is the largest ocean?"
->
-> **Output**: "The Pacific Ocean."
-
-### Packed Training Sequence
-
-```text
-### Instruction:
-Answer the question.
-### Input:
-Which is the largest ocean?
-### Response:
-The Pacific Ocean.
-<|eos|>
-```
-
-The model is asked to predict each next token. With masking, gradients are applied **only** on:
-
-```
-The ▲Pacific ▲Ocean. ▲<|eos|>
-```
-
-(symbol ▲ = tokens that contribute to loss)
-
----
-
-## Typical Use Cases
-
-| Domain          | Example Instruction‑Tuned Model   | Real‑World Impact                            |
-| --------------- | --------------------------------- | -------------------------------------------- |
-| Chat Assistants | ChatGPT (GPT‑3.5‑Turbo SFT stage) | Safer & more helpful responses               |
-| Code Generation | StarCoderBase ↦ StarChat          | Better instruction compliance for developers |
-| Education       | Math‑Tutor Llama 7B               | Step‑by‑step explanations for students       |
-| Medicine        | MedAlpaca / Gatortron‑SFT         | Reliable answers to clinical queries         |
-| Robotics & IoT  | In‑house SFT on task specs        | Accurate natural‑language robot control      |
-
----
-
-## Further Reading & Resources
-
-* **Stanford Alpaca** paper — first low‑cost 7 B instruction tuning.
-* **FLAN‑T5** — 62 diverse datasets merged for zero‑shot gen.
-* **"InstructGPT"** — OpenAI’s original RLHF work (SFT stage details).
-* **HuggingFace 🤗 Course — SFT Chapter**.
-* **DataCollatorForCompletionOnlyLM** docs.
-* **mt‑bench** by LMSys — instruction‑following benchmark.
-
----
-
-> 🏁 *Instruction tuning forms the bridge between raw language knowledge and task‑specific mastery. Master it, and your LLM will listen — not just talk.*
+Contributing
+Contributions are welcome! Please submit pull requests or issues for suggestions, corrections, or additional examples.
+License
+This project is licensed under the MIT License.
