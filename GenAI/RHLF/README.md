@@ -507,6 +507,167 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**⭐ Star this repository if it helped you!**
+# Implementation
 
-For questions and discussions, please use the [Issues](https://github.com/your-repo/instruction-tuning/issues) section.
+# 🧠 Instruction Fine-Tuning with Hugging Face
+
+This project demonstrates **instruction fine-tuning (Supervised Fine-Tuning)** of a base Large Language Model using the [CodeAlpaca-20k](https://huggingface.co/datasets/sahil2801/CodeAlpaca-20k) dataset. The model is fine-tuned to follow task-specific instructions using Hugging Face's `transformers`, `peft`, and `datasets` libraries.
+
+---
+
+## 📌 Overview
+
+We fine-tuned the `facebook/opt-350m` model using **LoRA** (Low-Rank Adaptation) to make the training lightweight and efficient. The dataset is made up of triplets:
+
+* `instruction`: the task prompt
+* `input`: optional context (we dropped these for simplicity)
+* `output`: the expected response
+
+The goal is to train the model to generate helpful and relevant responses based on specific instructions.
+
+---
+
+## 🏗️ Process Summary
+
+### 1. **Download Dataset**
+
+```bash
+wget https://huggingface.co/datasets/sahil2801/CodeAlpaca-20k/resolve/main/code_alpaca_20k.json -O code_alpaca_20k.json
+```
+
+### 2. **Split Dataset & Drop Inputs**
+
+```python
+import json, random
+
+with open("code_alpaca_20k.json") as f:
+    data = json.load(f)
+
+random.shuffle(data)
+split = int(0.8 * len(data))
+train = [ex for ex in data[:split] if ex.get("input", "") == ""]
+val = [ex for ex in data[split:] if ex.get("input", "") == ""]
+```
+
+### 3. **Prompt Formatting**
+
+```python
+def format_prompt(example):
+    return {
+        "text": f"### Instruction:\n{example['instruction']}\n\n### Response:\n{example['output']} </s>"
+    }
+```
+
+### 4. **Load Tokenizer & Model**
+
+```python
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+model_name = "facebook/opt-350m"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForCausalLM.from_pretrained(model_name)
+```
+
+### 5. **Apply LoRA using PEFT**
+
+```python
+from peft import LoraConfig, get_peft_model, TaskType
+
+lora_config = LoraConfig(
+    r=8,
+    lora_alpha=16,
+    lora_dropout=0.1,
+    target_modules=["q_proj", "v_proj"],
+    bias="none",
+    task_type=TaskType.CAUSAL_LM
+)
+
+model = get_peft_model(model, lora_config)
+```
+
+### 6. **Tokenize and Prepare Dataset**
+
+```python
+from datasets import Dataset
+
+def tokenize_fn(example):
+    return tokenizer(example["text"], truncation=True, padding="max_length", max_length=512)
+
+train_dataset = Dataset.from_list(list(map(format_prompt, train))).map(tokenize_fn)
+val_dataset = Dataset.from_list(list(map(format_prompt, val))).map(tokenize_fn)
+```
+
+### 7. **Train Using Hugging Face Trainer**
+
+```python
+from transformers import TrainingArguments, Trainer, DataCollatorForLanguageModeling
+
+training_args = TrainingArguments(
+    output_dir="./opt350m-lora-codealpaca",
+    per_device_train_batch_size=4,
+    num_train_epochs=1,
+    logging_steps=10,
+    fp16=True
+)
+
+collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=train_dataset,
+    eval_dataset=val_dataset,
+    tokenizer=tokenizer,
+    data_collator=collator
+)
+
+trainer.train()
+```
+
+---
+
+## 🤖 Difference Between Pretraining and Instruction Tuning
+
+| Feature  | Pretraining                              | Instruction Tuning                       |
+| -------- | ---------------------------------------- | ---------------------------------------- |
+| Purpose  | Learn general language patterns          | Learn task-specific behavior             |
+| Data     | Massive unstructured text                | Structured (instruction, response) pairs |
+| Format   | Predict next token in raw text           | Follow explicit instructions             |
+| Output   | Fluent language, but unfocused           | Task-specific and aligned                |
+| Examples | "The capital of France is ..." → "Paris" | "Translate to French: Hello" → "Bonjour" |
+
+---
+
+## 🔧 Tech Stack
+
+* Model: `facebook/opt-350m`
+* Dataset: CodeAlpaca-20k
+* Libraries:
+
+  * 🤗 Transformers
+  * 🤗 Datasets
+  * 🤗 PEFT (LoRA)
+
+---
+
+## ✅ Outcome
+
+After training, the model is better aligned to follow human-written instructions and generate useful responses. It acts like a simple code assistant for instructional prompts.
+
+---
+
+## 📬 Future Extensions
+
+* Use full input-instruction-output triads
+* Evaluate using BLEU / ROUGE / GPT-4 judge
+* Try instruction-tuning larger models (e.g. OPT-1.3B)
+* Add RLHF or preference-based optimization
+
+---
+
+## 📘 References
+
+* [CodeAlpaca Dataset](https://github.com/sahil280114/CodeAlpaca-20k)
+* [Hugging Face PEFT Docs](https://huggingface.co/docs/peft/index)
+* [LoRA Paper](https://arxiv.org/abs/2106.09685)
+
