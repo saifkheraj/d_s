@@ -151,14 +151,113 @@ Quick estimations like these help you:
 
 ---
 
-## ✨ Next Steps
+## Using OpenAI
 
-In future lessons, we’ll:
+## RAG vs OpenAI API Deployment: Back-of-the-Envelope (BOTEC) Comparison
 
-* Apply these numbers to different model types (e.g., image, video)
-* Explore batching, quantization, and serverless inference
-* Optimize deployment costs
+This README provides a summarized case study comparing two major approaches for deploying LLM-based applications at scale:
 
-Stay tuned — BOTEC is just the start of system design!
+1. **Using OpenAI’s hosted API (e.g., GPT-4-turbo)**
+2. **Combining OpenAI API with Retrieval-Augmented Generation (RAG)**
+
+The goal is to understand their implications for storage, compute, bandwidth, and cost when serving 100 million daily active users (DAU).
 
 ---
+
+## 📱 Case Study: SmartPal AI Assistant App
+
+Assumptions:
+
+* 100M DAU
+* 10 interactions per user/day = 1B requests/day
+* Each response = 500 tokens
+* Model: GPT-4-turbo (hosted by OpenAI)
+
+---
+
+## 📊 Option 1: Using OpenAI API Directly
+
+### ✅ Pros:
+
+* No infra to manage
+* High performance and reliability
+* Fast to prototype and scale
+
+### ❌ Cons:
+
+* **Very expensive** at scale
+* Vendor lock-in
+* Limited context window
+
+### 🔢 Token Cost Estimation
+
+* Input tokens: 250/request → 250B/day
+* Output tokens: 500/request → 500B/day
+
+**Pricing (GPT-4-turbo)**:
+
+* Input: \$0.01 / 1K tokens → \$2.5M/day
+* Output: \$0.03 / 1K tokens → \$15M/day
+
+📉 **Total: \$17.5M/day** (\~\$525M/month)
+
+### 🚫 Not Feasible at 100M DAU Without Enterprise Licensing
+
+---
+
+## 📦 Option 2: RAG + OpenAI API
+
+Retrieval-Augmented Generation (RAG) allows you to:
+
+* Store user history, plans, or documents externally
+* Retrieve relevant data per request
+* Inject into prompt (shorter, more focused)
+
+### ✅ Benefits:
+
+* 50–75% token cost reduction
+* Reduced hallucinations
+* Personalization without context bloat
+
+### Example:
+
+* Input: 100 tokens (retrieved context)
+* Output: 300 tokens
+* Total/request = 400 tokens → \$0.004/request
+
+**Cost/day = 1B × \$0.004 = \$4M/day**
+📉 **Savings: >75% vs. direct API calls**
+
+### Required Infrastructure:
+
+* Vector DB (Pinecone, Weaviate, FAISS)
+* Embedding model (OpenAI `text-embedding-3-small`)
+* Orchestration layer (e.g., FastAPI, LangChain)
+
+---
+
+## 🧠 BOTEC Comparison Summary
+
+| Component           | OpenAI API Only     | OpenAI API + RAG       |
+| ------------------- | ------------------- | ---------------------- |
+| Model Storage       | ✅ OpenAI hosted     | ✅ OpenAI hosted        |
+| Compute (Inference) | ✅ Managed by OpenAI | ✅ Managed by OpenAI    |
+| Token Usage         | High (750 tokens)   | Low (400 tokens)       |
+| Cost per Request    | \~\$0.0175          | \~\$0.004              |
+| Daily Cost          | \~\$17.5M           | \~\$4M                 |
+| Personalization     | ❌ Stateless         | ✅ Context-aware        |
+| Dev Complexity      | Low                 | Medium (add RAG infra) |
+
+---
+
+## 🧰 Final Recommendation
+
+| You Are...                    | Best Approach               |
+| ----------------------------- | --------------------------- |
+| MVP builder or <10k users     | OpenAI API only             |
+| Scaling to millions of users  | Use RAG + OpenAI            |
+| Cost-sensitive at large scale | RAG + OpenAI or self-host   |
+| Need long-term memory         | RAG or fine-tuned embedding |
+
+---
+
