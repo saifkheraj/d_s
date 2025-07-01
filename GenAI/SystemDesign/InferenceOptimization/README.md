@@ -144,42 +144,39 @@ Connections:     ████░░░░████░░░░█████
 
 ---
 
-## 3. Knowledge Distillation
-
-### 🧠 **The Intuition**
-**Like a master chef teaching an apprentice:** The master chef (teacher model) knows complex techniques, but teaches the apprentice (student model) the essential skills to create 95% of the same quality with 10x less effort.
-
-### **How It Works**
-1. **Teacher Model:** Large, accurate model (e.g., GPT-4)
-2. **Student Model:** Smaller model learning from teacher
-3. **Training:** Student learns to mimic teacher's outputs
-
-### **Real Company Examples** 🏢
-
-**Google Vertex AI (2024):**
-With distillation techniques in Vertex AI, now available in preview, you can leverage the power of those large models while keeping your deployments lean and efficient
-
-**OpenAI Strategy:**
-OpenAI's ChatGPT reportedly uses model cascades and distilled variants for handling different query types more efficiently. Simple prompts might be handled by a smaller distilled model, and only complex ones use the full GPT-4
-
-**Spotify (2025):**
-Spotify focused on making open-weight LLMs "domain-aware" by grounding them in Spotify's unique catalog using semantic tokenization and fine-tuning LLaMA model's vocabulary
-
-### **Process Diagram**
-```
-Teacher Model (GPT-4)     Student Model (Small)
-     ↓                          ↓
-"The weather is nice"     "Weather is nice"
-Confidence: [0.9, 0.1]   Learns: [0.9, 0.1]
-     ↓                          ↓
-Student learns to match teacher's confidence patterns
+ = time.time()
+            result = self.student.predict(request.data)
+            latency = time.time() - start_time
+            
+            self.metrics_collector.record({
+                'model': 'student',
+                'latency': latency,
+                'accuracy': self.evaluate_accuracy(result, request.ground_truth),
+                'request_id': request.id
+            })
+        else:
+            # Use teacher model
+            start_time = time.time()
+            result = self.teacher.predict(request.data)
+            latency = time.time() - start_time
+            
+            self.metrics_collector.record({
+                'model': 'teacher', 
+                'latency': latency,
+                'accuracy': self.evaluate_accuracy(result, request.ground_truth),
+                'request_id': request.id
+            })
+        
+        return result
 ```
 
-### **Real Results** 
+### **Real Results & Benchmarks** 
 - **DistilBERT:** Reduced the size of a BERT model by 40%, while retaining 97% of its language understanding capabilities
-- **Size Reduction:** 2-10x smaller models
+- **Google BiT-ResNet:** Reduced 152×2 model to ResNet-50 architecture without sacrificing accuracy using 9600 distillation epochs
+- **Size Reduction:** 2-10x smaller models typically achievable
 - **Speed:** 2-5x faster inference
-- **Accuracy Retention:** 95-99%
+- **Accuracy Retention:** 95-99% with proper implementation
+- **Memory Usage:** 60-90% reduction in GPU memory requirements
 
 ---
 
