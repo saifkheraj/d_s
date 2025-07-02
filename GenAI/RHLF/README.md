@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/cead0d25-b2a2-4e00-8703-07a2a4420bdc)# Instruction Tuning: A Simple Guide
+# Instruction Tuning: A Simple Guide
 
 > **Goal**: Turn a text-completing AI into an instruction-following assistant
 
