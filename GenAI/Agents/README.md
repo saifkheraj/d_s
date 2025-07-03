@@ -1,4 +1,5 @@
-```flowchart TD
+```mermaid
+flowchart TD
     START([🚀 START PROCESS<br/>Event Planning Request]) 
     
     START --> INPUT[📝 COLLECT INPUT REQUIREMENTS<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Conference Name & Details<br/>• Venue Requirements & Specifications<br/>• Budget Constraints & Limitations<br/>• Date, Time & Duration<br/>• Expected Attendee Count]
