@@ -1,69 +1,91 @@
 ```mermaid
 flowchart TD
-    START([🚀 START PROCESS<br/>Event Planning Request]) 
+    START([🚀 START<br/>Event Planning Request]) 
     
-    START --> INPUT[📝 COLLECT INPUT REQUIREMENTS<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Conference Name & Details<br/>• Venue Requirements & Specifications<br/>• Budget Constraints & Limitations<br/>• Date, Time & Duration<br/>• Expected Attendee Count]
+    START --> INPUT[/📝 INPUT<br/>Conference Details<br/>Venue Requirements<br/>Budget & Constraints<br/>Timeline/]
     
-    INPUT --> INIT[🏗️ INITIALIZE CREW SYSTEM<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Load Agent Configurations<br/>• Initialize Task Definitions<br/>• Enable Memory System<br/>• Set Verbose Output Mode<br/>• Configure Tool Access]
+    INPUT --> PREP{{🏗️ PREPARATION<br/>Initialize Crew System<br/>Load Agent Configurations<br/>Enable Memory & Tools}}
     
-    INIT --> KICKOFF[⚡ CREW KICKOFF<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>Begin Sequential Task Execution<br/>Start Multi-Agent Coordination]
+    PREP --> PROCESS1[⚡ PROCESS<br/>Crew Kickoff<br/>Begin Sequential Execution]
     
-    KICKOFF --> TASK1_START[📋 TASK 1: VENUE FINDING<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>Status: Initializing<br/>Priority: High<br/>Expected Output: Venue List]
+    PROCESS1 --> TASK1_INIT{{📋 PREPARATION<br/>Initialize Task 1<br/>Venue Finding Task<br/>Set Priority & Goals}}
     
-    TASK1_START --> AGENT1_ASSIGN[🤖 VENUE FINDER AGENT<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>Role: Conference Venue Specialist<br/>Goal: Find Suitable Venues<br/>Backstory: Expert in Venue Selection<br/>Tools: Search Tool Access]
+    TASK1_INIT --> ASSIGN1[🤖 PROCESS<br/>Assign Venue Finder Agent<br/>Role: Conference Venue Specialist<br/>Load Tools & Capabilities]
     
-    AGENT1_ASSIGN --> TOOL_SEARCH[🔍 EXECUTE SEARCH OPERATIONS<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Query Online Venue Databases<br/>• Filter by Location & Capacity<br/>• Check Availability Calendars<br/>• Gather Pricing Information<br/>• Collect Venue Specifications]
+    ASSIGN1 --> SEARCH_OP[🔍 PROCESS<br/>Execute Search Operations<br/>Query Online Databases<br/>Filter by Criteria<br/>Gather Information]
     
-    TOOL_SEARCH --> SEARCH_RESULTS{📊 EVALUATE SEARCH RESULTS<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>Venues Found?<br/>Quality Check?<br/>Meets Criteria?}
+    SEARCH_OP --> SEARCH_CHECK{📊 DECISION<br/>Venues Found?<br/>Quality Check Passed?<br/>Meets Requirements?}
     
-    SEARCH_RESULTS -->|✅ SUCCESS| PROCESS_VENUES[⚙️ PROCESS VENUE DATA<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Parse Venue Details<br/>• Extract Key Information<br/>• Format Results Structure<br/>• Validate Data Completeness<br/>• Prepare for Next Stage]
+    SEARCH_CHECK -->|No| RETRY{{🔄 PREPARATION<br/>Adjust Search Strategy<br/>Broaden Criteria<br/>Try Alternative Methods}}
     
-    SEARCH_RESULTS -->|❌ RETRY| SEARCH_RETRY[🔄 RETRY SEARCH STRATEGY<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Broaden Search Criteria<br/>• Try Alternative Keywords<br/>• Expand Location Range<br/>• Adjust Budget Parameters]
+    RETRY --> SEARCH_OP
     
-    SEARCH_RETRY --> SEARCH_RESULTS
+    SEARCH_CHECK -->|Yes| PROCESS_DATA[⚙️ PROCESS<br/>Process Venue Data<br/>Parse Details<br/>Format Results<br/>Validate Information]
     
-    PROCESS_VENUES --> TASK1_OUTPUT[📤 TASK 1 COMPLETION<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Comprehensive Venue List<br/>• Detailed Venue Specifications<br/>• Pricing Information Matrix<br/>• Availability Status Report<br/>• Location & Accessibility Data]
+    PROCESS_DATA --> OUTPUT1[/📤 OUTPUT<br/>Task 1 Results<br/>Venue List<br/>Specifications<br/>Pricing Data/]
     
-    TASK1_OUTPUT --> MEMORY_STORE[💾 STORE IN MEMORY SYSTEM<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Save Venue List Data<br/>• Store Search Criteria Used<br/>• Keep Client Requirements<br/>• Log Agent Performance<br/>• Prepare Context for Next Task]
+    OUTPUT1 --> MEMORY_STORE[(💾 STORAGE<br/>Store in Memory<br/>Save Results<br/>Preserve Context)]
     
-    MEMORY_STORE --> TASK2_START[📋 TASK 2: QUALITY ASSURANCE<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>Status: Initializing<br/>Priority: Critical<br/>Expected Output: Quality Report]
+    MEMORY_STORE --> TASK2_INIT{{📋 PREPARATION<br/>Initialize Task 2<br/>Quality Assurance<br/>Set Review Parameters}}
     
-    TASK2_START --> AGENT2_ASSIGN[🤖 QUALITY ASSURANCE AGENT<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>Role: Quality Assurance Specialist<br/>Goal: Review Venue Suitability<br/>Backstory: Expert Quality Reviewer<br/>Access: Memory & Analysis Tools]
+    TASK2_INIT --> ASSIGN2[🤖 PROCESS<br/>Assign QA Agent<br/>Role: Quality Specialist<br/>Access Memory System]
     
-    AGENT2_ASSIGN --> MEMORY_RETRIEVE[🔍 RETRIEVE FROM MEMORY<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Access Previous Venue Results<br/>• Load Client Requirements<br/>• Review Search Criteria<br/>• Import Performance Metrics<br/>• Prepare Analysis Context]
+    ASSIGN2 --> MEMORY_GET[(🔍 STORAGE<br/>Retrieve from Memory<br/>Load Previous Results<br/>Access Requirements)]
     
-    MEMORY_RETRIEVE --> QA_REVIEW[🔎 QUALITY REVIEW PROCESS<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Check Venue Against Criteria<br/>• Identify Potential Issues<br/>• Assess Location Suitability<br/>• Evaluate Pricing Reasonableness<br/>• Verify Availability Accuracy]
+    MEMORY_GET --> QA_PROCESS[🔎 PROCESS<br/>Quality Review<br/>Check Against Standards<br/>Identify Issues<br/>Assess Suitability]
     
-    QA_REVIEW --> REVIEW_DECISION{✅ QUALITY ASSESSMENT<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>Standards Met?<br/>Issues Found?<br/>Approval Status?}
+    QA_PROCESS --> QA_DECISION{✅ DECISION<br/>Quality Standards Met?<br/>Issues Found?<br/>Approval Status?}
     
-    REVIEW_DECISION -->|✅ APPROVED| FINAL_REPORT[📋 GENERATE FINAL REPORT<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Detailed Venue Reviews<br/>• Quality Assessment Scores<br/>• Prioritized Recommendations<br/>• Risk Analysis & Mitigation<br/>• Next Steps & Action Items]
+    QA_DECISION -->|Rejected| FEEDBACK[/📝 OUTPUT<br/>Generate Feedback<br/>List Issues<br/>Improvement Suggestions/]
     
-    REVIEW_DECISION -->|❌ REJECTED| FEEDBACK[📝 GENERATE FEEDBACK<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• List Critical Issues Found<br/>• Suggest Search Improvements<br/>• Recommend Criteria Adjustments<br/>• Request Additional Information]
+    FEEDBACK --> TASK1_INIT
     
-    FEEDBACK --> TASK1_START
+    QA_DECISION -->|Approved| FINAL_PROCESS[📋 PROCESS<br/>Generate Final Report<br/>Create Recommendations<br/>Prepare Deliverables]
     
-    FINAL_REPORT --> TASK2_OUTPUT[📤 TASK 2 COMPLETION<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Final Venue Report<br/>• Quality Scores & Rankings<br/>• Strategic Recommendations<br/>• Implementation Roadmap<br/>• Risk Assessment Summary]
+    FINAL_PROCESS --> OUTPUT2[/📤 OUTPUT<br/>Final Report<br/>Quality Assessment<br/>Recommendations<br/>Action Items/]
     
-    TASK2_OUTPUT --> VALIDATION{🎯 FINAL VALIDATION<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>All Tasks Complete?<br/>Quality Standards Met?<br/>Client Requirements Satisfied?}
+    OUTPUT2 --> FINAL_CHECK{🎯 DECISION<br/>All Tasks Complete?<br/>Standards Met?<br/>Ready for Delivery?}
     
-    VALIDATION -->|✅ SUCCESS| SUCCESS[✅ PROCESS COMPLETE<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Venue Recommendations Ready<br/>• Quality Assured Output<br/>• Client Deliverable Prepared<br/>• Process Documentation Complete<br/>• Success Metrics Recorded]
+    FINAL_CHECK -->|No| ERROR_HANDLE[❌ PROCESS<br/>Handle Errors<br/>Log Issues<br/>Retry Operations]
     
-    VALIDATION -->|❌ ERROR| ERROR[❌ ERROR HANDLING<br/>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br/>• Log System Issues<br/>• Retry Failed Operations<br/>• Notify System Administrator<br/>• Escalate Critical Problems]
+    ERROR_HANDLE --> TASK1_INIT
     
-    ERROR --> TASK1_START
+    FINAL_CHECK -->|Yes| SUCCESS[✅ PROCESS<br/>Mark Complete<br/>Record Success Metrics<br/>Prepare Delivery]
     
-    SUCCESS --> END([🎉 END PROCESS<br/>Successful Completion])
+    SUCCESS --> END([🎉 END<br/>Process Complete<br/>Client Deliverable Ready])
+    
+    subgraph legend [📋 FLOWCHART LEGEND]
+        L1([Oval: Start/End Terminators])
+        L2[Rectangle: Process Steps]
+        L3{Diamond: Decision Points}
+        L4[/Parallelogram: Input/Output/]
+        L5{{Hexagon: Preparation Steps}}
+        L6[(Cylinder: Data Storage)]
+    end
+    
+    subgraph agents [🤖 AGENT SYSTEM]
+        VF[Venue Finder Agent<br/>• Search Specialist<br/>• Venue Expert<br/>• Tool Access]
+        QA[Quality Assurance Agent<br/>• Review Expert<br/>• Standards Validator<br/>• Memory Access]
+    end
+    
+    subgraph memory [💾 MEMORY SYSTEM]
+        STM[(Short-term Memory<br/>Session Data<br/>Task Results)]
+        LTM[(Long-term Memory<br/>Historical Data<br/>Patterns)]
+    end
+    
+    subgraph tools [🛠️ TOOL ECOSYSTEM]
+        ST[Search Tool<br/>Web APIs<br/>Data Parsing]
+        CT[Custom Tools<br/>Databases<br/>Validators]
+    end
     
     style START fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
     style END fill:#e8f5e8,stroke:#2e7d32,stroke-width:3px
     style SUCCESS fill:#c8e6c9,stroke:#388e3c,stroke-width:3px
-    style ERROR fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px
-    style SEARCH_RESULTS fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style REVIEW_DECISION fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style VALIDATION fill:#fff3e0,stroke:#f57c00,stroke-width:2px
-    style AGENT1_ASSIGN fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
-    style AGENT2_ASSIGN fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style ERROR_HANDLE fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px
+    style SEARCH_CHECK fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style QA_DECISION fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style FINAL_CHECK fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    style ASSIGN1 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    style ASSIGN2 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
     style MEMORY_STORE fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    style MEMORY_RETRIEVE fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-
-```
+    style MEMORY_GET fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
