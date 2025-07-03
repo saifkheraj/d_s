@@ -122,3 +122,139 @@ Response: ω̂ ───▶│                      │
 ---
 
 
+# Reward Model Training – Complete Guide to Ranking, Loss Function, and Optimization
+
+## 🎯 Goal of Reward Model Training
+
+Reward model training teaches a model to assign **higher scores to better responses** and **lower scores to worse ones**, based on a given input (query). This is particularly important in aligning language models with human preferences — for instance, helping chatbots generate more helpful and factual replies.
+
+---
+
+## 🧪 Training Setup: Inputs and Responses
+
+Each training sample includes:
+
+* **Query (X)**: A user input or question
+* **Yₐ (better response)**: A good or preferred response (e.g., accurate, relevant)
+* **Y\_b (worse response)**: A less preferred or incorrect response
+
+These responses are ranked by humans. The model learns to satisfy:
+
+$Zₐ = r_ϕ(X, Yₐ) > Z_b = r_ϕ(X, Y_b)$
+
+Where:
+
+* `r_ϕ` is the reward model (e.g., transformer + linear head)
+* `ϕ` are the model parameters to be learned
+* `Zₐ` and `Z_b` are scalar reward scores
+
+---
+
+## ⚙️ Turning Preferences into a Loss Function
+
+We can’t directly train on `Zₐ > Z_b` since it’s not differentiable. So, we build a smooth loss function in three steps:
+
+### Step 1: Compute Score Difference
+
+$Δ = Zₐ - Z_b$
+This margin tells us how much better `Yₐ` is than `Y_b`.
+
+### Step 2: Sigmoid – Convert to Probability
+
+$\sigma(Δ) = \frac{1}{1 + e^{-Δ}}$
+Sigmoid is a mathematical function that maps any real-valued input to the range (0, 1).
+
+In this case, `σ(Δ)` gives the **model's estimated probability** that `Yₐ` is better than `Y_b`:
+
+* If Δ = 0 → $\sigma(Δ) = 0.5$ → the model is **50% confident** that both responses are equally good.
+* If Δ ≫ 0 → $\sigma(Δ) → 1$ → the model is confident that `Yₐ` is better
+* If Δ ≪ 0 → $\sigma(Δ) → 0$ → the model mistakenly thinks `Y_b` is better
+
+### Step 3: Log Loss – Penalize Uncertainty
+
+$\mathcal{L} = -\log(\sigma(Zₐ - Z_b))$
+This is the final loss function we minimize. It increases if the model assigns a lower score to the better response and decreases when the model is confident that the preferred response (whichever one humans rank higher) gets a higher score.
+
+> 🧠 Note: In general, we always want the **human-preferred response** to get a higher score — regardless of whether it's labeled as `Yₐ` or `Y_b`. The loss function is symmetric and can be applied to any pair of responses as long as you know which one should be better. The training objective is to **maximize the reward difference in the correct direction**.
+
+---
+
+## 🔍 Why Use Sigmoid and Log?
+
+### Is Yₐ a probability?
+
+No. `Yₐ` and `Y_b` are **responses (text)**. The reward model turns `(X, Y)` into a score `Z`. We apply:
+
+* **Sigmoid** to score difference: turns it into a probability
+* **Log** to turn that into a smooth, differentiable **loss**
+
+### Why log?
+
+The log function is used because of its role in **cross-entropy loss**, a standard for binary classification.
+
+Binary cross-entropy:
+$\text{Loss} = -[y \log(p) + (1 - y) \log(1 - p)]$
+When the true label is `y = 1` (i.e., we prefer `Yₐ`), this simplifies to:
+$\text{Loss} = -\log(p)$
+In our case, `p = σ(Zₐ - Z_b)`. So the loss becomes:
+$\mathcal{L} = -\log(\sigma(Zₐ - Z_b))$
+
+This form of the loss function:
+
+* **Penalizes incorrect or unsure predictions heavily**
+* **Rewards confident, correct predictions**
+* Is **monotonically decreasing**, which means the loss gets smaller as the model becomes more correct
+
+![image](https://github.com/user-attachments/assets/6336c25e-d06d-4be2-be96-b87111d28606)
+
+
+---
+
+## 📉 Loss Intuition Table
+
+| Δ (Zₐ - Z\_b) | Sigmoid | Loss = -log(sigmoid) |
+| ------------- | ------- | -------------------- |
+| 0.0           | 0.5     | 0.693                |
+| 1.0           | 0.73    | 0.313                |
+| 2.0           | 0.88    | 0.127                |
+| 5.0           | 0.99    | 0.007                |
+
+The bigger the margin, the smaller the loss. This trains the model to **increase Δ**, i.e., increase the reward gap between good and bad responses.
+
+---
+
+## 📐 Geometric View
+
+Δ acts like a **margin**, similar to support vector machines:
+
+* The larger the margin, the more confident the model is
+* The log loss curve rapidly drops as Δ increases, encouraging larger margins
+
+---
+
+## 🔧 What Are We Optimizing?
+
+We're adjusting the model's parameters `ϕ` (weights of the transformer + linear head) to minimize the loss:
+
+* Make `Zₐ` bigger
+* Make `Z_b` smaller
+* Maximize the reward gap `Δ`
+
+If `Y_b` were the preferred response instead, the terms would be reversed — the model would learn to minimize the loss for `Z_b > Zₐ` using the same method.
+
+---
+
+## ✅ Final Summary
+
+| Concept        | Meaning                                                   |
+| -------------- | --------------------------------------------------------- |
+| `X`            | Input query                                               |
+| `Yₐ`, `Y_b`    | Better and worse responses (text)                         |
+| `Zₐ`, `Z_b`    | Reward scores predicted by the model                      |
+| `Δ = Zₐ - Z_b` | Score margin between responses                            |
+| `σ(Δ)`         | Probability that `Yₐ` is better than `Y_b`                |
+| `-log(σ(Δ))`   | Cross-entropy style loss function to train reward ranking |
+
+Using **sigmoid** and **log** together converts preference into a mathematically sound and gradient-friendly loss — enabling the reward model to learn which responses are better through smooth optimization.
+
+Would you like to add diagrams, a Python simulation, or real examples next?
