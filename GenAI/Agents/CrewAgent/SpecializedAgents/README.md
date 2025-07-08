@@ -26,52 +26,16 @@ The CrewAI system implements a **sequential multi-agent workflow** that combines
 - **Memory Management**: Persistent context across agent interactions
 
 ```mermaid
-graph TD
-    Start([User Provides YouTube URL]) --> Init[Initialize CrewAI System]
+flowchart LR
+    A[YouTube URL] --> B[Research Agent]
+    B --> C[Writer Agent] 
+    C --> D{Human Feedback?}
+    D -->|Approve| E[Final Article]
+    D -->|Revise| C
     
-    Init --> RA[Research Agent Activated]
-    RA --> YT[YouTubeVideoSearchTool]
-    YT --> RAG[RAG Analysis of Video]
-    RAG --> Extract[Extract Key Information]
-    Extract --> Research[Research Task Complete]
-    
-    Research --> WA[Writer Agent Activated]
-    WA --> Draft[Create Article Draft]
-    Draft --> Review{Human Review Required?}
-    
-    Review -->|Yes| Human[Human Feedback Input]
-    Human --> Feedback{Feedback Type}
-    
-    Feedback -->|Approve| Final[Final Article Published]
-    Feedback -->|Minor Changes| Refine[Writer Agent Refines]
-    Feedback -->|Major Changes| Rewrite[Writer Agent Rewrites]
-    
-    Refine --> Human
-    Rewrite --> Human
-    
-    Review -->|No| Final
-    
-    subgraph "Memory System"
-        Memory[(Agent Memory)]
-        Context[(Shared Context)]
-    end
-    
-    subgraph "Tools & Resources"
-        YTTool[YouTubeVideoSearchTool]
-        RAGSys[RAG System]
-        SearchCap[Search Capabilities]
-    end
-    
-    RA -.->|Uses| Memory
-    WA -.->|Uses| Memory
-    YT -.->|Powered by| YTTool
-    RAG -.->|Utilizes| RAGSys
-    
-    style Start fill:#e1f5fe
-    style Final fill:#c8e6c9
-    style Human fill:#fff3e0
-    style Memory fill:#f3e5f5
-    style YTTool fill:#e8f5e8
+    style A fill:#e3f2fd
+    style E fill:#e8f5e8
+    style D fill:#fff3e0
 ```
 
 ## Key Components
