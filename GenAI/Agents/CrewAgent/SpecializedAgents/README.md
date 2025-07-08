@@ -207,40 +207,196 @@ sequenceDiagram
     C-->>H: Deliver final article
 ```
 
-## Implementation Examples
+## Complete Implementation Example
 
-### Basic Crew Execution
+Here's the full code implementation that matches our simplified workflow:
+
+### Step 1: Setup and Imports
 
 ```python
-# Initialize the crew
-youtube_crew = Crew(
-    agents=[researcher, writer],
-    tasks=[research_task, writing_task],
-    process=Process.sequential
-)
+from crewai import Agent, Task, Crew, Process
+from crewai_tools import YoutubeVideoSearchTool
 
-# Execute the workflow
-result = youtube_crew.kickoff(
-    inputs={
-        "video_url": "https://youtube.com/watch?v=example",
-        "topic_focus": "AI and machine learning concepts"
-    }
+# Initialize the YouTube search tool
+search_tool = YoutubeVideoSearchTool()
+```
+
+### Step 2: Create Research Agent
+
+```python
+# Research Agent - Analyzes YouTube content
+researcher = Agent(
+    role="Video Content Researcher",
+    goal="Extract key insights from YouTube videos for article creation",
+    backstory="""You are an expert at analyzing video content and identifying 
+    the most important points, themes, and takeaways that would be valuable 
+    for creating engaging articles.""",
+    tools=[search_tool],
+    memory=True,
+    verbose=True
 )
 ```
 
-### Advanced Configuration
+### Step 3: Create Writer Agent
 
 ```python
-# Custom crew with additional configuration
-advanced_crew = Crew(
+# Writer Agent - Creates articles based on research
+writer = Agent(
+    role="Tech Article Writer",
+    goal="Transform research insights into compelling, well-structured articles",
+    backstory="""You are a skilled technical writer who excels at taking 
+    research findings and creating engaging, informative articles that 
+    resonate with readers.""",
+    tools=[search_tool],  # Can access for additional research if needed
+    memory=True,
+    verbose=True
+)
+```
+
+### Step 4: Define Tasks
+
+```python
+# Research Task
+research_task = Task(
+    description="""
+    Analyze the YouTube video at the provided URL and extract:
+    - Main topics and key concepts
+    - Important insights and takeaways  
+    - Notable examples or case studies
+    - Technical details worth highlighting
+    
+    Provide a comprehensive summary that will serve as the foundation 
+    for article creation.
+    """,
+    agent=researcher,
+    expected_output="Detailed research summary with key points organized by topic"
+)
+
+# Writing Task with Human Feedback
+writing_task = Task(
+    description="""
+    Using the research findings, create an engaging article that:
+    - Has a compelling introduction and conclusion
+    - Is well-structured with clear sections
+    - Explains technical concepts in accessible language
+    - Includes relevant examples from the research
+    - Maintains reader engagement throughout
+    """,
+    agent=writer,
+    expected_output="Complete article ready for publication",
+    human_input=True  # Enable human feedback for refinement
+)
+```
+
+### Step 5: Create and Run the Crew
+
+```python
+# Setup the crew
+youtube_crew = Crew(
     agents=[researcher, writer],
     tasks=[research_task, writing_task],
-    process=Process.sequential,
-    memory=True,
-    cache=True,
-    max_rpm=10,
+    process=Process.sequential,  # Research first, then writing
     verbose=2
 )
+
+# Execute the workflow
+def run_youtube_analysis(video_url):
+    result = youtube_crew.kickoff(
+        inputs={
+            "video_url": video_url,
+            "target_audience": "tech professionals and enthusiasts"
+        }
+    )
+    return result
+
+# Example usage
+if __name__ == "__main__":
+    video_url = "https://www.youtube.com/watch?v=your-video-id"
+    final_article = run_youtube_analysis(video_url)
+    print("Final Article:", final_article)
+```
+
+### Step 6: Human Feedback Integration
+
+When `human_input=True` is enabled, the system will pause and prompt for feedback:
+
+```python
+# The system will automatically prompt:
+# "Please provide feedback on the article draft:"
+# 
+# Example responses:
+# - "Looks good, publish it!" (proceeds to final output)
+# - "Make the introduction more engaging" (agent refines and asks again)
+# - "Add more technical details in section 2" (agent revises specific parts)
+```
+
+### Complete Workflow Example
+
+```python
+#!/usr/bin/env python3
+
+from crewai import Agent, Task, Crew, Process
+from crewai_tools import YoutubeVideoSearchTool
+
+def create_youtube_article_crew():
+    """Create and configure the YouTube article creation crew"""
+    
+    # Initialize tools
+    search_tool = YoutubeVideoSearchTool()
+    
+    # Create agents
+    researcher = Agent(
+        role="Video Content Researcher",
+        goal="Extract key insights from YouTube videos",
+        backstory="Expert video content analyst",
+        tools=[search_tool],
+        memory=True
+    )
+    
+    writer = Agent(
+        role="Tech Article Writer", 
+        goal="Create engaging articles from research",
+        backstory="Skilled technical writer",
+        tools=[search_tool],
+        memory=True
+    )
+    
+    # Define tasks
+    research_task = Task(
+        description="Analyze video and extract key insights",
+        agent=researcher,
+        expected_output="Research summary with main points"
+    )
+    
+    writing_task = Task(
+        description="Create article from research findings",
+        agent=writer,
+        expected_output="Complete article",
+        human_input=True  # Enable feedback loop
+    )
+    
+    # Create crew
+    crew = Crew(
+        agents=[researcher, writer],
+        tasks=[research_task, writing_task],
+        process=Process.sequential
+    )
+    
+    return crew
+
+# Run the workflow
+def main():
+    crew = create_youtube_article_crew()
+    
+    result = crew.kickoff(inputs={
+        "video_url": "https://www.youtube.com/watch?v=example"
+    })
+    
+    print("Article created successfully!")
+    return result
+
+if __name__ == "__main__":
+    main()
 ```
 
 ## Best Practices
