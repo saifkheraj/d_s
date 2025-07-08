@@ -1,4 +1,5 @@
 ## Example 1 (Notebook crewagent.ipynb)
+
 ```mermaid
 graph TD
     %% Root
@@ -76,6 +77,7 @@ graph TD
     class S4_DELIVER io
     class INSIGHT insight
 
+```
 
 ## Scenario 2: Use of Tools
 
