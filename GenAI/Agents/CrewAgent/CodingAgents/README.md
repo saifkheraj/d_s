@@ -208,6 +208,335 @@ print(result)
 | Follows clear instructions | Analyzes and improves code |
 | Pure creation | Problem-solving with constraints |
 
+## Advanced Crew Execution Patterns
+
+CrewAI provides powerful execution patterns that allow you to handle complex workflows efficiently. These advanced functionalities enable you to process multiple inputs, run crews asynchronously, and replay specific tasks when needed.
+
+### 1. Processing Multiple Inputs with `kickoff_for_each()`
+
+Instead of manually running the same analysis multiple times, you can process a list of inputs automatically using `kickoff_for_each()`. This is perfect when you need to apply the same workflow to multiple datasets or parameters.
+
+#### Example: Analyzing Multiple Datasets
+
+```python
+import os
+from crewai import Agent, Task, Crew
+from langchain_anthropic import ChatAnthropic
+from dotenv import load_dotenv
+
+# Setup
+load_dotenv()
+llm = ChatAnthropic(model="claude-3-5-sonnet-20241022", temperature=0.1)
+
+# Create a data analysis agent
+data_analyst = Agent(
+    role="Data Analyst",
+    goal="Analyze datasets and provide statistical insights",
+    backstory="Expert at analyzing data and extracting meaningful insights",
+    allow_code_execution=True,
+    llm=llm
+)
+
+# Create a task template that will work with multiple inputs
+analysis_task = Task(
+    description="""
+    Analyze the following dataset: {dataset}
+    
+    Provide:
+    1. Total count of items
+    2. Average value
+    3. Minimum and maximum values
+    4. Any notable patterns or insights
+    
+    Write Python code to perform this analysis.
+    """,
+    expected_output="Complete statistical analysis of the dataset",
+    agent=data_analyst
+)
+
+# Create the crew
+analysis_crew = Crew(
+    agents=[data_analyst],
+    tasks=[analysis_task]
+)
+
+# Multiple datasets to analyze
+datasets = [
+    [23, 35, 31, 29, 40, 33, 28],  # Ages dataset 1
+    [1500, 2300, 1800, 2100, 2500, 1900, 2200],  # Sales dataset
+    [85, 92, 78, 88, 95, 82, 90],  # Test scores dataset
+]
+
+# Process each dataset automatically
+print("Starting analysis of multiple datasets...")
+results = analysis_crew.kickoff_for_each(
+    inputs=[{"dataset": dataset} for dataset in datasets]
+)
+
+# Display results
+for i, result in enumerate(results):
+    print(f"\n{'='*50}")
+    print(f"DATASET {i+1} ANALYSIS:")
+    print(f"{'='*50}")
+    print(result)
+```
+
+**Key Benefits:**
+- **Efficiency**: Process multiple inputs without manual intervention
+- **Consistency**: Same analysis logic applied to all datasets
+- **Scalability**: Easily handle large numbers of inputs
+
+### 2. Asynchronous Execution with `kickoff_async()`
+
+When you need to run crews in the background while continuing other work, use `kickoff_async()`. This non-blocking approach is perfect for managing multiple tasks concurrently.
+
+#### Example: Running Multiple Crews Concurrently
+
+```python
+import asyncio
+import time
+from crewai import Agent, Task, Crew
+from langchain_anthropic import ChatAnthropic
+
+# Setup
+llm = ChatAnthropic(model="claude-3-5-sonnet-20241022", temperature=0.1)
+
+# Create agents for different types of analysis
+data_agent = Agent(
+    role="Data Analyst",
+    goal="Perform statistical data analysis",
+    allow_code_execution=True,
+    llm=llm
+)
+
+market_agent = Agent(
+    role="Market Researcher",
+    goal="Analyze market trends and patterns",
+    allow_code_execution=True,
+    llm=llm
+)
+
+# Create tasks
+data_task = Task(
+    description="Analyze sales data: [1000, 1200, 950, 1100, 1300] and provide insights",
+    expected_output="Statistical analysis with trends",
+    agent=data_agent
+)
+
+market_task = Task(
+    description="Analyze market competition data: [25, 30, 22, 28, 35] (market share %) and provide strategy recommendations",
+    expected_output="Market analysis with strategic recommendations",
+    agent=market_agent
+)
+
+# Create crews
+data_crew = Crew(agents=[data_agent], tasks=[data_task])
+market_crew = Crew(agents=[market_agent], tasks=[market_task])
+
+async def run_multiple_analyses():
+    print("Starting multiple analyses concurrently...")
+    start_time = time.time()
+    
+    # Start both crews asynchronously
+    print("🚀 Launching data analysis crew (async)...")
+    data_future = data_crew.kickoff_async()
+    
+    print("🚀 Launching market research crew (async)...")
+    market_future = market_crew.kickoff_async()
+    
+    # Do other work while crews are running
+    print("💼 Performing other tasks while crews work in background...")
+    await asyncio.sleep(2)  # Simulate other work
+    print("✅ Other tasks completed")
+    
+    # Wait for both crews to complete
+    print("⏳ Waiting for analysis results...")
+    data_result = await data_future
+    market_result = await market_future
+    
+    end_time = time.time()
+    
+    print(f"\n🎉 All analyses completed in {end_time - start_time:.2f} seconds")
+    print(f"\n📊 DATA ANALYSIS RESULT:\n{data_result}")
+    print(f"\n📈 MARKET RESEARCH RESULT:\n{market_result}")
+
+# Run the async example
+asyncio.run(run_multiple_analyses())
+```
+
+#### Comparison: Sync vs Async Execution
+
+```python
+import time
+
+def compare_execution_methods():
+    # Synchronous execution (blocking)
+    print("=== SYNCHRONOUS EXECUTION ===")
+    start_sync = time.time()
+    
+    result1 = crew1.kickoff()  # Waits for completion
+    result2 = crew2.kickoff()  # Waits for completion
+    
+    sync_time = time.time() - start_sync
+    print(f"Sync execution time: {sync_time:.2f} seconds")
+    
+    # Asynchronous execution (non-blocking)
+    print("\n=== ASYNCHRONOUS EXECUTION ===")
+    start_async = time.time()
+    
+    async def async_execution():
+        future1 = crew1.kickoff_async()
+        future2 = crew2.kickoff_async()
+        
+        result1 = await future1
+        result2 = await future2
+        return result1, result2
+    
+    results = asyncio.run(async_execution())
+    async_time = time.time() - start_async
+    print(f"Async execution time: {async_time:.2f} seconds")
+    print(f"Time saved: {sync_time - async_time:.2f} seconds")
+
+# compare_execution_methods()
+```
+
+**When to Use Async:**
+- Processing multiple independent tasks
+- Long-running analyses that don't need immediate results
+- Building responsive applications that need to handle other operations
+- Managing resource-intensive workflows
+
+### 3. Task Replay Functionality
+
+Sometimes you need to rerun specific parts of your workflow without starting from scratch. CrewAI's replay functionality allows you to restart execution from any specific task.
+
+#### Using Command Line Tools
+
+```bash
+# View tasks from the most recent execution
+crewai log-tasks-outputs
+
+# Replay from a specific task ID
+crewai replay -t <task_id>
+```
+
+#### Example: Replay Workflow
+
+```python
+# Original crew execution
+def run_analysis_pipeline():
+    # Step 1: Data Collection
+    collection_task = Task(
+        description="Collect and validate data from multiple sources",
+        expected_output="Clean, validated dataset",
+        agent=data_collector
+    )
+    
+    # Step 2: Data Analysis  
+    analysis_task = Task(
+        description="Perform statistical analysis on collected data",
+        expected_output="Statistical insights and trends",
+        agent=data_analyst,
+        context=[collection_task]  # Depends on collection_task
+    )
+    
+    # Step 3: Report Generation
+    report_task = Task(
+        description="Generate comprehensive report with visualizations",
+        expected_output="Final analysis report",
+        agent=report_generator,
+        context=[analysis_task]  # Depends on analysis_task
+    )
+    
+    pipeline_crew = Crew(
+        agents=[data_collector, data_analyst, report_generator],
+        tasks=[collection_task, analysis_task, report_task]
+    )
+    
+    return pipeline_crew.kickoff()
+
+# If Step 2 (analysis) needs to be rerun with different parameters:
+# 1. Run: crewai log-tasks-outputs
+# 2. Find the analysis_task ID
+# 3. Run: crewai replay -t analysis_task_id
+```
+
+#### Programmatic Replay Control
+
+```python
+# You can also implement replay logic in your code
+def replay_from_task(crew, task_name, new_inputs=None):
+    """
+    Replay crew execution from a specific task
+    """
+    print(f"🔄 Replaying execution from task: {task_name}")
+    
+    # Find the task to replay from
+    task_index = None
+    for i, task in enumerate(crew.tasks):
+        if task.description.startswith(task_name) or hasattr(task, 'name') and task.name == task_name:
+            task_index = i
+            break
+    
+    if task_index is None:
+        print(f"❌ Task '{task_name}' not found")
+        return
+    
+    # Update inputs if provided
+    if new_inputs:
+        for key, value in new_inputs.items():
+            setattr(crew.tasks[task_index], key, value)
+    
+    # Note: This is conceptual - actual replay would use CrewAI's built-in functionality
+    print(f"✅ Replaying from task {task_index}: {crew.tasks[task_index].description[:50]}...")
+    
+    return crew.kickoff()
+
+# Example usage:
+# replay_from_task(analysis_crew, "Perform statistical analysis", {"parameters": "updated_config"})
+```
+
+**Replay Use Cases:**
+- **Debugging**: Fix issues in specific workflow steps
+- **Optimization**: Improve task parameters without full re-execution
+- **Experimentation**: Test different approaches in specific stages
+- **Error Recovery**: Resume from the last successful checkpoint
+
+### 4. Combining Advanced Patterns
+
+You can combine these patterns for even more powerful workflows:
+
+```python
+async def advanced_workflow_example():
+    """
+    Combine multiple inputs, async execution, and replay capabilities
+    """
+    
+    # Process multiple datasets asynchronously
+    datasets = [dataset1, dataset2, dataset3]
+    
+    # Create crews for each dataset
+    crews = []
+    for i, dataset in enumerate(datasets):
+        task = Task(
+            description=f"Analyze dataset {i+1}: {dataset}",
+            expected_output="Analysis results",
+            agent=analyst_agent
+        )
+        crew = Crew(agents=[analyst_agent], tasks=[task])
+        crews.append(crew)
+    
+    # Run all crews asynchronously
+    futures = [crew.kickoff_async() for crew in crews]
+    results = await asyncio.gather(*futures)
+    
+    print("All datasets processed!")
+    return results
+
+# Run the advanced workflow
+# results = asyncio.run(advanced_workflow_example())
+```
+
 ## Advanced Configuration
 
 ### Custom LLM Settings
