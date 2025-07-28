@@ -7,7 +7,7 @@ This README explains automated feature engineering using the FeatureTools librar
 Key concepts:
 - **Parent DataFrame**: `games_df` - One row per game (basic game info like type: 'R' for regular, 'P' for postseason).
 - **Child DataFrame**: `plays_df` - Many rows per game (detailed events like goals or shots, linked by `game_id`).
-
+ 
 We'll use Python libraries: Pandas, FeatureTools, Framequery, and scikit-learn. This automates what would otherwise be manual work.
 
 ## Prerequisites
