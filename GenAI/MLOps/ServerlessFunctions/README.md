@@ -374,9 +374,113 @@ print(result.json())
 - **JSON API** - RESTful interface for model predictions
 - **Automatic Scaling** - Handles varying request loads
 
-## Next Steps
-- Add authentication for production use
-- Implement model versioning and A/B testing
-- Set up monitoring and logging
-- Integrate with CI/CD pipelines
-- Explore advanced deployment patterns
+## Security Considerations
+
+### Production Security Warning
+
+⚠️ **Important**: The Cloud Functions examples in this guide use "Allow unauthenticated invocations" for demonstration purposes. This makes your endpoints open to the web, meaning anyone can access them and potentially abuse your model serving endpoints.
+
+### Security Risks of Open Endpoints
+- **Unauthorized Usage** - Anyone can make requests to your model
+- **Cost Abuse** - Malicious users can generate expensive compute costs
+- **Rate Limiting Issues** - Uncontrolled traffic can overwhelm your function
+- **Data Privacy** - Sensitive model predictions exposed to public access
+
+### Recommended Security Practices
+
+#### 1. Disable Unauthenticated Access
+The most important step is to disable "Allow unauthenticated invocations" during function setup:
+
+**During Function Creation:**
+1. In GCP Console, when creating your Cloud Function
+2. **Uncheck** "Allow unauthenticated invocations"
+3. This prevents hosting the function on the open web
+
+#### 2. Authentication Methods
+Once unauthenticated access is disabled, you'll need to set up proper authentication:
+
+**Options Include:**
+- **IAM Roles** - Control access through Google Cloud IAM
+- **Service Accounts** - For service-to-service authentication
+- **API Keys** - For controlled client access
+- **OAuth 2.0** - For user-based authentication
+
+#### 3. Implementation Steps
+Setting up authentication involves several steps that may change as GCP evolves:
+
+1. **Create IAM Roles** - Define who can access your function
+2. **Set up Service Accounts** - For automated access
+3. **Configure Credentials** - Proper authentication tokens
+4. **Update Client Code** - Include authentication in requests
+
+**Reference Documentation:**
+For current, step-by-step authentication setup instructions, refer to the official [GCP Cloud Functions Authentication Documentation](https://cloud.google.com/functions/docs/securing/authenticating) as the process may change over time.
+
+#### 4. Additional Security Measures
+
+**Network Security:**
+- Use **VPC** (Virtual Private Cloud) for internal-only access
+- Implement **private IP** restrictions similar to AWS private IPs
+- Set up **firewall rules** for additional network-level protection
+
+**Function-Level Security:**
+- **Input Validation** - Validate all incoming request parameters
+- **Rate Limiting** - Implement request throttling
+- **Logging & Monitoring** - Track usage and detect abuse
+- **Error Handling** - Don't expose sensitive information in error messages
+
+### Example Authenticated Request
+
+Once authentication is set up, your client requests will need to include credentials:
+
+```python
+import requests
+from google.auth.transport.requests import Request
+from google.oauth2 import service_account
+
+# Load service account credentials
+credentials = service_account.Credentials.from_service_account_file(
+    'path/to/service-account-key.json',
+    scopes=['https://www.googleapis.com/auth/cloud-platform']
+)
+
+# Get access token
+credentials.refresh(Request())
+access_token = credentials.token
+
+# Make authenticated request
+headers = {'Authorization': f'Bearer {access_token}'}
+response = requests.post(
+    'https://your-region-project.cloudfunctions.net/predict',
+    json={'G1': '1', 'G2': '0', 'G3': '0', 'G4': '0', 'G5': '0'},
+    headers=headers
+)
+```
+
+### Security Checklist for Production
+
+Before deploying to production, ensure:
+
+- [ ] **Disabled** unauthenticated invocations
+- [ ] **Configured** appropriate IAM roles
+- [ ] **Set up** service account authentication
+- [ ] **Implemented** input validation
+- [ ] **Added** rate limiting
+- [ ] **Enabled** logging and monitoring
+- [ ] **Tested** authentication flow
+- [ ] **Documented** access procedures for your team
+
+### Development vs Production
+
+**Development/Testing:**
+- ✅ Unauthenticated access acceptable for rapid prototyping
+- ✅ Public endpoints OK for demos and testing
+- ⚠️ Always use test data, never production data
+
+**Production:**
+- ❌ Never use unauthenticated access
+- ✅ Always implement proper authentication
+- ✅ Use private networks when possible
+- ✅ Monitor and log all access
+
+Remember: Security should be planned from the beginning, not added as an afterthought. The convenience of open endpoints during development can become a serious vulnerability in production.
