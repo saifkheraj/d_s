@@ -222,15 +222,14 @@ print(response.json())
 
 ### 4. Keras/TensorFlow Model Serving
 
-Deploy deep learning models with proper TensorFlow graph management and custom metrics handling.
+Deploy deep learning models with custom metrics handling for modern TensorFlow.
 
 **requirements.txt**
 ```
 google-cloud-storage
 pandas
 flask
-tensorflow
-keras
+tensorflow>=2.0
 ```
 
 #### Understanding Keras Serverless Challenges
@@ -238,41 +237,36 @@ keras
 **The Custom Metrics Problem (AUC)**
 When you train a Keras model with custom metrics like AUC, the model file stores a reference to that function. When loading the model in Cloud Functions, Python doesn't know what `auc` means anymore - you need to "teach" the new environment by redefining the function.
 
-**The TensorFlow Graph Problem**
-TensorFlow uses "graphs" (blueprints) to organize computations. In serverless environments, each request might create a new blueprint, but your model was built with the original blueprint. You need to ensure you always use the same blueprint for consistent predictions.
+#### TensorFlow Version Considerations
 
-**Keras Model Implementation**
+**TensorFlow 1.x (Legacy - Graph Mode)**
+Required explicit graph management with `tf.get_default_graph()` and `with graph.as_default():` because TensorFlow used static computation graphs.
+
+**TensorFlow 2.x (Modern - Eager Execution)**
+Uses eager execution by default, eliminating the need for explicit graph management in most cases. The graph handling is automatic.
+
+**Modern Keras Model Implementation (TF 2.x)**
 ```python
-model = None    
-graph = None  # Cache both model and TensorFlow graph
+model = None
 
 def predict(request):
     global model
-    global graph
             
     from google.cloud import storage
     import pandas as pd
-    import flask
     import tensorflow as tf
-    import keras as k
-    from keras.models import load_model
+    from tensorflow.keras.models import load_model
     from flask import jsonify
     
     # Redefine custom function that was used during training
     def auc(y_true, y_pred):
-        auc = tf.metrics.auc(y_true, y_pred)[1]
-        k.backend.get_session().run(
-                      tf.local_variables_initializer())
-        return auc
+        return tf.keras.metrics.AUC()(y_true, y_pred)
     
     data = {"success": False}
     params = request.get_json()
     
     # Download model if not cached (lazy loading)
     if not model:
-        # Capture the graph when we first load the model
-        graph = tf.get_default_graph()  # Save this blueprint!
-        
         bucket_name = "dsp_model_store"
         storage_client = storage.Client()
         bucket = storage_client.get_bucket(bucket_name)
@@ -281,9 +275,9 @@ def predict(request):
         
         # Load model with custom function definition
         model = load_model('/tmp/games.h5', 
-                          custom_objects={'auc': auc})  # Tell Keras about AUC
+                          custom_objects={'auc': auc})
     
-    # Apply the model with proper graph context
+    # Apply the model (no graph context needed in TF 2.x)
     if "G1" in params: 
         new_row = { 
             "G1": params.get("G1"), "G2": params.get("G2"), 
@@ -295,40 +289,64 @@ def predict(request):
         new_x = pd.DataFrame.from_dict(new_row, 
                                       orient="index").transpose()               
      
-        # Always use the original graph for predictions
-        with graph.as_default():  # Switch to the correct blueprint        
-            data["response"] = str(model.predict_proba(new_x)[0][0])
-            data["success"] = True
+        # Direct prediction - eager execution handles everything
+        prediction = model.predict(new_x)
+        data["response"] = str(prediction[0][0])
+        data["success"] = True
     
     return jsonify(data)
 ```
 
-#### Why This Pattern is Essential
+**Legacy Implementation (TF 1.x) - For Reference Only**
+```python
+# Only needed for TensorFlow 1.x - DO NOT USE with TF 2.x
+model = None    
+graph = None
 
-**Without Proper Handling:**
-- ❌ "ValueError: Unknown metric function: auc"
-- ❌ "Cannot use the default session to evaluate tensor"  
-- ❌ Inconsistent predictions across requests
-- ❌ Model fails on second+ requests
+def predict_legacy(request):
+    global model, graph
+    
+    if not model:
+        graph = tf.get_default_graph()  # TF 1.x only
+        model = load_model('/tmp/games.h5', custom_objects={'auc': auc})
+    
+    with graph.as_default():  # TF 1.x only
+        prediction = model.predict(new_x)
+```
 
-**With Proper Handling:**
-- ✅ Custom functions work in new environment
-- ✅ Consistent predictions across all requests
-- ✅ No graph context errors
-- ✅ Reliable serverless deployment
+#### Key Differences Between Versions
 
-**Key Components Explained:**
-- **AUC Redefinition** - "Teach the new environment what AUC means"
-- **Graph Caching** - "Remember which blueprint we used to build the model"  
-- **Graph Context** - "Always use the same blueprint for predictions"
-- **Custom Objects** - Tell `load_model()` about your custom functions
+**TensorFlow 1.x Requirements:**
+- ❌ Manual graph management with `tf.get_default_graph()`
+- ❌ Graph context with `with graph.as_default():`
+- ❌ Session management
+- ❌ Complex setup for serverless environments
 
-**Testing Keras Model**
+**TensorFlow 2.x Benefits:**
+- ✅ Eager execution by default
+- ✅ No manual graph management needed
+- ✅ Simpler, cleaner code
+- ✅ Better serverless compatibility
+- ✅ Modern Keras API (`tf.keras` instead of separate `keras`)
+
+#### What You Still Need
+
+**Custom Metrics (Still Required):**
+- Must redefine custom functions like AUC
+- Use `custom_objects` parameter in `load_model()`
+- Modern syntax: `tf.keras.metrics.AUC()` instead of legacy approaches
+
+**Model Caching (Still Beneficial):**
+- Cache model in global variable for performance
+- Lazy loading from Cloud Storage
+- Reduces cold start impact
+
+**Testing Modern Keras Model**
 ```python
 import requests
 
 result = requests.post(
-    "https://us-central1-gameanalytics.cloudfunctions.net/predict",
+    "https://your-region-project.cloudfunctions.net/predict",
     json={
         'G1':'1', 'G2':'0', 'G3':'0', 'G4':'0', 'G5':'0',
         'G6':'0', 'G7':'0', 'G8':'0', 'G9':'0', 'G10':'0'
@@ -338,8 +356,11 @@ print(result.json())
 # Output: {'response': '0.8234567', 'success': True}
 ```
 
-**Mental Model:**
-Think of custom metrics like a recipe calling for "Mom's special sauce" - when someone else tries to make it, they need the recipe for the special sauce too! The graph is like ensuring you always drive on the correct side of the road for your car.
+**Migration Summary:**
+- **Remove**: Graph management code (`tf.get_default_graph()`, `with graph.as_default():`)
+- **Update**: Use `tf.keras` instead of separate `keras` imports
+- **Modernize**: Custom metrics with current TensorFlow 2.x syntax
+- **Keep**: Model caching and custom objects handling
 
 ## Supported Models
 - **scikit-learn Models** - Classification, regression, clustering
