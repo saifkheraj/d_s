@@ -222,7 +222,7 @@ print(response.json())
 
 ### 4. Keras/TensorFlow Model Serving
 
-Deploy deep learning models with proper TensorFlow graph management.
+Deploy deep learning models with proper TensorFlow graph management and custom metrics handling.
 
 **requirements.txt**
 ```
@@ -233,10 +233,18 @@ tensorflow
 keras
 ```
 
+#### Understanding Keras Serverless Challenges
+
+**The Custom Metrics Problem (AUC)**
+When you train a Keras model with custom metrics like AUC, the model file stores a reference to that function. When loading the model in Cloud Functions, Python doesn't know what `auc` means anymore - you need to "teach" the new environment by redefining the function.
+
+**The TensorFlow Graph Problem**
+TensorFlow uses "graphs" (blueprints) to organize computations. In serverless environments, each request might create a new blueprint, but your model was built with the original blueprint. You need to ensure you always use the same blueprint for consistent predictions.
+
 **Keras Model Implementation**
 ```python
 model = None    
-graph = None
+graph = None  # Cache both model and TensorFlow graph
 
 def predict(request):
     global model
@@ -250,6 +258,7 @@ def predict(request):
     from keras.models import load_model
     from flask import jsonify
     
+    # Redefine custom function that was used during training
     def auc(y_true, y_pred):
         auc = tf.metrics.auc(y_true, y_pred)[1]
         k.backend.get_session().run(
@@ -259,19 +268,22 @@ def predict(request):
     data = {"success": False}
     params = request.get_json()
     
-    # Download model if not cached    
+    # Download model if not cached (lazy loading)
     if not model:
-        graph = tf.get_default_graph()
+        # Capture the graph when we first load the model
+        graph = tf.get_default_graph()  # Save this blueprint!
         
         bucket_name = "dsp_model_store"
         storage_client = storage.Client()
         bucket = storage_client.get_bucket(bucket_name)
         blob = bucket.blob("serverless/keras/v1")
         blob.download_to_filename("/tmp/games.h5")
+        
+        # Load model with custom function definition
         model = load_model('/tmp/games.h5', 
-                          custom_objects={'auc':auc})
+                          custom_objects={'auc': auc})  # Tell Keras about AUC
     
-    # Apply the model 
+    # Apply the model with proper graph context
     if "G1" in params: 
         new_row = { 
             "G1": params.get("G1"), "G2": params.get("G2"), 
@@ -283,18 +295,33 @@ def predict(request):
         new_x = pd.DataFrame.from_dict(new_row, 
                                       orient="index").transpose()               
      
-        with graph.as_default():        
+        # Always use the original graph for predictions
+        with graph.as_default():  # Switch to the correct blueprint        
             data["response"] = str(model.predict_proba(new_x)[0][0])
             data["success"] = True
     
     return jsonify(data)
 ```
 
-**Key Points for Keras/TensorFlow:**
-- **Graph Management** - Cache both model and TensorFlow graph using global variables
-- **Custom Objects** - Redefine custom functions (like `auc`) used during model training
-- **Graph Context** - Use `with graph.as_default():` for predictions to ensure proper graph scope
-- **Model Format** - Load `.h5` files using `load_model()` with custom objects
+#### Why This Pattern is Essential
+
+**Without Proper Handling:**
+- ❌ "ValueError: Unknown metric function: auc"
+- ❌ "Cannot use the default session to evaluate tensor"  
+- ❌ Inconsistent predictions across requests
+- ❌ Model fails on second+ requests
+
+**With Proper Handling:**
+- ✅ Custom functions work in new environment
+- ✅ Consistent predictions across all requests
+- ✅ No graph context errors
+- ✅ Reliable serverless deployment
+
+**Key Components Explained:**
+- **AUC Redefinition** - "Teach the new environment what AUC means"
+- **Graph Caching** - "Remember which blueprint we used to build the model"  
+- **Graph Context** - "Always use the same blueprint for predictions"
+- **Custom Objects** - Tell `load_model()` about your custom functions
 
 **Testing Keras Model**
 ```python
@@ -310,6 +337,9 @@ result = requests.post(
 print(result.json())
 # Output: {'response': '0.8234567', 'success': True}
 ```
+
+**Mental Model:**
+Think of custom metrics like a recipe calling for "Mom's special sauce" - when someone else tries to make it, they need the recipe for the special sauce too! The graph is like ensuring you always drive on the correct side of the road for your car.
 
 ## Supported Models
 - **scikit-learn Models** - Classification, regression, clustering
