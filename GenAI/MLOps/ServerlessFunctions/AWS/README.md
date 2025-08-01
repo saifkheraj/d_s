@@ -402,3 +402,143 @@ aws s3 cp s3://bucket-name/file.txt ./       # Download file
 - **File not found**: Ensure model file is in zip package
 - **Timeout**: Increase Lambda timeout in configuration
 - **Memory**: Increase memory allocation for large models
+
+# 🧠 ML API Endpoint on AWS (Lambda + API Gateway)
+
+This project demonstrates how to deploy a **serverless API** that serves predictions from a Machine Learning model using:
+
+* **AWS Lambda** (backend logic)
+* **API Gateway** (public HTTP endpoint)
+* **S3 (optional)** for model storage
+
+---
+
+## 📦 Folder Structure
+
+```
+├── lambda_function.py   # Lambda code for prediction
+├── model.pkl            # Trained ML model (optional)
+├── requirements.txt     # Python dependencies (e.g., scikit-learn, numpy)
+├── function.zip         # Zipped deployment package (code + model)
+└── README.md            # You're here!
+```
+
+---
+
+## ✅ Prerequisites
+
+* AWS CLI configured (`aws configure`)
+* Python 3.8+
+* IAM role with Lambda execution + (optional) S3 read access
+* Trained model saved as `model.pkl` (or use `joblib`, `h5`, etc.)
+
+---
+
+## 🚀 Deployment Steps
+
+### 1. Install Dependencies & Package Code
+
+```bash
+pip install -r requirements.txt -t ./package
+cp lambda_function.py model.pkl ./package/
+cd package && zip -r ../function.zip . && cd ..
+```
+
+> This zips everything (code + dependencies) into `function.zip`.
+
+---
+
+### 2. Create IAM Role
+
+Create an IAM role named `lambda-ml-role` with:
+
+* **AWSLambdaBasicExecutionRole**
+* (Optional) **AmazonS3ReadOnlyAccess**
+
+Copy the **Role ARN** (looks like: `arn:aws:iam::123456789012:role/lambda-ml-role`)
+
+---
+
+### 3. Deploy Lambda Function
+
+```bash
+aws lambda create-function \
+  --function-name mlPredictor \
+  --runtime python3.12 \
+  --role arn:aws:iam::123456789012:role/lambda-ml-role \
+  --handler lambda_function.lambda_handler \
+  --zip-file fileb://function.zip
+```
+
+---
+
+### 4. Create API Gateway
+
+* Go to AWS Console → API Gateway → **Create HTTP API**
+* **Integration type**: Lambda
+* Select `mlPredictor`
+* Deploy → Copy the public **Invoke URL**
+
+---
+
+### 5. Test the Endpoint
+
+Send a test request (replace the URL with yours):
+
+```bash
+curl -X POST https://abc123.execute-api.us-east-1.amazonaws.com/predict \
+  -H "Content-Type: application/json" \
+  -d '{"feature1": 1.5, "feature2": 3.7}'
+```
+
+---
+
+## 🧠 Example `lambda_function.py`
+
+```python
+import json
+import joblib
+
+model = joblib.load('model.pkl')  # Load model on cold start
+
+def lambda_handler(event, context):
+    try:
+        body = json.loads(event['body'])
+        features = [[body['feature1'], body['feature2']]]
+        prediction = model.predict(features).tolist()
+
+        return {
+            'statusCode': 200,
+            'body': json.dumps({'prediction': prediction})
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)})
+        }
+```
+
+---
+
+## 📁 Optional: Load Model from S3 (Instead of bundling)
+
+```python
+import boto3
+import joblib
+
+def load_model_from_s3():
+    s3 = boto3.client('s3')
+    s3.download_file('your-bucket-name', 'model.pkl', '/tmp/model.pkl')
+    return joblib.load('/tmp/model.pkl')
+```
+
+---
+
+## 🔒 Notes
+
+* Lambda has a **250MB deployment limit** including dependencies.
+* `/tmp` directory inside Lambda can be used for temporary file storage (up to 512MB).
+* Use **Amazon SageMaker** for large models or more control.
+
+---
+
