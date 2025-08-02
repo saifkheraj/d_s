@@ -1,289 +1,507 @@
-# README.md
+# Understanding LLMs: From Probability Distributions to Intelligent Policies
 
-## Understanding LLMs as Distributions and Sampling
-
-This guide explains how large language models (LLMs), such as transformers, work as **distributions** and how we can generate different outputs by sampling from them. We break it down step by step.
+*A comprehensive guide to how large language models work under the hood*
 
 ---
 
-### 1. LLMs as Distributions
+## 🎯 What You'll Learn
 
-LLMs do not generate a fixed answer. They generate responses by **sampling** from a **probability distribution** over possible words, given an input query.
+This guide explains three fundamental concepts that make LLMs work:
+1. **How LLMs generate text** (distributions and sampling)
+2. **Why responses vary each time** (stochastic generation)
+3. **How this connects to AI decision-making** (policies and rollouts)
 
-> Example:
-> For the query: **"Which is the largest ocean?"**
-> Possible outputs:
-
-* "Pacific Ocean"
-* "Pacific Ocean is the largest ocean."
-* "Atlantic Ocean"
-
-These are sampled from the distribution $Y \sim \pi(Y|X)$, where $\pi$ is the probability distribution (policy) conditioned on input $X$.
+**Who this is for:** Developers, researchers, and curious minds who want to understand the mechanics behind ChatGPT, Claude, and other LLMs.
 
 ---
 
-### 2. How Transformers Generate Words
+## 🎲 Part 1: LLMs as Probability Machines
 
-LLMs generate text **one token at a time**:
+### The Big Idea: LLMs Don't "Know" Answers
 
-1. **Tokenize** the input (e.g., "Which is the largest ocean?").
-2. Pass tokens through transformer layers.
-3. Get **logits** (scores) for each word.
-4. Apply **softmax** to convert logits into probabilities.
-5. Sample a word from these probabilities.
+Think of an LLM like a sophisticated **probability calculator**. When you ask "What's the capital of France?", the model doesn't have a stored answer. Instead, it:
 
-> Example:
-> Softmax might produce:
+1. Calculates the probability of every possible next word
+2. Randomly selects from the most likely options
+3. Repeats this process word by word
 
-* "Pacific" = 60%
-* "Atlantic" = 25%
-* "Indian" = 15%
+### 🎯 Real Example: "The largest ocean is..."
 
-A word is sampled from this distribution instead of choosing the max (argmax).
+Let's trace what happens when you ask: **"Which is the largest ocean?"**
 
----
+```
+Input: "Which is the largest ocean?"
 
-### 3. Time-based Word Generation (t → t+1)
+Step 1 - Model calculates probabilities:
+┌─────────────┬─────────────┐
+│    Word     │ Probability │
+├─────────────┼─────────────┤
+│ "The"       │    45%      │
+│ "Pacific"   │    35%      │  ← Most likely completions
+│ "It"        │    12%      │
+│ "Atlantic"  │     5%      │
+│ "Indian"    │     2%      │
+│ "Arctic"    │     1%      │
+└─────────────┴─────────────┘
 
-Each word depends on the previous words:
+Step 2 - Model samples: "The" (selected randomly based on 45% chance)
 
-* At **time t**, the current word affects the next word's probability.
-* This process is **causal** — past tokens influence future tokens.
+Step 3 - Now the sequence is "Which is the largest ocean? The"
+Model calculates next word probabilities:
+┌─────────────┬─────────────┐
+│    Word     │ Probability │
+├─────────────┼─────────────┤
+│ "Pacific"   │    78%      │  ← Much higher now!
+│ "largest"   │    15%      │
+│ "Atlantic"  │     4%      │
+│ "answer"    │     2%      │
+│ "Indian"    │     1%      │
+└─────────────┴─────────────┘
 
-> Example:
-> “Pacific” at time t might lead to:
+Step 4 - Model samples: "Pacific"
+```
 
-* “Ocean is”
-* “Ocean covers”
+**Final result:** "Which is the largest ocean? The Pacific Ocean is..."
 
-This generates sequences like:
+### 🔄 Why Different Responses Each Time
 
-* “Pacific Ocean is the…”
-* “Atlantic Sea is not…”
-* “Indian Ocean if you…”
+Because the model **samples** (like rolling dice), you get different responses:
 
-#### 🔁 What If Multiple Words Are Generated at Time t?
+- **Run 1:** "The Pacific Ocean"
+- **Run 2:** "Pacific Ocean is the largest"  
+- **Run 3:** "It's the Pacific Ocean"
+- **Run 4:** "Atlantic Ocean" (unlikely but possible!)
 
-If at **time `t`** the model generates **multiple possible next words** (like in beam search or sampling), then **each of those words becomes the start of a separate path**. Every generated word continues into its **own time `t+1`** with its own probability distribution.
-
-> For example:
-> At `t = 1`:
-
-* "Pacific"
-* "Atlantic"
-* "Indian"
-
-At `t = 2`, each path expands:
-
-* "Pacific Ocean"
-* "Atlantic Ocean"
-* "Indian Ocean"
-
-This allows exploration of **multiple future paths** in parallel.
-
----
-
-### 4. Visualizing with Bar Graphs
-
-Each time step has a **bar graph**:
-
-* **X-axis** = vocabulary words
-* **Y-axis** = softmax probability for each word
-
-Words are **sampled** based on their heights in the bar graph.
+This is why ChatGPT gives different answers when you ask the same question multiple times.
 
 ---
 
-### 5. Generation Parameters
+## ⚙️ Part 2: The Generation Process (Step by Step)
 
-You can influence how the LLM generates output using these settings:
+### How Transformers Build Sentences
 
-#### a. Temperature ($\tau$)
+Think of text generation like **autocomplete on steroids**:
 
-Controls randomness in the softmax function:
+```
+1. Tokenization
+   "Hello world" → ["Hello", " world"]
 
-* Low $\tau$: sharp/peaky distribution (less random)
-* High $\tau$: flat/uniform distribution (more random)
+2. Neural Network Processing
+   Each token goes through many layers of computation
+   
+3. Logits (Raw Scores)
+   "Hello" → ["world": 8.5, "there": 6.2, "!": 4.1, "everyone": 2.8]
+   
+4. Softmax (Convert to Probabilities)
+   ["world": 67%, "there": 23%, "!": 8%, "everyone": 2%]
+   
+5. Sampling
+   Randomly pick based on probabilities → "world"
+   
+6. Repeat
+   "Hello world" → calculate next probabilities...
+```
 
-> Example:
+### 📊 Visualizing the Process
 
-* $\tau = 1$: Normal behavior
-* $\tau = 10$: Almost all tokens equally likely
+Imagine each step as a **bar chart race**:
 
-#### b. Top-K Sampling
+```
+Time Step 1: After "The weather is"
+████████████████████ sunny (40%)
+████████████ rainy (24%)  
+████████ cloudy (16%)
+█████ nice (10%)
+███ bad (6%)
+█ terrible (4%)
 
-Limits selection to the top K highest-probability words.
+Time Step 2: After "The weather is sunny"
+███████████████████████ and (46%)
+████████████ today (24%)
+██████ outside (12%)
+████ but (8%)
+███ with (6%)
+█ very (4%)
+```
 
-* Keeps only K best tokens
-* Re-normalizes their probabilities
-
-#### c. Top-p Sampling (Nucleus Sampling)
-
-Selects the **smallest** group of words whose cumulative probability ≥ p.
-
-* Dynamically adapts number of tokens
-* Balances quality and diversity
-
-#### d. Beam Search
-
-Keeps **multiple best sequences** (beams) at each step:
-
-* Expands them all
-* Chooses the best final result
-
-More coherent, but less diverse.
-
-#### e. Repetition Penalty
-
-Reduces probability of repeating previous words.
-
-* Avoids loops like: "The ocean is big. The ocean is big."
-
-#### f. Min/Max Tokens
-
-Controls the length of output:
-
-* **Min tokens** = at least this many words
-* **Max tokens** = cut off after this many words
+Each bar represents how likely each word is to come next.
 
 ---
 
-### Summary Table
+## 🎛️ Part 3: Controlling Generation (The Knobs You Can Turn)
 
-| Concept               | Meaning                                  |
-| --------------------- | ---------------------------------------- |
-| LLM as distribution   | Sampled outputs based on probabilities   |
-| Softmax               | Converts logits to probabilities         |
-| Time-step generation  | Each token depends on previous ones      |
-| Multiple outputs at t | Each word branches into its own t+1 path |
-| Temperature           | Controls randomness                      |
-| Top-K Sampling        | Sample only from top-K tokens            |
-| Top-p Sampling        | Sample from smallest cumulative p tokens |
-| Beam Search           | Tracks top sequences at each step        |
-| Repetition Penalty    | Penalizes repeated tokens                |
-| Min/Max Tokens        | Limits output length                     |
+### Temperature (τ): The Creativity Dial
 
----
+**Temperature controls randomness** - like adjusting the "creativity" of the model.
 
-### Final Note
+```
+Low Temperature (τ = 0.1) - Conservative
+"The capital of France is Paris." ✓ Predictable
+"The capital of France is Paris." ✓ Same answer
+"The capital of France is Paris." ✓ Reliable
 
-The key idea is: **LLMs generate output by sampling from distributions**, not by selecting fixed outputs. You can customize the randomness and structure of generated sequences using parameters like temperature, top-k, and beam search.
+High Temperature (τ = 2.0) - Creative  
+"The capital of France is Paris." 
+"France's capital city is Paris, known for..."
+"Paris is the beautiful capital of France where..."
+"Well, Paris is definitely the capital of France!"
+```
 
-Let us know if you'd like a **code example**, **diagram**, or **Colab notebook** to explore this further!
+**Technical explanation:** Temperature scales the probability distribution:
+- Low τ: Sharp peaks (confident choices)
+- High τ: Flat distribution (more random choices)
 
+### Top-K Sampling: The Fixed Filter
 
+**Always picks from exactly K most likely words, no matter what**
 
+Think of Top-K like having a **fixed-size menu** - you always get exactly K options to choose from.
 
-## From Distributions to Policies in LLMs
+```
+Example: "The weather is ___" with Top-K = 3
 
-This guide explains how language models (LLMs) can be understood and used as **policies** in the context of **reinforcement learning (RL)**, and how the concept of **rollouts** plays a role in generating diverse and effective responses.
+Step 1: Model calculates ALL probabilities
+┌─────────────┬─────────────┐
+│    Word     │ Probability │
+├─────────────┼─────────────┤
+│ "sunny"     │    40%      │ ← Top 3
+│ "rainy"     │    25%      │ ← Top 3  
+│ "cloudy"    │    15%      │ ← Top 3
+│ "nice"      │    10%      │ ← Ignored
+│ "terrible"  │     5%      │ ← Ignored
+│ "purple"    │     3%      │ ← Ignored
+│ "quantum"   │     2%      │ ← Ignored
+└─────────────┴─────────────┘
 
----
+Step 2: Keep only top 3, throw away the rest
+Step 3: Re-calculate percentages for just these 3:
+- "sunny": 40/(40+25+15) = 50%
+- "rainy": 25/(40+25+15) = 31.25%  
+- "cloudy": 15/(40+25+15) = 18.75%
 
-### 1. What Is a Policy in Reinforcement Learning?
+Step 4: Sample from these 3 options only
+```
 
-In reinforcement learning, a **policy** is a strategy or mapping that tells an **agent** what action to take, based on the current **state** of the environment.
+**Key point:** Top-K = 3 ALWAYS gives you exactly 3 choices, even if some are terrible!
 
-> Formally:
-> **Policy**: $\pi(a|s)$ — a distribution over actions $a$, given a state $s$.
+### Top-p (Nucleus) Sampling: The Smart Filter
 
-Policies are **stochastic** in nature — they rely on **probabilities**, allowing for exploration of **different action paths**.
+**Dynamically picks enough words to reach a probability threshold**
 
----
+Think of Top-p like having a **flexible menu** - you get however many options you need to feel confident.
 
-### 2. Policies in Language Models (LLMs)
+```
+Example 1: "2 + 2 equals ___" with Top-p = 0.9 (90%)
 
-In LLMs, we can treat text generation as a **decision-making task** — where each word (token) is an action.
+Model probabilities:
+┌─────────────┬─────────────┬──────────────┐
+│    Word     │ Probability │ Cumulative   │
+├─────────────┼─────────────┼──────────────┤
+│ "4"         │    95%      │    95%       │ ← Already > 90%!
+│ "four"      │     3%      │    98%       │ ← Not needed
+│ "2"         │     1%      │    99%       │ ← Not needed
+│ "5"         │     1%      │   100%       │ ← Not needed
+└─────────────┴─────────────┴──────────────┘
 
-* A **policy** in this case is a distribution over the next word, given the previous sequence.
-* Policies enable models to generate diverse, creative, and contextually rich outputs.
+Result: Only considers "4" (1 word total)
+```
 
-> Example:
-> For the query: **"Which is the largest ocean?"**, possible completions:
+```
+Example 2: "The movie was ___" with Top-p = 0.9 (90%)
 
-* "Pacific Ocean"
-* "The Pacific Ocean is the largest ocean."
-* "Atlantic Ocean"
+Model probabilities:
+┌─────────────┬─────────────┬──────────────┐
+│    Word     │ Probability │ Cumulative   │
+├─────────────┼─────────────┼──────────────┤
+│ "good"      │    25%      │    25%       │ ← Include
+│ "great"     │    20%      │    45%       │ ← Include  
+│ "bad"       │    18%      │    63%       │ ← Include
+│ "okay"      │    15%      │    78%       │ ← Include
+│ "amazing"   │    12%      │    90%       │ ← Include (hits 90%!)
+│ "terrible"  │     5%      │    95%       │ ← Stop here
+│ "boring"    │     3%      │    98%       │ ← Not needed
+│ "purple"    │     2%      │   100%       │ ← Not needed
+└─────────────┴─────────────┴──────────────┘
 
-These completions are sampled from a **policy distribution** $\pi(y|x)$, where:
+Result: Considers 5 words total
+```
 
-* $x$: input query
-* $y$: output sequence
+**Key point:** Top-p adapts! Sometimes 1 word, sometimes 10 words - whatever it takes to reach the threshold.
 
----
+### Other Important Controls
 
-### 3. Policy as a Function of Omega
+**Beam Search:** Keep track of multiple "best" sequences
+```
+Beam Size = 3
 
-The model follows the distribution:
+Step 1: "The weather"
+- Beam 1: "The weather is" (score: 8.2)
+- Beam 2: "The weather was" (score: 7.9)  
+- Beam 3: "The weather looks" (score: 7.1)
 
-$y \sim \pi(y|x) = \pi(y_1, y_2, ..., y_n|x_1, ..., x_m)$
+Step 2: Expand each beam and keep best 3 overall
+- "The weather is sunny" (score: 15.8)
+- "The weather was nice" (score: 15.2)
+- "The weather is cloudy" (score: 14.9)
+```
 
-This distribution is **factorized over time** — each token’s probability depends on prior tokens and is represented as a function of $\omega$ (the random seed or sampling process).
-
-> For instance, to compute the probability of generating:
-> **"Atlantic"**
-
-* The model considers the query "Which is the largest ocean"
-* Then evaluates: $\pi(\text{Atlantic}|x_1, x_2, ..., x_m)$
-
----
-
-### 4. What Are Rollouts?
-
-**Rollouts** refer to multiple **sampled responses** from the same query.
-
-Each rollout is a **possible realization** from the model's policy:
-
-> For the query **"Which is the largest ocean?"**, rollouts could include:
-
-* Rollout 1: "Pacific Ocean"
-* Rollout 2: "The Pacific Ocean is the largest ocean on Earth."
-* Rollout 3: "Atlantic Ocean is 155 million square kilometers."
-
-These are all **valid completions**, sampled from the same underlying policy.
-
----
-
-### 5. Rollouts vs Hugging Face Definitions
-
-In **RL**, a rollout usually includes **states, actions, and rewards**.
-In **Hugging Face** and **LLM contexts**, rollout refers to:
-
-* Sampling multiple completions (no rewards involved by default)
-* Useful for tasks like summarization, code generation, etc.
-
-> Example:
-> Query: **"Can you give me some Python code?"**
-> Rollouts:
-
-* `print("Hello World")`
-* `for i in range(5): print(i)`
-* `def greet(): print("Hi!")`
-
-Each is a separate **rollout**.
-
----
-
-### 6. Summary Table
-
-| Concept          | Description                                     |                                 |
-| ---------------- | ----------------------------------------------- | ------------------------------- |
-| Policy (RL)      | Strategy for choosing actions based on state    |                                 |
-| Policy (LLMs)    | Distribution over next tokens, given input      |                                 |
-| Policy Notation  | ( y \sim \pi(y                                  | x) ) — Output from distribution |
-| Omega ($\omega$) | Underlying random seed guiding generation       |                                 |
-| Rollouts (LLMs)  | Different sampled responses from the same query |                                 |
-| Rollouts (RL)    | Includes state, action, reward tuples           |                                 |
+**Repetition Penalty:** Avoid getting stuck
+```
+Without penalty: "The ocean is big. The ocean is big. The ocean is big..."
+With penalty: "The ocean is big. It covers most of Earth's surface."
+```
 
 ---
 
-### Final Note
+## 🎮 Part 4: From Text Generation to AI Policies
 
-In this framework, LLMs operate **like RL agents**:
+### The Big Picture: LLMs as Decision Makers
 
-* **Policies** guide which tokens to generate.
-* **Rollouts** are diverse realizations of output sequences.
+In **Reinforcement Learning**, an agent makes decisions using a **policy**:
+- **State:** Current situation
+- **Action:** What to do next  
+- **Policy:** Strategy for choosing actions
 
-Understanding this helps you apply **reinforcement-style thinking** to language modeling — optimizing responses, exploring diverse outputs, and eventually using rewards (e.g., human feedback) to **fine-tune the policy**.
+**LLMs work the same way:**
+- **State:** Text written so far
+- **Action:** Next word to write
+- **Policy:** Probability distribution over words
 
-Let us know if you'd like an example notebook or diagram to visualize policy and rollout concepts!
+### Mathematical Notation (Don't Panic!)
+
+```
+Traditional RL: π(action|state)
+LLM Version:   π(word|previous_text)
+
+Example:
+π("sunny"|"The weather is") = 0.4  (40% chance of "sunny")
+π("rainy"|"The weather is") = 0.24 (24% chance of "rainy")
+```
+
+### 🎲 Rollouts: Multiple Attempts at the Same Task
+
+A **rollout** is one complete run through the generation process.
+
+**Example Task:** "Write a greeting"
+
+```
+Rollout 1: "Hello! How are you today?"
+Rollout 2: "Hi there! Nice to meet you."  
+Rollout 3: "Good morning! Hope you're doing well."
+Rollout 4: "Hey! What's up?"
+```
+
+Each rollout samples differently from the same underlying policy.
+
+### Why Rollouts Matter
+
+**Quality through Quantity:** Generate multiple responses, pick the best
+
+```
+Task: "Explain photosynthesis simply"
+
+Rollout 1: "Plants use sunlight to make food from air and water."
+Rollout 2: "Photosynthesis is when plants convert light into energy using chlorophyll."
+Rollout 3: "Plants eat sunlight and turn it into sugar through photosynthesis."
+
+→ You can choose the clearest explanation
+→ Or combine the best parts of each
+```
+
+---
+
+## 🔧 Part 5: Practical Applications
+
+### Code Generation Example
+
+**Prompt:** "Write a function to calculate fibonacci numbers"
+
+Different rollouts might produce:
+```python
+# Rollout 1 - Recursive
+def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+# Rollout 2 - Iterative  
+def fibonacci(n):
+    a, b = 0, 1
+    for _ in range(n):
+        a, b = b, a + b
+    return a
+
+# Rollout 3 - With memoization
+def fibonacci(n, memo={}):
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+    memo[n] = fibonacci(n-1, memo) + fibonacci(n-2, memo)
+    return memo[n]
+```
+
+### Content Creation Example
+
+**Prompt:** "Write a product description for wireless headphones"
+
+```
+Rollout 1 (Technical):
+"Advanced Bluetooth 5.0 connectivity with 40mm drivers delivering crisp audio..."
+
+Rollout 2 (Emotional):
+"Immerse yourself in crystal-clear sound that brings your music to life..."
+
+Rollout 3 (Features-focused):
+"30-hour battery life, noise cancellation, and comfortable over-ear design..."
+```
+
+---
+
+## 📊 Quick Reference Tables
+
+### Generation Parameters Cheat Sheet
+
+| Parameter | What it does | Low value | High value |
+|-----------|--------------|-----------|------------|
+| Temperature | Controls randomness | Conservative, predictable | Creative, varied |
+| Top-K | Limits word choices | Few options, focused | Many options, diverse |
+| Top-p | Smart word filtering | Quality-focused | Exploratory |
+| Max tokens | Output length | Short responses | Long responses |
+| Repetition penalty | Avoids repetition | May repeat phrases | Avoids repetition |
+
+### When to Use What
+
+| Goal | Recommended Settings |
+|------|---------------------|
+| Factual answers | Low temperature (0.1-0.3), Top-K=10 |
+| Creative writing | High temperature (0.7-1.0), Top-p=0.9 |
+| Code generation | Medium temperature (0.2-0.5), repetition penalty |
+| Multiple options | Generate many rollouts, vary temperature |
+
+---
+
+## 🚀 Advanced Concepts
+
+### Policy Optimization
+
+Just like training an RL agent, you can improve LLM policies:
+
+1. **Generate multiple rollouts**
+2. **Score them** (human feedback, automated metrics)
+3. **Update the policy** to favor better responses
+
+This is how **ChatGPT** and **Claude** were trained with human feedback!
+
+### Distribution Shaping
+
+You can modify the probability distribution:
+```python
+# Pseudo-code for custom generation
+logits = model.forward(input_text)
+logits = apply_temperature(logits, temperature=0.7)
+logits = apply_top_k(logits, k=50)
+logits = apply_repetition_penalty(logits, previous_tokens)
+probabilities = softmax(logits)
+next_token = sample(probabilities)
+```
+
+---
+
+## 💡 Key Takeaways
+
+1. **LLMs are probability machines** - they don't store answers, they calculate them
+2. **Sampling creates variety** - same input can produce different outputs
+3. **You control the process** - temperature, top-k, and other parameters shape responses
+4. **Multiple rollouts = better results** - generate several options and pick the best
+5. **This is decision-making** - LLMs are essentially RL agents choosing words
+
+---
+
+## 🔍 Going Deeper
+
+**Want to experiment?** Try these:
+
+1. **Hugging Face Transformers:** Load a model and adjust generation parameters
+2. **OpenAI API:** Use the temperature and top_p parameters  
+3. **Anthropic API:** Experiment with Claude's generation settings
+4. **Local models:** Run Llama or Mistral with different sampling strategies
+
+**Further Reading:**
+- "Attention Is All You Need" (Transformer paper)
+- "Constitutional AI" (Policy improvement methods)
+- "Training Language Models to Follow Instructions" (InstructGPT)
+
+---
+
+## ❓ Common Questions
+
+**Q: Why don't LLMs give the same answer every time?**
+A: Because they sample randomly from probability distributions. Set temperature=0 for deterministic output.
+
+**Q: How do I get more creative responses?**  
+A: Increase temperature, use top-p sampling, generate multiple rollouts.
+
+### 🔍 Top-K vs Top-p: Side-by-Side Comparison
+
+Let's see how they behave differently with the same scenario:
+
+**Scenario:** "The capital of France is ___"
+
+```
+Original probabilities:
+"Paris" = 85%, "Lyon" = 8%, "Nice" = 4%, "Marseille" = 2%, "Berlin" = 1%
+
+Top-K = 3:
+✅ Always picks exactly 3 words: "Paris", "Lyon", "Nice" 
+✅ Ignores "Marseille" and "Berlin"
+✅ Re-normalizes: Paris=87.6%, Lyon=8.2%, Nice=4.1%
+
+Top-p = 0.9:  
+✅ Adds words until cumulative ≥ 90%
+✅ "Paris" (85%) + "Lyon" (8%) = 93% → Stop!
+✅ Only considers 2 words: "Paris", "Lyon"
+✅ Re-normalizes: Paris=91.4%, Lyon=8.6%
+```
+
+**Another scenario:** "I feel ___" (more uncertain)
+
+```
+Original probabilities:
+"good"=15%, "bad"=12%, "happy"=11%, "sad"=10%, "okay"=9%, "great"=8%, "tired"=7%, ...
+
+Top-K = 3:
+✅ Always exactly 3: "good", "bad", "happy"
+✅ Misses many reasonable options!
+
+Top-p = 0.9:
+✅ Needs many words to reach 90%
+✅ Includes: "good", "bad", "happy", "sad", "okay", "great", "tired", "fine", "excited"
+✅ Much more variety when model is uncertain!
+```
+
+### 🎯 When to Use Which?
+
+| Situation | Use This | Why |
+|-----------|----------|-----|
+| **Want consistent variety** | Top-K | Always get exactly K options |
+| **Want quality control** | Top-p | Adapts to model confidence |
+| **Creative writing** | Top-p = 0.9 | More words when model is uncertain |
+| **Factual answers** | Top-K = 1-3 | Focus on most likely answers |
+| **Brainstorming** | Top-K = 10-20 | Fixed number of diverse ideas |
+
+**Q: What's the difference between top-k and top-p?**
+A: 
+- **Top-K = Fixed menu size** (always exactly K words)
+- **Top-p = Flexible menu size** (however many words needed to reach probability threshold)
+- **Top-K is predictable**, Top-p adapts to the situation
+
+**Q: Can I make an LLM never repeat itself?**
+A: Use repetition penalty, but some repetition is natural in language.
+
+**Q: How is this related to reinforcement learning?**
+A: LLMs can be viewed as RL policies that choose words (actions) based on context (state).
+
+---
+
+*This guide provides a foundation for understanding how modern AI language models work. The key insight is that they're sophisticated probability calculators that sample words based on context - and you can control this process to get the outputs you want.*
