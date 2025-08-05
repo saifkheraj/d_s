@@ -1,0 +1,15 @@
+artifact_uri: file:///workspaces/d_s/GenAI/MLOps/Kubeflow/demo/mlruns/680043507079128982/be2eedd36fef4f22994c7a176149f66b/artifacts
+end_time: 1754389748722
+entry_point_name: ''
+experiment_id: '680043507079128982'
+lifecycle_stage: active
+run_id: be2eedd36fef4f22994c7a176149f66b
+run_name: adaptable-mouse-754
+run_uuid: be2eedd36fef4f22994c7a176149f66b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1754389748712
+status: 3
+tags: []
+user_id: codespace

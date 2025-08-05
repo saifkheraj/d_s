@@ -1,0 +1,182 @@
+# PIPELINE DEFINITION
+# Name: essay-writer-pipeline
+# Description: Simple Kubeflow pipeline for essay writing with CrewAI
+# Inputs:
+#    experiment_name: str [Default: 'Kubeflow_Essay_Demo']
+#    topic: str [Default: 'Benefits of reading']
+# Outputs:
+#    Output: str
+components:
+  comp-create-essay-with-crewai:
+    executorLabel: exec-create-essay-with-crewai
+    inputDefinitions:
+      parameters:
+        topic:
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        Output:
+          parameterType: STRUCT
+  comp-log-to-mlflow:
+    executorLabel: exec-log-to-mlflow
+    inputDefinitions:
+      parameters:
+        essay_data:
+          parameterType: STRUCT
+        experiment_name:
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        Output:
+          parameterType: STRING
+deploymentSpec:
+  executors:
+    exec-create-essay-with-crewai:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - create_essay_with_crewai
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.8.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef create_essay_with_crewai(topic: str) -> Dict:\n    \"\"\"Kubeflow\
+          \ component that uses CrewAI to write essays\"\"\"\n\n    from crewai import\
+          \ Agent, Task, Crew\n    import time\n\n    # Create agents\n    writer_agent\
+          \ = Agent(\n        role=\"Essay Writer\",\n        goal=\"Write high-quality\
+          \ essays on any topic\",\n        backstory=\"Expert writer with years of\
+          \ experience\",\n        verbose=True\n    )\n\n    checker_agent = Agent(\n\
+          \        role=\"Quality Checker\", \n        goal=\"Evaluate and score essays\"\
+          ,\n        backstory=\"Experienced editor who scores writing quality\",\n\
+          \        verbose=True\n    )\n\n    # Create tasks\n    writing_task = Task(\n\
+          \        description=f\"Write a 300-word essay about '{topic}' with intro,\
+          \ body, conclusion.\",\n        agent=writer_agent,\n        expected_output=\"\
+          Complete structured essay\"\n    )\n\n    evaluation_task = Task(\n    \
+          \    description=\"Score the essay 1-10 and give brief feedback.\",\n  \
+          \      agent=checker_agent, \n        expected_output=\"Score and feedback\"\
+          \n    )\n\n    # Run crew\n    start_time = time.time()\n    crew = Crew(agents=[writer_agent,\
+          \ checker_agent], tasks=[writing_task, evaluation_task])\n    results =\
+          \ crew.kickoff()\n    writing_time = time.time() - start_time\n\n    # Parse\
+          \ results\n    essay = results[0] if len(results) > 0 else \"No essay\"\n\
+          \    evaluation = results[1] if len(results) > 1 else \"No evaluation\"\n\
+          \n    # Extract score\n    score = 7.0\n    try:\n        import re\n  \
+          \      match = re.search(r'(\\d+(?:\\.\\d+)?)', evaluation)\n        if\
+          \ match:\n            score = float(match.group(1))\n            if score\
+          \ > 10:\n                score = score / 10  # Handle cases like \"75\"\
+          \ meaning 7.5\n    except:\n        pass\n\n    return {\n        \"topic\"\
+          : topic,\n        \"essay\": essay,\n        \"evaluation\": evaluation,\
+          \ \n        \"score\": min(score, 10.0),\n        \"writing_time\": writing_time,\n\
+          \        \"word_count\": len(essay.split())\n    }\n\n"
+        image: python:3.8
+    exec-log-to-mlflow:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - log_to_mlflow
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.8.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef log_to_mlflow(essay_data: Dict, experiment_name: str) -> str:\n\
+          \    \"\"\"Kubeflow component to log results to MLflow\"\"\"\n\n    import\
+          \ mlflow\n\n    mlflow.set_experiment(experiment_name)\n\n    with mlflow.start_run()\
+          \ as run:\n        # Log parameters\n        mlflow.log_params({\n     \
+          \       \"topic\": essay_data[\"topic\"],\n            \"agent_pipeline\"\
+          : \"crewai_kubeflow\"\n        })\n\n        # Log metrics\n        mlflow.log_metrics({\n\
+          \            \"essay_score\": essay_data[\"score\"],\n            \"writing_time_sec\"\
+          : essay_data[\"writing_time\"],\n            \"word_count\": essay_data[\"\
+          word_count\"]\n        })\n\n        # Save essay\n        with open(\"\
+          essay.txt\", \"w\") as f:\n            f.write(f\"Topic: {essay_data['topic']}\\\
+          n\\n{essay_data['essay']}\")\n        mlflow.log_artifact(\"essay.txt\"\
+          )\n\n        return run.info.run_id\n\n"
+        image: python:3.8
+pipelineInfo:
+  description: Simple Kubeflow pipeline for essay writing with CrewAI
+  name: essay-writer-pipeline
+root:
+  dag:
+    outputs:
+      parameters:
+        Output:
+          valueFromParameter:
+            outputParameterKey: Output
+            producerSubtask: log-to-mlflow
+    tasks:
+      create-essay-with-crewai:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-create-essay-with-crewai
+        inputs:
+          parameters:
+            topic:
+              componentInputParameter: topic
+        taskInfo:
+          name: create-essay-with-crewai
+      log-to-mlflow:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-log-to-mlflow
+        dependentTasks:
+        - create-essay-with-crewai
+        inputs:
+          parameters:
+            essay_data:
+              taskOutputParameter:
+                outputParameterKey: Output
+                producerTask: create-essay-with-crewai
+            experiment_name:
+              componentInputParameter: experiment_name
+        taskInfo:
+          name: log-to-mlflow
+  inputDefinitions:
+    parameters:
+      experiment_name:
+        defaultValue: Kubeflow_Essay_Demo
+        isOptional: true
+        parameterType: STRING
+      topic:
+        defaultValue: Benefits of reading
+        isOptional: true
+        parameterType: STRING
+  outputDefinitions:
+    parameters:
+      Output:
+        parameterType: STRING
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.8.0
