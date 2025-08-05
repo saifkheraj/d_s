@@ -1,0 +1,1 @@
+docker save test-model:latest | gzip > test-model.tar.gz
