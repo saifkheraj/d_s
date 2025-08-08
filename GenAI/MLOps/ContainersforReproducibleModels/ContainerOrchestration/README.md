@@ -246,6 +246,8 @@ aws ecr list-images --repository-name models
 
 ## Next Steps
 
+The outcome of this process is that we now have a Docker image pushed to ECR that can be used by an orchestration system. 
+
 Once your image is successfully pushed to ECR, you can:
 - Use it with AWS ECS for container orchestration
 - Deploy it with AWS EKS (Kubernetes)
