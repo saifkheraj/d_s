@@ -59,6 +59,9 @@ Container orchestration provides a powerful middle ground between serverless sim
 
 # Docker to AWS ECR Deployment Guide
 
+<img width="1912" height="640" alt="image" src="https://github.com/user-attachments/assets/5ae8b94a-62dc-464e-9780-3d6ecd59ea88" />
+
+
 ## Overview
 
 This guide walks you through the process of pushing Docker images to AWS Elastic Container Registry (ECR). ECR is a managed Docker registry that integrates seamlessly with AWS services like ECS and EKS.
