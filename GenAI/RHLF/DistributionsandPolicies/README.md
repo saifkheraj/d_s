@@ -151,6 +151,21 @@ High Temperature (τ = 2.0) - Creative
 - Low τ: Sharp peaks (confident choices)
 - High τ: Flat distribution (more random choices)
 
+1️⃣ Model generates logits (raw scores)
+      Example: [2.0, 1.0, 0.1]  → (Token A, Token B, Token C)
+
+2️⃣ Apply temperature:
+      New logits = logits / τ
+      If τ = 0.5 → [4.0, 2.0, 0.2]  (sharper distribution)
+      If τ = 2.0 → [1.0, 0.5, 0.05] (flatter distribution)
+
+3️⃣ Apply softmax (convert to probabilities)
+      Sharper logits → high peak probabilities
+      Flatter logits → probabilities more spread out
+
+4️⃣ Sample from probabilities
+
+
 ### Top-K Sampling: The Fixed Filter
 
 **Always picks from exactly K most likely words, no matter what**
@@ -183,6 +198,20 @@ Step 4: Sample from these 3 options only
 ```
 
 **Key point:** Top-K = 3 ALWAYS gives you exactly 3 choices, even if some are terrible!
+
+[Model Output]  → logits  
+   ↓  
+[Temperature Scaling]  → logits / τ  
+   ↓  
+[Softmax]  → probabilities  
+   ↓  
+[Top-k / Top-p filtering]  → keep only certain tokens  
+   ↓  
+[Re-normalize probabilities]  
+   ↓  
+[Sample next token]  
+
+
 
 ### Top-p (Nucleus) Sampling: The Smart Filter
 
