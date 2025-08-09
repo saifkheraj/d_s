@@ -1,4 +1,4 @@
-# Understanding LLMs: From Probability Distributions to Intelligent Policies
+[# Understanding LLMs: From Probability Distributions to Intelligent Policies
 
 *A comprehensive guide to how large language models work under the hood*
 
@@ -1136,3 +1136,4 @@ A: LLMs can be viewed as RL policies that choose words (actions) based on contex
 ---
 
 *This guide provides a foundation for understanding how modern AI language models work. The key insight is that they're sophisticated probability calculators that sample words based on context - and you can control this process to get the outputs you want.*
+](https://github.com/saifkheraj)
