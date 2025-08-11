@@ -317,6 +317,10 @@ Enter your:
 
 ### Step 2: Create Container Storage
 
+- ml-service is the local image name (before the colon).
+- :latest is the tag for that local image.
+
+
 ```bash
 # Create a repository in ECR
 aws ecr create-repository --repository-name my-ml-service
