@@ -342,6 +342,11 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 
 ### Step 4: Upload Your Container
 
+docker tag my-ml-service:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ml-service:v1.0
+
+docker tag my-ml-service:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ml-service:production
+
+
 ```bash
 # Tag your container for ECR (this sets the version tag)
 docker tag my-ml-service:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ml-service:latest
