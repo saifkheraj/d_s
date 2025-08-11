@@ -399,6 +399,10 @@ docker login --username AWS --password-stdin \
 
 ### Step 6: Push to ECR
 
+- ml-service is the local image name (before the colon).
+- :latest is the tag for that local image.
+
+
 ```bash
 # Tag your image
 docker tag ml-service:latest \
