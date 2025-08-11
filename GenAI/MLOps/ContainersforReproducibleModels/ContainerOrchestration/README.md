@@ -342,10 +342,12 @@ aws ecr get-login-password --region us-east-1 | docker login --username AWS --pa
 
 ### Step 4: Upload Your Container
 
-docker tag my-ml-service:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ml-service:v1.0
+Docker images can have multiple tags pointing to the same underlying image ID.
+In your case:
 
-docker tag my-ml-service:latest 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ml-service:production
-
+- You could push v1.0 (specific, immutable version)
+- You could push production (floating tag that always points to the latest prod-ready build)
+- ECR will show two tags for the same image digest. They’re just different “labels” pointing to the same stored image.
 
 ```bash
 # Tag your container for ECR (this sets the version tag)
