@@ -325,6 +325,12 @@ Step 3: "Write a greeting Hi there" → Sample next word
 Result: "Hi there! Nice to meet you."
 ```
 
+- Exploration: With sampling (temperature > 0, top-k/top-p), each rollout can be different, showing a variety of plausible continuations.
+
+- Evaluation: You can measure diversity, coherence, or probability across multiple completions.
+
+- RL-style training: In RLHF, PPO, or other policy optimization, multiple rollouts from the same prompt give you the “trajectories” needed to calculate rewards and policy updates.
+
 **The magic:** Same probabilities, different random choices = different outputs!
 
 #### 🎛️ Method 2: Change Generation Parameters
