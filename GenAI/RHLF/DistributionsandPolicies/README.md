@@ -102,6 +102,9 @@ Think of text generation like **autocomplete on steroids**:
    "Hello world" → calculate next probabilities...
 ```
 
+<img width="1456" height="616" alt="image" src="https://github.com/user-attachments/assets/824356e0-f4d1-428c-8194-43312b5835cb" />
+
+
 ### 📊 Visualizing the Process
 
 Imagine each step as a **bar chart race**:
