@@ -1,4 +1,4 @@
-[# Understanding LLMs: From Probability Distributions to Intelligent Policies
+# Understanding LLMs: From Probability Distributions to Intelligent Policies
 
 *A comprehensive guide to how large language models work under the hood*
 
@@ -151,21 +151,6 @@ High Temperature (τ = 2.0) - Creative
 - Low τ: Sharp peaks (confident choices)
 - High τ: Flat distribution (more random choices)
 
-1️⃣ Model generates logits (raw scores)
-      Example: [2.0, 1.0, 0.1]  → (Token A, Token B, Token C)
-
-2️⃣ Apply temperature:
-      New logits = logits / τ
-      If τ = 0.5 → [4.0, 2.0, 0.2]  (sharper distribution)
-      If τ = 2.0 → [1.0, 0.5, 0.05] (flatter distribution)
-
-3️⃣ Apply softmax (convert to probabilities)
-      Sharper logits → high peak probabilities
-      Flatter logits → probabilities more spread out
-
-4️⃣ Sample from probabilities
-
-
 ### Top-K Sampling: The Fixed Filter
 
 **Always picks from exactly K most likely words, no matter what**
@@ -198,20 +183,6 @@ Step 4: Sample from these 3 options only
 ```
 
 **Key point:** Top-K = 3 ALWAYS gives you exactly 3 choices, even if some are terrible!
-
-[Model Output]  → logits  
-   ↓  
-[Temperature Scaling]  → logits / τ  
-   ↓  
-[Softmax]  → probabilities  
-   ↓  
-[Top-k / Top-p filtering]  → keep only certain tokens  
-   ↓  
-[Re-normalize probabilities]  
-   ↓  
-[Sample next token]  
-
-
 
 ### Top-p (Nucleus) Sampling: The Smart Filter
 
@@ -1041,6 +1012,337 @@ The magic of RLHF: It transforms a model that just predicts the next word into a
 
 ---
 
+## 🧮 The Complete Mathematical Derivation (From Your Transcript)
+
+Let me explain this step-by-step with intuition first, then show the math:
+
+### 🤔 The Big Picture: What Are We Actually Trying to Do?
+
+**Simple Goal:** Make the language model better at giving responses humans like.
+
+**The Challenge:** How do we mathematically "make it better"?
+
+Think of it like training a student:
+1. Student writes an essay (model generates response)
+2. Teacher grades it (reward model gives score)
+3. Student learns to write more like the good essays (model updates parameters)
+
+But how do we do step 3 mathematically? That's what all these equations solve.
+
+### 🎯 Step 1: What Does "Better" Mean Mathematically?
+
+**Intuition:** We want the model to generate high-reward responses more often.
+
+**Math Translation:**
+```
+J(θ) = E[R(x,y)] - β × KL(π_θ || π_ref)
+```
+
+**Plain English:**
+- `J(θ)` = "How good is our model?" (higher = better)
+- `E[R(x,y)]` = "Average reward across all possible responses" 
+- `β × KL(...)` = "Penalty for changing too much from original model"
+
+**Why the penalty?** Without it, the model might become amazing at one type of question but forget everything else!
+
+### 🎲 Step 2: How Do We Calculate "Average Reward"?
+
+**Intuition:** We can't test every possible response, so we estimate using samples.
+
+**The Problem:**
+```
+E[R(x,y)] = "Average reward" = Σ (probability of response) × (reward for that response)
+```
+
+**Example:**
+```
+Query: "What's 2+2?"
+
+All possible responses and their probabilities:
+- "4" → probability 60%, reward 1.0 → contributes 0.6 to average
+- "5" → probability 20%, reward 0.0 → contributes 0.0 to average  
+- "Fish" → probability 20%, reward 0.0 → contributes 0.0 to average
+
+Average reward = 0.6 + 0.0 + 0.0 = 0.6
+```
+
+**Math Version:**
+```
+E[R(x,y)] = Σ_x Σ_y π_θ(y|x) × R(x,y) × p(x)
+```
+
+Translation: Sum over all queries and responses: (probability) × (reward) × (how often we see this query)
+
+### 🚀 Step 3: How Do We Make It Better? (The Core Problem)
+
+**Intuition:** We want to find which direction to "push" the model parameters to increase the average reward.
+
+**The Challenge:** We need the gradient (direction of improvement):
+```
+∇_θ E[R(x,y)] = "Which way should we adjust the parameters?"
+```
+
+**The Problem:** This is really hard to compute directly because responses are random samples!
+
+**Analogy:** It's like asking "If I randomly throw darts, how should I adjust my throwing technique to hit the bullseye more often?" You can't compute this directly - you need to throw many darts and learn from the results.
+
+### 🎭 Step 4: The Log-Derivative Trick (The Breakthrough!)
+
+**Intuition:** Convert the impossible calculation into something we can actually do with samples.
+
+**The Magic Transformation:**
+
+**Before (impossible):**
+"Calculate how changing parameters affects average reward across all possible responses"
+
+**After (possible):**
+"Generate some responses, see their rewards, and estimate the gradient from those samples"
+
+**The Mathematical Trick:**
+```
+∇_θ π_θ(y|x) = π_θ(y|x) × ∇_θ log π_θ(y|x)
+```
+
+**Plain English:** 
+- Left side: "How does changing θ affect the probability?" (hard to compute)
+- Right side: "Probability × How does changing θ affect log probability" (easy to compute!)
+
+**Why this helps:** The right side uses standard backpropagation, which neural networks already know how to do!
+
+### 🔧 Step 5: Putting It Together (Sample-Based Training)
+
+**The Final Algorithm (Intuitive):**
+
+```
+1. Generate a response: "4"
+2. Get its reward: 1.0 (good!)
+3. Calculate: "How much should we strengthen the patterns that led to '4'?"
+4. Answer: gradient = (how to adjust log probability) × (how good the reward was)
+5. Update model parameters in that direction
+```
+
+**The Math:**
+```
+∇_θ J(θ) ≈ (1/N) Σ [∇_θ log π_θ(y_i|x_i) × R(x_i,y_i)]
+```
+
+**Translation:** 
+- For each sample response `y_i` with reward `R(x_i,y_i)`
+- Calculate `∇_θ log π_θ(y_i|x_i)` = "direction to increase probability of this response"
+- Multiply by reward = "how much to push in that direction" 
+- Average over all samples
+
+### 🛡️ Step 6: The Safety Brake (KL Penalty)
+
+**Intuition:** Don't change too fast or the model might break!
+
+**The Problem:**
+```
+Without safety: Model sees "4" gets reward 1.0
+→ Immediately makes P("4") = 99.9% for ALL questions
+→ Model breaks! Now it says "4" for "What's your name?"
+```
+
+**The Solution:**
+```
+KL penalty = β × "How much has the model changed from the original?"
+```
+
+**The Complete Formula:**
+```
+gradient = (reward direction) - β × (change penalty direction)
+```
+
+**Translation:** "Move toward higher rewards, but not too fast!"
+
+### 💡 Step 7: Why This Actually Works
+
+**The Beautiful Insight:**
+
+1. **Generate samples** (responses to queries)
+2. **Get rewards** (how good each response was) 
+3. **Calculate gradients** (which direction strengthens good responses)
+4. **Add safety constraint** (don't change too dramatically)
+5. **Update parameters** (make the model slightly better)
+6. **Repeat thousands of times** (gradual improvement)
+
+**The Math Just Formalizes This Intuition!**
+
+Each equation corresponds to one step of this intuitive process.
+
+### 🔍 Concrete Example (Following One Response Through The System)
+
+**Step 1: Generate**
+```
+Query: "What's the capital of France?"
+Model generates: "Paris" 
+Current probability: π_θ("Paris"|query) = 0.4
+```
+
+**Step 2: Evaluate** 
+```
+Reward model: R("Paris") = 0.9 (good answer!)
+```
+
+**Step 3: Calculate Direction**
+```
+∇_θ log π_θ("Paris"|query) = direction to increase P("Paris")
+Let's call this direction vector: [0.1, -0.2, 0.3, ...] (thousands of numbers)
+```
+
+**Step 4: Calculate Update Size**
+```
+update = reward × direction = 0.9 × [0.1, -0.2, 0.3, ...] = [0.09, -0.18, 0.27, ...]
+```
+
+**Step 5: Apply Safety**
+```
+If model changed too much from reference, reduce the update
+final_update = [0.08, -0.15, 0.22, ...] (slightly smaller)
+```
+
+**Step 6: Update Model**
+```
+new_parameters = old_parameters + learning_rate × final_update
+Result: Model is now slightly more likely to say "Paris" for geography questions
+```
+
+**Step 7: Repeat**
+```
+Do this for thousands of different queries and responses
+→ Model gradually gets better at everything
+```
+
+### 🎯 The Key Insight
+
+**All the complex math is just a way to:**
+1. **Measure** how good the model is (expected reward)
+2. **Find** which direction makes it better (gradients)  
+3. **Update** carefully without breaking it (KL penalty + clipping)
+
+**The equations look scary, but they're just formalizing the common-sense idea: "Do more of what works, less of what doesn't, but don't change too fast!"**
+
+This is exactly how ChatGPT and Claude learned to be helpful - through this mathematical process applied millions of times!
+
+---
+
+### 📊 The Policy Gradient Objective Function
+
+**What we want to maximize:**
+```
+J(θ) = E[R(x,y)] - β × KL(π_θ || π_ref)
+
+Where:
+- J(θ) = Objective function (what we want to maximize)
+- E[R(x,y)] = Expected reward over queries x and responses y  
+- β = KL penalty coefficient (hyperparameter)
+- KL(π_θ || π_ref) = KL divergence between new policy and reference policy
+```
+
+### 🎯 Expanding the Expected Reward
+
+**From transcript: "extend the entire dataset and estimate the expected reward over all queries"**
+
+```
+E[R(x,y)] = Σ_x Σ_y π_θ(y|x) × R(x,y) × p(x)
+
+Where:
+- π_θ(y|x) = Policy probability of response y given query x
+- R(x,y) = Reward function for query-response pair  
+- p(x) = Distribution of queries in dataset
+```
+
+### 🎲 The Log-Derivative Trick (Step-by-Step)
+
+**The Problem:** "the derivative cannot be directly computed in this form"
+
+**The Solution:**
+```
+Step 1: Start with the expectation
+∇_θ E[R(x,y)] = ∇_θ [Σ_x Σ_y π_θ(y|x) × R(x,y) × p(x)]
+
+Step 2: Move gradient inside (linearity)  
+= Σ_x Σ_y ∇_θ π_θ(y|x) × R(x,y) × p(x)
+
+Step 3: Apply the log-derivative trick
+∇_θ π_θ(y|x) = π_θ(y|x) × ∇_θ log π_θ(y|x)
+
+Step 4: Substitute back
+= Σ_x Σ_y π_θ(y|x) × ∇_θ log π_θ(y|x) × R(x,y) × p(x)
+
+Step 5: Rearrange into expectation form
+= E_x,y [∇_θ log π_θ(y|x) × R(x,y)]
+```
+
+### 🔧 Complete Gradient Formula
+
+**Putting it all together:**
+```
+∇_θ J(θ) = E_x,y [∇_θ log π_θ(y|x) × (R(x,y) - β × (1 + log[π_θ(y|x) / π_ref(y|x)]))]
+
+In practice (with samples):
+∇_θ J(θ) ≈ (1/N) Σ_{i=1}^N ∇_θ log π_θ(y_i|x_i) × (R(x_i,y_i) - β × (1 + log[π_θ(y_i|x_i) / π_ref(y_i|x_i)]))
+```
+
+### 💻 Implementation Code
+
+```python
+def compute_policy_gradient(model, reference_model, rollouts, beta=0.01):
+    gradients = []
+    
+    for query, response, reward in rollouts:
+        # Get log probability and its gradient
+        log_prob = model.get_log_probability(response, query)
+        log_prob_gradient = model.get_log_prob_gradient(response, query)
+        
+        # Compute KL penalty term
+        ref_log_prob = reference_model.get_log_probability(response, query)
+        kl_term = 1 + log_prob - ref_log_prob
+        
+        # Apply log-derivative trick formula
+        policy_gradient = log_prob_gradient * (reward - beta * kl_term)
+        gradients.append(policy_gradient)
+    
+    return torch.mean(torch.stack(gradients), dim=0)
+```
+
+### 🔍 Numerical Example
+
+```
+Example rollout:
+- Query: "What's 2+2?"
+- Response: "4"  
+- Reward: R = 1.0
+- Current policy prob: π_θ("4"|query) = 0.6
+- Reference policy prob: π_ref("4"|query) = 0.5
+- Beta: β = 0.01
+
+Calculations:
+log π_θ = log(0.6) = -0.511
+log π_ref = log(0.5) = -0.693
+kl_term = 1 + (-0.511) - (-0.693) = 1.182
+coeff = 1.0 - 0.01 × 1.182 = 0.988
+
+Final gradient = ∇_θ log π_θ("4"|query) × 0.988
+→ This increases probability of generating "4" for math questions!
+```
+
+### 🎛️ Mathematical Insight
+
+**Why the log-derivative trick works:**
+```
+Key transformation: ∇_θ π_θ(y|x) = π_θ(y|x) × ∇_θ log π_θ(y|x)
+
+This converts:
+"Gradient of probability" (hard to compute)
+↓  
+"Probability × Gradient of log probability" (easy to compute)
+
+Because π_θ(y|x) is model output and ∇_θ log π_θ(y|x) is standard backpropagation!
+```
+
+---
+
 ## 🚀 Advanced Concepts
 
 ### Policy Optimization
@@ -1165,4 +1467,3 @@ A: LLMs can be viewed as RL policies that choose words (actions) based on contex
 ---
 
 *This guide provides a foundation for understanding how modern AI language models work. The key insight is that they're sophisticated probability calculators that sample words based on context - and you can control this process to get the outputs you want.*
-](https://github.com/saifkheraj)
