@@ -59,14 +59,7 @@ Step-Back Prompting is a reasoning technique that helps language models handle c
 2. **Step-Back Question**: "What were the major inventions and technological developments during the Renaissance period?"
 3. **Enhanced Understanding**: Model gains broader historical context before answering the specific question
 
-## Real-World Example
-
-**🧮 Math Problem Analogy:**
-- **Specific Question**: "In a right triangle with sides 3 and 4, what's the hypotenuse?"
-- **Step-Back Question**: "What mathematical principles apply to right triangles?"
-- **Result**: Model recognizes Pythagorean theorem (a² + b² = c²) and applies it correctly
-
-## Step-by-Step Implementation Guide
+## Implementation Steps
 
 ### Step 1: Environment Setup
 
@@ -85,15 +78,12 @@ if not os.environ["OPENAI_API_KEY"]:
     raise ValueError("Please set the OPENAI_API_KEY environment variable")
 ```
 
-**What's happening here?**
-- Import necessary libraries for prompting, LLM interaction, and web search
-- Configure OpenAI API access for step-back question generation and final answer synthesis
-- Validate API key to ensure proper authentication
+**What's happening:** Setting up required libraries and API keys for LLM interaction and web search functionality.
 
-### Step 2: Few-Shot Learning Setup
+### Step 2: Create Few-Shot Examples for Step-Back Generation
 
 ```python
-# Define examples for step-back prompting
+# Define examples that show how to transform specific questions into general ones
 examples = [
     {
         "input": "Could the members of The Police perform lawful arrests?",
@@ -126,39 +116,7 @@ few_shot_prompt = FewShotChatMessagePromptTemplate(
 )
 ```
 
-**Expected Output:**
-```python
-print("Few-shot examples loaded:")
-for i, example in enumerate(examples, 1):
-    print(f"\nExample {i}:")
-    print(f"  Input: {example['input']}")
-    print(f"  Output: {example['output']}")
-```
-
-```
-Few-shot examples loaded:
-
-Example 1:
-  Input: Could the members of The Police perform lawful arrests?
-  Output: what can people named after a profession do?
-
-Example 2:
-  Input: Jan Sindel's was born in what country?
-  Output: what is Jan Sindel's personal history?
-
-Example 3:
-  Input: Did Leonardo da Vinci invent the printing press?
-  Output: What were the major inventions and developments during Leonardo da Vinci's time?
-
-Example 4:
-  Input: What is the capital of the moon?
-  Output: What are the basic facts about the moon's geography and political status?
-```
-
-**What's happening here?**
-- **Pattern Learning**: Examples show how to transform specific questions into general ones
-- **Abstraction Training**: Model learns to identify underlying concepts and principles  
-- **Consistent Format**: Examples maintain consistent input/output structure for reliable learning
+**What's happening:** Teaching the model how to abstract specific questions into broader, more general questions through examples.
 
 ### Step 3: Build Step-Back Question Generator
 
@@ -173,28 +131,23 @@ prompt = ChatPromptTemplate.from_messages([
 # Create question generation pipeline
 question_gen = prompt | ChatOpenAI(temperature=0) | StrOutputParser()
 
-# Test with a specific question
+# Test the generator
 question = "Did Leonardo da Vinci invent the printing press?"
 step_back_question = question_gen.invoke({"question": question})
-```
 
-**Expected Output:**
-```python
 print("Original Question:", question)
 print("Step-Back Question:", step_back_question)
 ```
 
+**Expected Output:**
 ```
 Original Question: Did Leonardo da Vinci invent the printing press?
 Step-Back Question: What were the major inventions and technological developments during the Renaissance period?
 ```
 
-**What's happening here?**
-- **Template Integration**: Combines system instructions with few-shot examples
-- **Temperature=0**: Ensures consistent, deterministic step-back question generation
-- **Abstraction Process**: Model learns to identify the broader topic or principle behind specific questions
+**What's happening:** Creating a pipeline that takes any specific question and generates a broader, more abstract version that's easier to answer comprehensively.
 
-### Step 4: Dual Information Retrieval
+### Step 4: Set Up Information Retrieval
 
 ```python
 # Set up web search functionality
@@ -204,70 +157,98 @@ def retriever(query):
     """Retrieve information from web search"""
     return search.run(query)
 
-# Retrieve information for both questions
+# Test both searches
 normal_context = retriever(question)
 step_back_context = retriever(step_back_question)
+
+print("=== NORMAL CONTEXT ===")
+print(f"Query: {question}")
+print(f"Results: {normal_context[:200]}...")
+
+print("\n=== STEP-BACK CONTEXT ===") 
+print(f"Query: {step_back_question}")
+print(f"Results: {step_back_context[:200]}...")
 ```
 
 **Expected Output:**
-```python
-print("=== NORMAL CONTEXT (Original Question) ===")
-print(f"Query: {question}")
-print(f"Results: {normal_context[:300]}...")
-
-print("\n=== STEP-BACK CONTEXT (Abstract Question) ===") 
-print(f"Query: {step_back_question}")
-print(f"Results: {step_back_context[:300]}...")
 ```
-
-```
-=== NORMAL CONTEXT (Original Question) ===
+=== NORMAL CONTEXT ===
 Query: Did Leonardo da Vinci invent the printing press?
-Results: Leonardo da Vinci did not invent the printing press. The printing press was invented by Johannes Gutenberg around 1440, when Leonardo was not yet born (he was born in 1452). However, Leonardo did make numerous other inventions and...
+Results: Leonardo da Vinci did not invent the printing press. The printing press was invented by Johannes Gutenberg around 1440, when Leonardo was not yet born...
 
-=== STEP-BACK CONTEXT (Abstract Question) ===
+=== STEP-BACK CONTEXT ===
 Query: What were the major inventions and technological developments during the Renaissance period?
-Results: The Renaissance period (14th-17th centuries) saw numerous technological breakthroughs including the printing press by Gutenberg (1440), improvements in navigation instruments, advances in optics and astronomy, developments in engineering...
+Results: The Renaissance period (14th-17th centuries) saw numerous technological breakthroughs including the printing press by Gutenberg (1440), improvements in navigation...
 ```
 
-**What's happening here?**
-- **Dual Perspective**: Search both specific and general questions to capture different types of information
-- **Complementary Context**: Original question provides direct answers, step-back question provides broader context
-- **Enhanced Coverage**: Broader search captures historical context, innovations, and related developments
+**What's happening:** Setting up dual retrieval system that searches for both specific and general information to provide comprehensive context.
 
-### Step 5: RAG Chain Assembly and Answer Generation
+### Step 5: Build Complete RAG Chain and Generate Final Answer
+
+This is the most complex step - let me break it down clearly:
 
 ```python
-# Get RAG response template from LangChain hub
+# Get the response template from LangChain hub
 response_prompt = hub.pull("langchain-ai/stepback-answer")
 
 # Build the complete RAG chain
 chain = (
     {
-        # Retrieve context for both questions
+        # This dictionary defines what data gets passed to the response template
+        # All three operations run when chain.invoke() is called
+        
         "normal_context": lambda x: retriever(x["question"]),
         "step_back_context": lambda x: retriever(
             question_gen.invoke({"question": x["question"]})
         ),
         "question": lambda x: x["question"]
     }
-    | response_prompt
-    | ChatOpenAI(temperature=0)
-    | StrOutputParser()
+    | response_prompt    # Template that formats all the data
+    | ChatOpenAI(temperature=0)  # LLM that generates final answer
+    | StrOutputParser()  # Cleans up the output
 )
 
 # Generate final answer
 result = chain.invoke({"question": question})
-```
-
-**Expected Output:**
-```python
-print("=== FINAL COMPREHENSIVE ANSWER ===")
+print("=== FINAL ANSWER ===")
 print(result)
 ```
 
+#### What Exactly Happens in Step 5?
+
+Let me show you **exactly** what data flows through each part:
+
+**Input to chain:**
+```python
+{"question": "Did Leonardo da Vinci invent the printing press?"}
 ```
-=== FINAL COMPREHENSIVE ANSWER ===
+
+**After the dictionary operations, the data becomes:**
+```python
+{
+    "normal_context": "Leonardo da Vinci did not invent the printing press. The printing press was invented by Johannes Gutenberg around 1440, when Leonardo was not yet born (he was born in 1452). However, Leonardo did make numerous other inventions and contributions to art, science, and engineering...",
+    
+    "step_back_context": "The Renaissance period (14th-17th centuries) saw numerous technological breakthroughs including the printing press by Gutenberg (1440), improvements in navigation instruments, advances in optics and astronomy, developments in engineering, artistic innovations, and scientific discoveries. This period marked a significant shift in technological progress...",
+    
+    "question": "Did Leonardo da Vinci invent the printing press?"
+}
+```
+
+**The response_prompt template then creates something like:**
+```
+Context from original question:
+Leonardo da Vinci did not invent the printing press. The printing press was invented by Johannes Gutenberg around 1440...
+
+Context from step-back question:
+The Renaissance period saw numerous technological breakthroughs including the printing press by Gutenberg (1440)...
+
+Question: Did Leonardo da Vinci invent the printing press?
+
+Please provide a comprehensive answer using both contexts above.
+```
+
+**Final LLM Output:**
+```
 No, Leonardo da Vinci did not invent the printing press. The printing press was invented by Johannes Gutenberg around 1440 in Mainz, Germany, which was about 12 years before Leonardo da Vinci was even born (1452).
 
 **Historical Context:**
@@ -278,93 +259,146 @@ While Leonardo da Vinci did not invent the printing press, he was indeed a proli
 - Engineering designs (flying machines, tanks, bridges)
 - Anatomical studies and medical illustrations  
 - Artistic techniques and innovations
-- Hydraulic engineering and water management systems
-- Military engineering and fortification designs
-
-**The Printing Press Impact:**
-Gutenberg's printing press was crucial during Leonardo's lifetime, as it enabled the rapid reproduction and distribution of books, scientific treatises, and artistic works that influenced Renaissance thinkers like Leonardo himself. The technology helped spread the very ideas and knowledge that fueled the Renaissance period's intellectual achievements.
 
 In summary, while both the printing press and Leonardo da Vinci were significant contributors to Renaissance innovation, they represent different aspects of this remarkable period in human history.
 ```
 
-**What's happening here?**
-- **Context Integration**: Combines both normal and step-back contexts for comprehensive understanding
-- **Enhanced Reasoning**: Broader context helps model provide more nuanced, accurate answers
-- **Structured Response**: Step-back approach leads to well-organized, informative answers with proper historical context
+#### Step-by-Step Execution Flow
 
-## Benefits of Step-Back Prompting
+Here's a more explicit version showing exactly what happens:
 
-### ✅ **Improved Accuracy**
-- Reduces hallucinations by encouraging broader knowledge access
-- Helps model recognize when it lacks specific information
-- Provides historical/contextual grounding for better reasoning
+```python
+def explicit_step_back_rag(question):
+    """
+    Explicit version showing each step of the RAG chain
+    """
+    print(f"🔍 INPUT: {question}")
+    print("-" * 60)
+    
+    # STEP 1: Generate step-back question
+    print("📝 STEP 1: Generating step-back question...")
+    step_back_q = question_gen.invoke({"question": question})
+    print(f"   Result: {step_back_q}")
+    print()
+    
+    # STEP 2: Dual retrieval
+    print("🔎 STEP 2: Performing dual searches...")
+    normal_ctx = retriever(question)
+    step_back_ctx = retriever(step_back_q)
+    print(f"   Normal context: {normal_ctx[:100]}...")
+    print(f"   Step-back context: {step_back_ctx[:100]}...")
+    print()
+    
+    # STEP 3: Prepare data for final prompt
+    print("📋 STEP 3: Preparing final prompt data...")
+    prompt_data = {
+        "normal_context": normal_ctx,
+        "step_back_context": step_back_ctx, 
+        "question": question
+    }
+    print("   Data prepared with normal context, step-back context, and original question")
+    print()
+    
+    # STEP 4: Generate final answer
+    print("🤖 STEP 4: Generating comprehensive answer...")
+    final_prompt = response_prompt.format(**prompt_data)
+    answer = ChatOpenAI(temperature=0).invoke(final_prompt).content
+    print(f"   Final answer generated (length: {len(answer)} chars)")
+    
+    return answer
 
-### ✅ **Better Handling of Complex Questions**
-- Abstracts complex queries into manageable concepts
-- Identifies underlying principles and relationships
-- Reduces confusion from overly specific or poorly phrased questions
+# Run the explicit version
+result = explicit_step_back_rag(question)
+print("\n" + "="*60)
+print("FINAL COMPREHENSIVE ANSWER:")
+print("="*60)
+print(result)
+```
+
+## Why Step-Back Prompting Works
 
 ### ✅ **Enhanced Context Understanding**
-- Captures broader thematic information
-- Provides background knowledge that informs specific answers
-- Helps distinguish between related but different concepts
+- **Normal search**: Direct answer to specific question
+- **Step-back search**: Broader historical/conceptual context
+- **Combined**: Comprehensive understanding with proper background
 
-### ✅ **More Comprehensive Responses**
-- Combines specific answers with broader context
-- Addresses not just "what" but also "why" and "how"
-- Provides educational value beyond the immediate question
+### ✅ **Better Reasoning Quality**
+- Prevents getting stuck on specific details
+- Provides conceptual framework for understanding
+- Reduces hallucinations through broader knowledge access
 
-## Use Cases
+### ✅ **Improved Answer Structure**
+- Answers both the specific question AND provides context
+- More educational and informative responses
+- Better handling of complex or poorly phrased questions
 
-### **Perfect for Step-Back Prompting:**
-- **Historical Questions**: "Did Napoleon use cannons at Waterloo?" → "What military technologies were used in Napoleonic warfare?"
-- **Scientific Inquiries**: "Does water boil at 100°C on Mount Everest?" → "How does altitude affect the boiling point of liquids?"
-- **Complex Factual Questions**: "Can penguins fly?" → "What are the characteristics and adaptations of flightless birds?"
-- **Technical Problems**: "Why won't my Python code work?" → "What are common programming errors and debugging approaches?"
+## Complete Working Example
 
-### **Less Suitable For:**
-- **Simple Factual Lookups**: "What's 2+2?" (doesn't need abstraction)
-- **Current Events**: "Who won yesterday's game?" (time-sensitive, specific)
-- **Personal Questions**: "What's my favorite color?" (subjective, no general principle)
+```python
+# Full implementation
+import os
+from langchain_core.prompts import ChatPromptTemplate, FewShotChatMessagePromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
+from langchain import hub
 
-## Comparison with Other RAG Techniques
+# Setup
+os.environ["OPENAI_API_KEY"] = "your_key_here"
+search = DuckDuckGoSearchAPIWrapper(max_results=4)
 
-| Technique | API Calls | Best For | Strength | Limitation |
-|-----------|-----------|----------|----------|------------|
-| **Traditional RAG** | 1 | Simple questions | Speed, cost | Limited reasoning |
-| **Multi-Query RAG** | 2 | Varied terminology | Better retrieval | Still single perspective |
-| **Query Decomposition** | 5+ | Complex, multi-part questions | Comprehensive coverage | High cost, complexity |
-| **Step-Back Prompting** | 3 | Poorly phrased, complex reasoning | Enhanced reasoning, context | Moderate cost increase |
+# Examples and templates
+examples = [
+    {"input": "Could the members of The Police perform lawful arrests?", 
+     "output": "what can people named after a profession do?"},
+    {"input": "Did Leonardo da Vinci invent the printing press?",
+     "output": "What were the major inventions during Leonardo da Vinci's time?"}
+]
 
-## API Cost Analysis
+example_prompt = ChatPromptTemplate.from_messages([("human", "{input}"), ("ai", "{output}")])
+few_shot_prompt = FewShotChatMessagePromptTemplate(example_prompt=example_prompt, examples=examples)
 
-### **Cost Structure:**
-1. **Step-Back Generation**: 1 API call (usually small prompt)
-2. **Dual Web Search**: 2 search operations (typically low/no cost)  
-3. **Final Answer**: 1 API call (with enhanced context)
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are an expert at world knowledge. Your task is to step back and paraphrase a question to a more generic step-back question, which is easier to answer. Here are a few examples:"),
+    few_shot_prompt,
+    ("user", "{question}")
+])
 
-**Total**: ~3x cost of traditional RAG, but significantly better reasoning capability
+# Pipelines
+question_gen = prompt | ChatOpenAI(temperature=0) | StrOutputParser()
+retriever = lambda query: search.run(query)
+response_prompt = hub.pull("langchain-ai/stepback-answer")
 
-## Performance Optimizations
+# Complete chain
+chain = (
+    {
+        "normal_context": lambda x: retriever(x["question"]),
+        "step_back_context": lambda x: retriever(question_gen.invoke({"question": x["question"]})),
+        "question": lambda x: x["question"]
+    }
+    | response_prompt
+    | ChatOpenAI(temperature=0)
+    | StrOutputParser()
+)
 
-1. **Caching Step-Back Questions**: Store abstractions for similar question patterns
-2. **Async Processing**: Run dual searches in parallel
-3. **Smart Routing**: Use step-back only for questions that need abstraction
-4. **Context Compression**: Optimize retrieved content to reduce token usage
+# Use it
+question = "Did Leonardo da Vinci invent the printing press?"
+answer = chain.invoke({"question": question})
+print(answer)
+```
 
-## Implementation Tips
+## Use Cases and Benefits
 
-1. **Quality Examples**: Curate diverse, high-quality few-shot examples
-2. **Domain Adaptation**: Adjust examples for specific domains (medical, legal, technical)
-3. **Evaluation Metrics**: Track improvement in answer quality and reasoning depth
-4. **Fallback Strategy**: Use traditional RAG if step-back generation fails
+**Perfect for:**
+- Historical questions with complex context
+- Scientific inquiries requiring background knowledge
+- Technical problems needing conceptual understanding
+- Questions that are poorly phrased or overly specific
 
-## Getting Started
+**Benefits:**
+- 📈 Improved answer accuracy and depth
+- 🧠 Better reasoning and contextualization  
+- 📚 More educational and comprehensive responses
+- 🎯 Handles complex questions more effectively
 
-1. **Set Up Environment**: Install required dependencies and configure API keys
-2. **Prepare Examples**: Create domain-specific few-shot examples for your use case
-3. **Test Abstraction**: Verify step-back questions are appropriately general
-4. **Evaluate Results**: Compare answer quality with traditional RAG approaches
-5. **Optimize for Domain**: Fine-tune examples and prompts for your specific domain
-
-Step-Back Prompting bridges the gap between simple retrieval and complex reasoning, making RAG systems more intelligent and capable of handling nuanced, challenging questions.
+**Cost:** ~3x traditional RAG (due to extra LLM call and dual search) but significantly better quality.
