@@ -23,6 +23,9 @@ The Simplex Method is an algorithm for solving **Linear Programming (LP)** probl
 ### Key Insight
 The optimal solution to any LP problem always occurs at a **corner point** (vertex) of the feasible region. The Simplex Method efficiently walks from one corner to another, always improving the objective function, until no further improvement is possible.
 
+<img width="780" height="706" alt="image" src="https://github.com/user-attachments/assets/2c972800-5303-45b0-8b63-7fba916ed8e7" />
+
+
 ## Prerequisites
 
 - Basic linear algebra (systems of equations)
