@@ -166,8 +166,6 @@ The algorithm terminates when the z-row has **no negative reduced costs**. This 
 
 ---
 
-
-
 # Simplex Method: Tableau vs Matrix Form
 
 This document explains and compares the two main ways of implementing the Simplex method:
@@ -177,231 +175,298 @@ This document explains and compares the two main ways of implementing the Simple
 
 ## Problem Setup (Example)
 
-We want to solve:
+We want to solve this Linear Programming problem:
 
-**Maximize:**
-```
-z = x₁ + 3x₂
-```
+**Maximize:** `z = x₁ + 3x₂`
 
 **Subject to:**
 ```
--x₁ +  x₂ ≤  3
--x₁ + 2x₂ ≤  8
- 3x₁ +  x₂ ≤ 18
- x₁, x₂ ≥  0
+-x₁ +  x₂  ≤   3
+-x₁ + 2x₂  ≤   8  
+ 3x₁ +  x₂  ≤  18
+ x₁, x₂    ≥   0
 ```
 
-### Step 1: Standard Form
+## Step 1: Convert to Standard Form
 
-Add slack variables s₁, s₂, s₃:
+Add slack variables s₁, s₂, s₃ to convert inequalities to equalities:
 
 ```
--x₁ +  x₂ + s₁      =  3
--x₁ + 2x₂      + s₂ =  8
- 3x₁ +  x₂           + s₃ = 18
+-x₁ +  x₂ + s₁ + 0s₂ + 0s₃ =  3
+-x₁ + 2x₂ + 0s₁ + s₂ + 0s₃ =  8
+ 3x₁ +  x₂ + 0s₁ + 0s₂ + s₃ = 18
 ```
 
-**Variables:** (x₁, x₂, s₁, s₂, s₃)
+**All variables:** x₁, x₂, s₁, s₂, s₃ ≥ 0
 
-**Matrix form:**
+**In matrix notation:**
+
+**Matrix A** (constraint coefficients):
 ```
-     [-1   1   1   0   0]
-A =  [-1   2   0   1   0]
-     [ 3   1   0   0   1]
-
-     [ 3]       [1]
-b =  [ 8],  c = [3]
-     [18]       [0]
-                [0]
-                [0]
+        x₁  x₂  s₁  s₂  s₃
+Row 1  [-1   1   1   0   0]
+Row 2  [-1   2   0   1   0]  
+Row 3  [ 3   1   0   0   1]
 ```
 
-## Tableau Method
+**Vector b** (right-hand side):
+```
+b = [ 3]
+    [ 8]
+    [18]
+```
+
+**Vector c** (objective coefficients):
+```
+c = [ 1]  ← coefficient of x₁
+    [ 3]  ← coefficient of x₂  
+    [ 0]  ← coefficient of s₁
+    [ 0]  ← coefficient of s₂
+    [ 0]  ← coefficient of s₃
+```
+
+---
+
+## Method 1: Tableau Method 📊
 
 ### Initial Tableau
 
-| Basis | x₁ | x₂ | s₁ | s₂ | s₃ | RHS |
-|-------|----|----|----|----|----|----|
-| s₁    | -1 |  1 |  1 |  0 |  0 |  3 |
-| s₂    | -1 |  2 |  0 |  1 |  0 |  8 |
-| s₃    |  3 |  1 |  0 |  0 |  1 | 18 |
-| z     | -1 | -3 |  0 |  0 |  0 |  0 |
+| Basic Var | x₁ | x₂ | s₁ | s₂ | s₃ | RHS |
+|-----------|----|----|----|----|----|----|
+| s₁        | -1 |  1 |  1 |  0 |  0 |  3 |
+| s₂        | -1 |  2 |  0 |  1 |  0 |  8 |
+| s₃        |  3 |  1 |  0 |  0 |  1 | 18 |
+| **z-row** | -1 | -3 |  0 |  0 |  0 |  0 |
 
-### Process
+### How Tableau Method Works:
 
-1. **Entering variable:** Most negative in z row = **-3** → x₂ enters
-2. **Leaving variable:** Ratio test → min(3/1, 8/2, 18/1) = **3** → s₁ leaves
-3. **Pivot:** Perform row operations to update tableau
-4. **Repeat** until all reduced costs ≥ 0
+**Step 1: Find Entering Variable**
+- Look at z-row for most negative number
+- Most negative = -3 (under x₂ column)
+- **x₂ enters the basis**
 
-## Matrix Method
+**Step 2: Find Leaving Variable (Ratio Test)**
+- For x₂ column, calculate: RHS ÷ positive coefficients
+- Row 1: 3 ÷ 1 = 3
+- Row 2: 8 ÷ 2 = 4  
+- Row 3: 18 ÷ 1 = 18
+- Minimum ratio = 3 → **s₁ leaves the basis**
 
-### Step 1: Split Basis/Nonbasis
+**Step 3: Pivot Operation**
+- Pivot element = 1 (intersection of x₂ column and s₁ row)
+- Use row operations to make this element = 1 and others in column = 0
+- Continue until no negative numbers in z-row
 
-- **Basis (initial):** s₁, s₂, s₃
-- **Nonbasis:** x₁, x₂
+---
 
-So:
+## Method 2: Matrix Method 🔢
+
+The matrix method splits variables into two groups:
+
+### Step 1: Identify Basic and Non-basic Variables
+
+**Initial Setup:**
+- **Basic variables** (in the solution): s₁, s₂, s₃
+- **Non-basic variables** (set to zero): x₁, x₂
+
+### Step 2: Split the Constraint Matrix
+
+**A_B** (Basic variables part - columns for s₁, s₂, s₃):
 ```
-A_B = I₃ (3×3 identity matrix) = [1  0  0]
-                                 [0  1  0]
-                                 [0  0  1]
-
-A_N = [-1  1]     c_B = [0]     c_N = [1]
-      [-1  2]           [0]           [3]
-      [ 3  1]           [0]
-```
-
-### Step 2: Compute Basic Solution
-
-```
-x_B = A_B⁻¹ × b = I₃ × b = b = [3]
-                               [8]
-                               [18]
-```
-
-Therefore: s₁ = 3, s₂ = 8, s₃ = 18, x₁ = 0, x₂ = 0
-
-### Step 3: Reduced Costs
-
-```
-r_N^T = c_N^T - c_B^T × A_B⁻¹ × A_N
-      = [1  3] - [0  0  0] × [-1  1]
-                              [-1  2]
-                              [ 3  1]
-      = [1  3] - [0  0] = [1  3]
+A_B = [1  0  0]  ← This is a 3×3 identity matrix
+      [0  1  0]
+      [0  0  1]
 ```
 
-In tableau convention → (-1, -3). Since -3 < 0, variable x₂ enters the basis.
-
-### Step 4: Ratio Test
-
-Direction vector for entering variable x₂:
+**A_N** (Non-basic variables part - columns for x₁, x₂):
 ```
-d = A_B⁻¹ × A_x₂ = I₃ × [1] = [1]
-                         [2]   [2]
-                         [1]   [1]
+A_N = [-1   1]  ← Column 1: x₁ coefficients  
+      [-1   2]  ← Column 2: x₂ coefficients
+      [ 3   1]
 ```
 
-Ratio test:
+**c_B** (costs of basic variables):
 ```
-min{x_Bᵢ/dᵢ : dᵢ > 0} = min{3/1, 8/2, 18/1} = min{3, 4, 18} = 3
-```
-
-→ s₁ leaves the basis (first constraint becomes tight)
-
-### Step 5: Update Basis
-
-**New basis:** (x₂, s₂, s₃)
-
-Update basis matrix:
-```
-A_B^new = [1  1  0]  (columns for x₂, s₂, s₃)
-          [2  0  1]
-          [1  0  0]
+c_B = [0]  ← cost of s₁
+      [0]  ← cost of s₂  
+      [0]  ← cost of s₃
 ```
 
-Compute new basic solution: x_B^new = (A_B^new)⁻¹ × b
+**c_N** (costs of non-basic variables):
+```
+c_N = [1]  ← cost of x₁
+      [3]  ← cost of x₂
+```
 
-Repeat until all reduced costs ≥ 0.
+### Step 3: Solve for Basic Variables
 
-## Comparison
+Since A_B is identity matrix: **x_B = A_B⁻¹ × b = b**
+
+**Current solution:**
+```
+s₁ = 3   (basic)
+s₂ = 8   (basic)  
+s₃ = 18  (basic)
+x₁ = 0   (non-basic)
+x₂ = 0   (non-basic)
+```
+
+### Step 4: Check if Optimal (Reduced Costs)
+
+**Formula:** `reduced_costs = c_N - c_B^T × A_B⁻¹ × A_N`
+
+**Calculation:**
+```
+c_N = [1, 3]
+c_B^T × A_B⁻¹ × A_N = [0, 0, 0] × [1 0 0] × [-1  1] = [0, 0]
+                                    [0 1 0]   [-1  2]
+                                    [0 0 1]   [ 3  1]
+
+reduced_costs = [1, 3] - [0, 0] = [1, 3]
+```
+
+**Interpretation:** 
+- For tableau: we use negative of these → [-1, -3]
+- Since -3 < 0, **x₂ should enter** (can improve objective)
+
+### Step 5: Find Leaving Variable
+
+**Direction vector** (what happens when x₂ enters):
+```
+d = A_B⁻¹ × (x₂ column from A_N) = [1 0 0] × [1] = [1]
+                                   [0 1 0]   [2]   [2]
+                                   [0 0 1]   [1]   [1]
+```
+
+**Ratio test:**
+```
+Current basic values: [3, 8, 18]
+Direction vector:     [1, 2,  1]
+Ratios:              [3/1, 8/2, 18/1] = [3, 4, 18]
+```
+
+**Minimum ratio = 3 → s₁ leaves**
+
+### Step 6: Update Basis and Repeat
+
+**New basic variables:** x₂, s₂, s₃  
+**New non-basic variables:** x₁, s₁
+
+Repeat steps 2-5 until all reduced costs ≥ 0.
+
+---
+
+## Side-by-Side Comparison
 
 | Aspect | Tableau Method | Matrix Method |
 |--------|----------------|---------------|
-| **What you do** | Pivot with row operations on a tableau | Compute x_B = A_B⁻¹×b, reduced costs, ratios |
-| **Good for** | Learning, small problems, manual solving | Computer implementations, large LPs |
-| **Pros** | Visual, intuitive, easy step tracking | Efficient, compact, avoids giant tableaux |
-| **Cons** | Gets messy for large LPs | Requires linear algebra (inverses/factorizations) |
+| **Visual** | Easy to see all steps in table format | More compact, requires matrix calculations |
+| **Manual Calculation** | ✅ Great for hand solving | ❌ Needs calculator/computer for matrices |
+| **Large Problems** | ❌ Table gets huge and messy | ✅ Stays organized and efficient |
+| **Computer Implementation** | ❌ Inefficient memory usage | ✅ Used by all professional solvers |
+| **Learning** | ✅ Shows exactly what's happening | ❌ Hides some geometric intuition |
+| **Speed** | ❌ Slow for big problems | ✅ Much faster with good linear algebra |
 
-## Which Method to Use?
+---
 
-### 📚 Learning/Exams → Use **Tableau Method**
-- Easy to understand entering/leaving variables
-- Clear visualization of how pivots work  
-- Step-by-step process is transparent
-- Good for hand calculations
+## Final Answer for Our Example
 
-### 💻 Coding/Real-World LP Solving → Use **Matrix Method**
-- All professional solvers (CPLEX, Gurobi, GLPK) use matrix-based implementations
-- More efficient for large problems
-- Better numerical stability control
-- Easier to implement advanced techniques (dual simplex, primal-dual, etc.)
+Both methods give the same result:
 
-## Final Result
-
-For this example:
-
-**Optimal solution:**
+**Optimal Solution:**
 ```
-x₁* = 2
-x₂* = 5  
-z*  = 17
+x₁ = 2
+x₂ = 5
+Maximum z = 1(2) + 3(5) = 17
 ```
 
-**Solution path:**
+**Verification (check all constraints):**
 ```
-(x₁, x₂): (0,0) → (0,3) → (2,5)
-```
-
-**Verification:**
-```
-z* = 1×2 + 3×5 = 2 + 15 = 17 ✓
-
-Constraint check:
--2 + 5  =  3 ≤  3 ✓
--2 + 10 =  8 ≤  8 ✓  
- 6 + 5  = 11 ≤ 18 ✓
+Constraint 1: -2 + 5 = 3 ≤ 3 ✅
+Constraint 2: -2 + 10 = 8 ≤ 8 ✅  
+Constraint 3: 6 + 5 = 11 ≤ 18 ✅
 ```
 
-## Implementation Examples
+**Path taken:**
+```
+Start: (0,0) with z = 0
+Step 1: (0,3) with z = 9  
+Step 2: (2,5) with z = 17 ← OPTIMAL
+```
 
-### Tableau Method (Python)
+---
+
+## When to Use Each Method
+
+### 🎓 Use Tableau Method When:
+- Learning the simplex method for the first time
+- Solving small problems by hand (≤ 4 variables)
+- Taking exams or homework
+- Want to see every step clearly
+
+### 💻 Use Matrix Method When:
+- Programming a solver
+- Dealing with large problems (≥ 10 variables)
+- Need computational efficiency
+- Building commercial optimization software
+
+---
+
+## Quick Implementation Guide
+
+### Python - Tableau Method
 ```python
 import numpy as np
 
-def simplex_tableau(c, A, b):
-    """
-    Solve LP using tableau method
-    min c^T x subject to Ax = b, x >= 0
-    """
-    m, n = A.shape
-    
-    # Create initial tableau [A b; c^T 0]
-    tableau = np.zeros((m+1, n+1))
-    tableau[:m, :n] = A
-    tableau[:m, n] = b
-    tableau[m, :n] = c
-    
-    while True:
-        # Find entering variable (most negative in bottom row)
-        entering_col = np.argmin(tableau[m, :n])
-        if tableau[m, entering_col] >= 0:
-            break  # Optimal solution found
-            
-        # Find leaving variable (minimum ratio test)
-        ratios = []
-        for i in range(m):
-            if tableau[i, entering_col] > 0:
-                ratios.append(tableau[i, n] / tableau[i, entering_col])
-            else:
-                ratios.append(float('inf'))
-        
-        leaving_row = np.argmin(ratios)
-        
-        # Pivot operation
-        pivot_element = tableau[leaving_row, entering_col]
-        tableau[leaving_row] /= pivot_element
+# Simple tableau structure
+tableau = np.array([
+    [-1,  1,  1,  0,  0,  3],   # s₁ row
+    [-1,  2,  0,  1,  0,  8],   # s₂ row  
+    [ 3,  1,  0,  0,  1, 18],   # s₃ row
+    [-1, -3,  0,  0,  0,  0]    # z row
+])
 
+# Main loop: find entering/leaving variables and pivot
+# (Full implementation would be ~50 lines)
+```
 
+### Python - Matrix Method
+```python
+import numpy as np
 
+# Define problem
+A = np.array([[-1, 1, 1, 0, 0], 
+              [-1, 2, 0, 1, 0], 
+              [3, 1, 0, 0, 1]])
+b = np.array([3, 8, 18])
+c = np.array([1, 3, 0, 0, 0])
 
+# Initial basis: columns 2, 3, 4 (s₁, s₂, s₃)
+basis = [2, 3, 4]
 
-## License
+# Solve using scipy or custom matrix operations
+# (Professional solvers use this approach)
+```
 
-This guide is provided for educational purposes. Feel free to use, modify, and distribute for learning and teaching.
+---
 
-## Contributing
+## Additional Resources
 
-Found an error or want to improve the explanation? Please open an issue or submit a pull request!
+### 📚 **Best Textbooks:**
+- **Beginner:** "Linear Programming" by Chvátal
+- **Advanced:** "Linear and Nonlinear Programming" by Luenberger & Ye
+- **Applied:** "Model Building in Mathematical Programming" by Williams
+
+### 🔧 **Software to Try:**
+- **Learning:** Excel Solver, LINGO
+- **Open Source:** GLPK, CBC, SciPy
+- **Commercial:** Gurobi, CPLEX, Xpress
+
+### 🎯 **Practice Problems:**
+- Start with 2-variable problems you can graph
+- Move to transportation/assignment problems  
+- Try portfolio optimization examples
+
+---
+
+*This guide should make the simplex method much clearer! Both approaches solve the same problems - tableau is better for learning, matrix is better for computing.* 🚀
