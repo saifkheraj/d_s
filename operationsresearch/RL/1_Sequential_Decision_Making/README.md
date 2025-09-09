@@ -221,3 +221,5 @@ Q_{n+1} = 0.5 + 0.1(1 - 0.5) = 0.55
 $$
 
 ✅ The estimate moves 10% closer to the new reward.
+
+
