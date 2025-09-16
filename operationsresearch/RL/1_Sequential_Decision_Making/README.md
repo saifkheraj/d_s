@@ -227,3 +227,36 @@ $$
 ✅ The estimate moves 10% closer to the new reward.
 
 
+No matter what α you pick, older rewards will always decay in influence. The difference is how fast they fade.
+
+### Case 1: Large α (e.g., α = 0.9)
+
+Newest reward weight = 0.9
+
+One step back = 
+0.9(0.1) = 0.09
+0.9(0.1)=0.09
+
+Two steps back = 0.9(0.1)^2=0.009
+
+Three steps back = 0.0009
+
+👉 Old rewards vanish very quickly. Almost only the latest matters.
+
+### Case 2: Small α (e.g., α = 0.1)
+
+Newest reward weight = 0.1
+
+One step back = 
+0.1(0.9) = 0.09
+0.1(0.9)=0.09
+
+Two steps back = 
+0.1(0.9)^2 = 0.081
+
+
+Three steps back = 0.0729
+
+Old rewards still fade, but more slowly. You keep a long memory.
+
+
