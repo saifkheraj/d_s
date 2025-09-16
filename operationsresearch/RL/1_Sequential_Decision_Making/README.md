@@ -2,6 +2,10 @@
 
 In reinforcement learning (e.g., bandits), we estimate the value of an action by the **sample average** of rewards received.
 
+![alt text](image.png)
+
+Doctor may choose greedy action and may choose maximum. (Most reward as of now Arg Max). Agent may choose to explore more by choosing non greedy action. Agent may sacrifise immediate reward by exploring more.
+
 ---
 
 ## Step 1: Definition of the Average
