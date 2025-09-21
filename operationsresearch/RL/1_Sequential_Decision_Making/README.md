@@ -260,3 +260,165 @@ Three steps back = 0.0729
 Old rewards still fade, but more slowly. You keep a long memory.
 
 
+# Understanding Q(a), q\*(a), the Update Rule, and Exploration–Exploitation
+
+In reinforcement learning, we balance two key ideas:
+
+* **Estimating values** incrementally (Q vs q\*)
+* **Choosing actions** (explore vs exploit)
+
+This README explains both concepts together.
+
+---
+
+## 1. The Hidden Truth: q\*(a)
+
+* Each action (e.g., a meal or a treatment) has a true average reward \**q*(a)\*\*.
+* Example: Meal A always gives on average **3 points of satisfaction** → q\*(A) = 3.
+* We never know q\*(a) exactly — it is hidden.
+
+---
+
+## 2. Our Estimate: Q(a)
+
+* We keep a running estimate **Q(a)**.
+* After each trial, we update Q(a) using the incremental update rule:
+
+$$
+Q_{n+1}(a) = Q_n(a) + \alpha (R_n - Q_n(a))
+$$
+
+* **Rₙ** = observed reward
+* **α** = step size (1/n for sample average, or constant for non-stationary problems)
+
+Over time, Q(a) gets closer to q\*(a).
+
+---
+
+## 3. Why Updating Matters
+
+* If reward is higher than our estimate, Q(a) goes up.
+* If reward is lower, Q(a) goes down.
+* With enough trials, Q(a) ≈ q\*(a).
+
+---
+
+## 4. Exploration vs Exploitation
+
+* **Exploitation** = pick the action with the highest current Q(a) → short-term benefit.
+* **Exploration** = try other actions to gather data → long-term benefit.
+
+👉 Example: At a restaurant:
+
+* Meal A: tried 5 times, Q(A) = 3 (true q\*(A) = 3)
+* Meal B: never tried, Q(B) = 0 (true q\*(B) = 4)
+* Meal C: never tried, Q(C) = 0 (true q\*(C) = 2)
+
+If we only exploit, we keep ordering Meal A. But exploring Meal B could reveal it’s even better.
+
+---
+
+## 5. The Epsilon-Greedy Strategy
+
+A simple way to balance exploration and exploitation:
+
+$$
+A_t =
+\begin{cases}
+\text{argmax}_a Q_t(a), & \text{with probability } 1-\varepsilon \\
+a \sim \text{Uniform(all actions)}, & \text{with probability } \varepsilon
+\end{cases}
+$$
+
+* With probability **1 – ε**, choose the best-known action (exploit).
+* With probability **ε**, choose a random action (explore).
+
+Example: If ε = 0.1 → 90% exploit, 10% explore.
+
+---
+
+## 6. Step-by-Step Example (Restaurant Visits)
+
+Suppose true values are:
+
+* q\*(A) = 3
+* q\*(B) = 4
+* q\*(C) = 2
+
+We don’t know this upfront. Let’s simulate a few visits with ε = 0.2 (20% explore, 80% exploit).
+
+**Visit 1:**
+
+* Start with Q(A) = Q(B) = Q(C) = 0.
+* Random explore → try Meal A.
+* Reward R = 3.
+* Update: Q(A) = 3.
+
+**Visit 2:**
+
+* ε-greedy → exploit (Meal A looks best).
+* Try A again, R = 2.
+* Update: Q(A) = (3 + 2)/2 = 2.5.
+
+**Visit 3:**
+
+* ε-greedy → explore this time.
+* Try Meal B, R = 4.
+* Update: Q(B) = 4.
+
+**Visit 4:**
+
+* Exploit → Q(B) = 4 is best.
+* Try B, R = 5.
+* Update: Q(B) = (4 + 5)/2 = 4.5.
+
+**Visit 5:**
+
+* Exploit → still choose B.
+* R = 3.
+* Update: Q(B) = (4 + 5 + 3)/3 ≈ 4.0.
+
+---
+
+## 7. Performance on the 10-Armed Testbed
+
+To test exploration–exploitation methods, researchers use the **10-armed testbed**:
+
+* 10 actions (slot machines or treatments), each with a hidden average reward q\*(a).
+* Each reward is noisy, sampled from a normal distribution.
+
+* <img width="497" height="349" alt="Screenshot 2025-09-22 at 1 41 05 AM" src="https://github.com/user-attachments/assets/be8e8e84-545f-41cf-8712-22ca26362131" />
+
+
+### Single Run Example
+
+* A run of ε = 0.1 shows noisy rewards with an upward trend.
+* One run is too noisy to conclude much.
+
+### Averaging Runs
+
+* Averaging **20 runs** smooths the curve a bit.
+* Averaging **100 runs** shows a clear increasing pattern.
+* Averaging **2000 runs** gives a stable curve → average reward over time.
+
+### Comparing Different ε Values
+
+* ε = 0 (pure greedy): quickly gets stuck, low long-term reward.
+* ε = 0.01: slowly improves, almost always finds the optimal action eventually.
+* ε = 0.1: learns faster at first, achieves higher early reward, but plateaus.
+* <img width="495" height="225" alt="Screenshot 2025-09-22 at 1 42 00 AM" src="https://github.com/user-attachments/assets/0f3a4a05-d9ba-49ca-ba49-6d23f605832d" />
+
+
+---
+
+## 8. Key Intuition
+
+* q\*(a) = the hidden truth about how good an action is.
+* Q(a) = our moving estimate that improves with updates.
+* If we only exploit → we might get stuck on Meal A and never discover Meal B.
+* If we only explore → we waste chances to enjoy the best meal.
+* Epsilon-greedy finds the middle ground: *occasionally try something new, mostly stick to the best so far*.
+* Averaging many runs helps us compare strategies fairly, since randomness makes single runs noisy.
+
+
+
