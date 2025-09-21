@@ -420,5 +420,12 @@ To test exploration–exploitation methods, researchers use the **10-armed testb
 * Epsilon-greedy finds the middle ground: *occasionally try something new, mostly stick to the best so far*.
 * Averaging many runs helps us compare strategies fairly, since randomness makes single runs noisy.
 
+## Limitations of Optimistic Initial Values
+
+- Optimistic initial values only **drive early exploration**
+- They are not well-suited for **non-stationary problems**
+- We may not know what the **optimistic initial value** should be
+
+
 
 
