@@ -428,4 +428,136 @@ To test exploration–exploitation methods, researchers use the **10-armed testb
 
 
 
+## Upper Confidence Bound (UCB) — Detailed Notes
+
+---
+
+### 1. The Idea
+
+In bandit problems, we want to balance:
+
+* **Exploitation**: pick the action with the best estimated reward so far.
+* **Exploration**: test actions we are uncertain about (maybe they’re better).
+
+UCB does this automatically by combining two terms:
+
+$$
+\text{Score}(a) = Q_t(a) + C \cdot \sqrt{\frac{\ln t}{N_t(a)}}
+$$
+
+Where:
+
+* **Q\_t(a)** = estimated value of action *a* at time *t* (average observed reward).
+* **N\_t(a)** = number of times action *a* has been chosen.
+* **t** = total number of steps so far.
+* **C** = exploration parameter (bigger C = more exploration).
+
+We choose the action with the **highest score**.
+
+---
+
+### 2. How It Works
+
+* **First term Q\_t(a):** exploitation — trust what we know.
+* **Second term:** exploration bonus.
+
+  * If N\_t(a) is small → bonus is large (high uncertainty).
+  * If N\_t(a) is large → bonus shrinks (low uncertainty).
+
+So:
+
+* Frequently sampled actions rely mostly on their Q-value.
+* Rarely sampled actions get a “boost,” encouraging exploration.
+
+---
+
+### 3. Step-by-Step Example (Restaurant 🍽️)
+
+We have 3 meals: A, B, C.
+Exploration constant: C = 2.
+At the start, force trying each meal once.
+
+**Observed rewards:**
+
+* Meal A → 2
+* Meal B → 5
+* Meal C → 1
+
+**Estimates after first round:**
+
+* Q(A) = 2, N(A) = 1
+* Q(B) = 5, N(B) = 1
+* Q(C) = 1, N(C) = 1
+* t = 3
+
+**Step 1: Calculate scores**
+
+$$
+\text{Bonus for all} = C \cdot \sqrt{\tfrac{\ln 3}{1}} \approx 2 \cdot 1.05 = 2.1
+$$
+
+* Score(A) = 2 + 2.1 = 4.1
+* Score(B) = 5 + 2.1 = 7.1
+* Score(C) = 1 + 2.1 = 3.1
+
+👉 UCB picks **B** (highest score).
+Here, all uncertainty bonuses were equal, so B was chosen because it had the best observed reward → **exploitation**.
+
+---
+
+**Step 2: Try B again**
+Reward = 3. Update:
+
+$$
+Q(B) = \frac{5 + 3}{2} = 4, \quad N(B) = 2, \quad t = 4
+$$
+
+New scores:
+
+* Score(A) = 2 + 2 · √(ln4 / 1) ≈ 2 + 2 · 1.18 = 4.36
+* Score(B) = 4 + 2 · √(ln4 / 2) ≈ 4 + 2 · 0.83 = 5.66
+* Score(C) = 1 + 2 · 1.18 = 3.36
+
+👉 Still pick **B**.
+
+---
+
+**Step 3: Try B again**
+Reward = 4. Update:
+
+$$
+Q(B) = \frac{5 + 3 + 4}{3} = 4, \quad N(B) = 3, \quad t = 5
+$$
+
+New scores:
+
+* Score(A) = 2 + 2 · √(ln5 / 1) ≈ 2 + 2 · 1.27 = 4.54
+* Score(B) = 4 + 2 · √(ln5 / 3) ≈ 4 + 2 · 0.74 = 5.48
+* Score(C) = 1 + 2 · 1.27 = 3.54
+
+👉 Still pick **B**, but notice A’s score (4.54) is slowly catching up.
+
+---
+
+### 4. Intuition from This Example
+
+* **Initially:** all meals have equal uncertainty. The one with the highest observed reward (B) is chosen → looks greedy.
+* **Later:** B’s bonus term shrinks because N(B) increases.
+* **Meanwhile:** A and C still have small N → their bonuses stay large.
+* Eventually, UCB will try A or C again → **exploration driven by uncertainty**.
+
+---
+
+### 5. Key Takeaways
+
+* UCB balances exploitation (Q) and exploration (bonus).
+* Early: looks greedy, but that’s okay — still samples everything once.
+* Later: bonus ensures less-sampled actions are revisited.
+* Smarter than ε-greedy, because exploration is **targeted**, not random.
+
+👉 **Optimism in the face of uncertainty**: if you don’t know much about an option, assume it might be good, and test it.
+
+
+
+
 
