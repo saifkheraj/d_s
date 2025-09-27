@@ -390,6 +390,23 @@ To test exploration–exploitation methods, researchers use the **10-armed testb
 * <img width="497" height="349" alt="Screenshot 2025-09-22 at 1 41 05 AM" src="https://github.com/user-attachments/assets/be8e8e84-545f-41cf-8712-22ca26362131" />
 
 
+
+In the 10-armed testbed benchmark:
+
+* Each **run** is carried out for **1000 time steps**.
+* That means the agent chooses an action, gets a reward, and updates its estimates **1000 times**.
+* This whole process (1000 steps) is repeated across **2000 independent runs**, each with different randomly generated true action values $q\*(a)$.
+
+---
+
+### Summary
+
+* **Steps per run:** 1000
+* **Number of runs:** 2000
+* **Result:** average performance curve across all 2000 runs
+
+
+
 ### Single Run Example
 
 * A run of ε = 0.1 shows noisy rewards with an upward trend.
@@ -406,6 +423,7 @@ To test exploration–exploitation methods, researchers use the **10-armed testb
 * ε = 0 (pure greedy): quickly gets stuck, low long-term reward.
 * ε = 0.01: slowly improves, almost always finds the optimal action eventually.
 * ε = 0.1: learns faster at first, achieves higher early reward, but plateaus.
+
 * <img width="495" height="225" alt="Screenshot 2025-09-22 at 1 42 00 AM" src="https://github.com/user-attachments/assets/0f3a4a05-d9ba-49ca-ba49-6d23f605832d" />
 
 <img width="698" height="609" alt="Screenshot 2025-09-28 at 2 15 19 AM" src="https://github.com/user-attachments/assets/19a26f38-d45b-4c8f-ad52-e04a65074ee1" />
