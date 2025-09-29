@@ -424,7 +424,7 @@ In the 10-armed testbed benchmark:
 * ε = 0.01: slowly improves, almost always finds the optimal action eventually.
 * ε = 0.1: learns faster at first, achieves higher early reward, but plateaus.
 
-* <img width="495" height="225" alt="Screenshot 2025-09-22 at 1 42 00 AM" src="https://github.com/user-attachments/assets/0f3a4a05-d9ba-49ca-ba49-6d23f605832d" />
+
 
 <img width="698" height="609" alt="Screenshot 2025-09-28 at 2 15 19 AM" src="https://github.com/user-attachments/assets/19a26f38-d45b-4c8f-ad52-e04a65074ee1" />
 
@@ -439,6 +439,10 @@ In the 10-armed testbed benchmark:
 * If we only explore → we waste chances to enjoy the best meal.
 * Epsilon-greedy finds the middle ground: *occasionally try something new, mostly stick to the best so far*.
 * Averaging many runs helps us compare strategies fairly, since randomness makes single runs noisy.
+
+
+
+
 
 ## Limitations of Optimistic Initial Values
 
