@@ -440,19 +440,91 @@ In the 10-armed testbed benchmark:
 * Epsilon-greedy finds the middle ground: *occasionally try something new, mostly stick to the best so far*.
 * Averaging many runs helps us compare strategies fairly, since randomness makes single runs noisy.
 
+# Optimistic Initial Values
+
+---
+
+## 1. The Core Idea
+
+* Normally, action-value estimates $Q(a)$ are initialized at 0.
+* Instead, we can set all initial estimates very high, e.g., +5.
+* Since the true values $q\*(a)$ are sampled from a distribution with mean 0 (and variance 1), +5 is overly optimistic.
+* This **optimism enforces exploration** because the first few rewards will always be lower than the initial guesses, creating **disappointment**.
+* The disappointment makes the agent switch to other actions that still look unrealistically good.
+
+👉 This is different from **epsilon-greedy**, which enforces exploration by injecting randomness.
+
+---
+
+## 2. How It Works
+
+1. **Start:** All actions look equally great (Q(a) = +5).
+2. **First pull:** Suppose action A gives reward 1.
+
+   * Update: Q(A) drops below 5.
+   * Other actions are still at 5, so they look better than A.
+3. **Switch:** The agent moves to another action, say B, because it still has Q=5.
+4. **Disappointment cycle:** Each action tried produces a reward < 5, lowering its estimate.
+
+   * The agent keeps jumping to unexplored actions that still appear optimistic.
+5. **Result:** The greedy policy explores all actions, even without randomness.
+
+---
+
+## 3. Example from the 10-Armed Bandit Testbed
+
+* True values $q\*(a)$ are sampled from $N(0, 1)$.
+* Initial Q-values are set to +5.
+
+### Exploration by Disappointment
+
+* First few pulls → rewards < 5 → estimates fall.
+* Actions not yet tried still have Q=5 → agent chooses them next.
+* Eventually, all actions are sampled, then estimates settle closer to reality.
+
+### Performance Comparison
+
+* **Optimistic greedy (Q1(a) = +5):**
+
+  * Performs worse early (because it over-explores due to disappointment).
+  * Performs better later, because exploration naturally stops when values converge.
+* **Epsilon-greedy (Q1(a) = 0, ε = 0.1):**
+
+  * Uses randomness to enforce exploration.
+  * Keeps exploring forever, even after learning the best action.
+ 
+<img width="751" height="351" alt="Screenshot 2025-10-01 at 12 09 33 AM" src="https://github.com/user-attachments/assets/cbc83bb2-44fe-42ad-b5eb-e3eb2da88f25" />
+
+
+---
+
+## 4. Strengths
+
+* Enforces exploration **systematically** (via disappointment).
+* Simple to implement — just pick high initial values.
+* Good for stationary problems where rewards don’t change.
+
+---
+
+## 5. Limitations
+
+* Only drives exploration **early on**. Once optimism is corrected, exploration stops.
+* Not suited to **non-stationary problems** (where true values change).
+* Choosing the “right” optimistic value is hard in practice.
+* Can lead to poor early performance while over-exploring.
+
+---
+
+## ✅ Takeaway
+
+* **Optimistic initial values** enforce exploration through **disappointment**: each action starts unrealistically high, and the agent keeps testing new ones until estimates fall.
+* Unlike ε-greedy, this exploration is **deterministic and systematic** rather than random.
+* Works well for stationary settings, but limited for changing environments.
 
 
 
 
-## Limitations of Optimistic Initial Values
-
-- Optimistic initial values only **drive early exploration**
-- They are not well-suited for **non-stationary problems**
-- We may not know what the **optimistic initial value** should be
-
-
-
-## Upper Confidence Bound (UCB) — Detailed Notes
+# Upper Confidence Bound (UCB) — Detailed Notes
 
 ---
 
