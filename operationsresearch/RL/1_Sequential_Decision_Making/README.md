@@ -565,6 +565,14 @@ So:
 * Frequently sampled actions rely mostly on their Q-value.
 * Rarely sampled actions get a “boost,” encouraging exploration.
 
+* In another words:
+  - If N_t(a) is small → the action hasn’t been tried much → bonus is large → encourages exploration.
+  - If N_t(a) is large → the action has been tried often → bonus is small → encourages exploitation of good actions.
+
+If t increases but N_t(a) stays small → bonus for that action slowly grows again → guarantees it will eventually be tried.
+
+This way, all actions are eventually tested
+
 ---
 
 ### 3. Step-by-Step Example (Restaurant 🍽️)
@@ -653,6 +661,11 @@ New scores:
 
 👉 **Optimism in the face of uncertainty**: if you don’t know much about an option, assume it might be good, and test it.
 
+<img width="832" height="354" alt="Screenshot 2025-10-01 at 1 06 34 AM" src="https://github.com/user-attachments/assets/c2002f0d-0ae8-4118-88fe-4545cf8d1ccc" />
+
+
+UCB generally performs better than "-greedy action selection, except in the first k steps, when
+it selects randomly among the as-yet-untried actions.
 
 
 
