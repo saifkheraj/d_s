@@ -187,4 +187,84 @@ This is cleaner than `try/except/pass`.
 
 ## 10. Key Sentence to Remember
 
+
+
+# Comprehensions and Assignment Expressions — Beginner Friendly
+
+## 1. Comprehensions
+
+A short way to write loops.
+
+```python
+# Normal loop
+squares = []
+for n in range(5):
+    squares.append(n * n)
+
+# List comprehension
+squares = [n * n for n in range(5)]
+```
+
+Both do the same thing, but the second is shorter.
+
+---
+
+## 2. Assignment Expression (`:=`) — Walrus Operator
+
+The `:=` operator lets you **assign a value inside an expression**.
+
+Think of it as: *“save this result, and use it right away.”*
+
+### Without walrus
+
+```python
+import re
+pattern = r"(\d+)"
+text = "Order123"
+
+result = re.search(pattern, text)
+if result:
+    print(result.group(1))  # 123
+```
+
+### With walrus
+
+```python
+import re
+pattern = r"(\d+)"
+text = "Order123"
+
+if (result := re.search(pattern, text)):
+    print(result.group(1))  # 123
+```
+
+Here `result` is created **inside the if**.
+
+---
+
+## 3. Combined Example
+
+```python
+import re
+pattern = r"arn:.*:(\d+):.*"
+resources = ["arn:aws:s3:12345:bucket", "arn:aws:s3:67890:bucket"]
+
+ids = {m.group(1) for r in resources if (m := re.match(pattern, r))}
+print(ids)  # {'12345', '67890'}
+```
+
+* Comprehension builds the set.
+* `:=` stores the match as `m` and uses it immediately.
+
+---
+
+## 4. Key Idea
+
+* **Comprehensions** = short loops for lists/sets/dicts.
+* **Walrus (`:=`)** = assign + use at the same time.
+
+✅ Great for short, clear code.
+⚠ If it looks confusing, use a normal loop instead.
+
+
 **A context manager = automatic setup and cleanup around a block of code.**
