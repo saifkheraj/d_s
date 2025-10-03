@@ -955,3 +955,66 @@ Each call updates the internal state.
 
 Together, these magic methods let you design objects that are **expressive, flexible, and Pythonic**.
 
+# Magic Methods in Python – Summary Cheat Sheet
+
+This document provides a quick overview of the most common **magic methods** (also called *dunder methods*) in Python, their purpose, and how they connect to Python’s special syntax.
+
+---
+
+## 🔑 Key Magic Methods and Their Behaviors
+
+* **Indexing & slicing**
+
+  * `obj[key]` → `__getitem__(key)` → makes objects *subscriptable*
+  * `obj[i:j]`, `obj[i:j:k]` → handled by `__getitem__` with slice objects
+
+* **Context Managers**
+
+  * `with obj:` → `__enter__()` and `__exit__()`
+  * Used for resources that need setup & cleanup (files, DB connections)
+
+* **Iteration & Sequences**
+
+  * `for i in obj:` → `__iter__()` + `__next__()` (iterator protocol)
+  * As fallback: `__len__()` + `__getitem__()` → makes it a *sequence*
+
+* **Dynamic Attributes**
+
+  * `obj.attr` → If not found, Python calls `__getattr__(name)`
+  * Useful for proxies, dynamic properties, or fallback attributes
+
+* **Callable Objects**
+
+  * `obj(*args, **kwargs)` → `__call__(*args, **kwargs)`
+  * Lets objects behave like functions, often used for decorators or stateful functions
+
+---
+
+## 🧰 Best Practices
+
+* Use **`collections.abc`** base classes:
+
+  * Example: `collections.abc.Iterable`, `collections.abc.Sequence`, etc.
+  * These enforce which methods must be implemented and ensure correct typing with `isinstance()`
+
+* Always:
+
+  * Raise `StopIteration` in `__next__()` when iteration is done
+  * Raise `AttributeError` in `__getattr__()` for missing attributes
+  * Use `__exit__()` for cleanup in context managers, even on exceptions
+
+---
+
+## 🎯 Final Notes
+
+* Magic methods let us integrate *our own classes* seamlessly with Python syntax.
+* They enable Pythonic expressions like:
+
+  * `with MyResource(): ...`
+  * `if item in my_container:`
+  * `for x in my_range:`
+* Learning and practicing these will make your code more **natural, compact, and expressive**.
+
+👉 With time, writing clean abstractions using magic methods becomes second nature — even in other languages that don’t support them natively.
+
+
