@@ -660,3 +660,169 @@ So: **`name` is not shared. Only mutable defaults behave like shared objects unl
 
 
 **A context manager = automatic setup and cleanup around a block of code.**
+
+
+# Iterable Objects and Sequences in Python
+
+---
+
+## 1. What Does Iterable Mean?
+
+An **iterable** is any Python object that can be used in a `for` loop.
+
+* Built-in examples: `list`, `tuple`, `set`, `dict`.
+* You can also create your **own iterable** objects.
+
+Python follows the **iterator protocol** when you do:
+
+```python
+for x in myobject:
+    ...
+```
+
+It checks:
+
+1. Does the object have `__iter__` or `__next__`?
+2. If not, is it a sequence with `__len__` and `__getitem__`?
+3. If neither → raises `TypeError`.
+
+---
+
+## 2. Creating a Custom Iterable
+
+When you call `iter(obj)`, Python looks for the `__iter__` method.
+
+* `__iter__`: returns an iterator object (often `self`).
+* `__next__`: returns the next item or raises `StopIteration` when done.
+
+### Example: DateRangeIterable
+
+```python
+from datetime import date, timedelta
+
+class DateRangeIterable:
+    def __init__(self, start_date, end_date):
+        self.current = start_date
+        self.end_date = end_date
+
+    def __iter__(self):
+        return self  # the object itself is the iterator
+
+    def __next__(self):
+        if self.current > self.end_date:
+            raise StopIteration
+        today = self.current
+        self.current += timedelta(days=1)
+        return today
+
+# Usage
+for d in DateRangeIterable(date(2023, 1, 1), date(2023, 1, 3)):
+    print(d)
+```
+
+Output:
+
+```
+2023-01-01
+2023-01-02
+2023-01-03
+```
+
+### Problem
+
+Once used, the iterable is **exhausted**:
+
+```python
+rng = DateRangeIterable(date(2023,1,1), date(2023,1,2))
+for d in rng: print(d)  # works
+for d in rng: print(d)  # empty, already exhausted
+```
+
+---
+
+## 3. Fixing with Container Iterables
+
+Instead of returning `self` in `__iter__`, return a **fresh iterator** each time. A generator is perfect here.
+
+```python
+class DateRangeIterable:
+    def __init__(self, start_date, end_date):
+        self.start = start_date
+        self.end = end_date
+
+    def __iter__(self):
+        current = self.start
+        while current <= self.end:
+            yield current
+            current += timedelta(days=1)
+
+# Now works in multiple loops
+rng = DateRangeIterable(date(2023,1,1), date(2023,1,2))
+for d in rng: print(d)
+for d in rng: print(d)
+```
+
+👉 This design is called a **container iterable**. Each `for` loop calls `__iter__`, which makes a new generator.
+
+---
+
+## 4. Creating a Sequence
+
+If `__iter__` is missing, Python checks for `__getitem__`. If that works with indices, the object is also iterable.
+
+A **sequence** must:
+
+* Implement `__len__`
+* Implement `__getitem__` (with integer indices)
+
+### Example: DateRangeSequence
+
+```python
+class DateRangeSequence:
+    def __init__(self, start_date, end_date):
+        self._dates = []
+        current = start_date
+        while current <= end_date:
+            self._dates.append(current)
+            current += timedelta(days=1)
+
+    def __len__(self):
+        return len(self._dates)
+
+    def __getitem__(self, index):
+        return self._dates[index]
+
+# Usage
+rng = DateRangeSequence(date(2023,1,1), date(2023,1,3))
+print(rng[0])       # 2023-01-01
+print(rng[-1])      # 2023-01-03
+for d in rng: print(d)
+```
+
+---
+
+## 5. Trade-Offs: Iterable vs Sequence
+
+* **Iterable (with generator)**:
+
+  * Uses less memory (stores only one item at a time).
+  * To access nth item, must loop n times → O(n).
+* **Sequence (with list)**:
+
+  * Uses more memory (stores all items).
+  * Can access any item directly by index → O(1).
+
+This is the classic **memory vs speed trade-off**.
+
+---
+
+## 6. Key Takeaways
+
+* **Iterable protocol**: `__iter__` + `__next__`.
+* **Sequence protocol**: `__len__` + `__getitem__`.
+* Use **generators/container iterables** for efficiency.
+* Use **sequences** when you need random access and indexing.
+* Always raise `StopIteration` when iteration is complete.
+
+👉 Rule of thumb: prefer **iterables (generators)** for large data, and **sequences** when you need indexing support.
+
