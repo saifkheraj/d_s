@@ -267,4 +267,209 @@ print(ids)  # {'12345', '67890'}
 ⚠ If it looks confusing, use a normal loop instead.
 
 
+# Python Attributes, Properties, and Methods — Clear Guide
+
+---
+
+## 1. Attributes in Python
+
+* In Python, all attributes are **public by default**.
+* Python does not have strict private/protected like Java or C++.
+* Instead, it uses **conventions**:
+
+| Syntax   | Meaning (Convention) | Example Access                          |
+| -------- | -------------------- | --------------------------------------- |
+| `attr`   | Public               | `obj.attr` ✅                            |
+| `_attr`  | Internal use only    | `obj._attr` (possible, but discouraged) |
+| `__attr` | Name mangling        | Accessed as `obj._ClassName__attr`      |
+
+### Example
+
+```python
+class Car:
+    def __init__(self):
+        self.color = "red"        # public
+        self._engine_status = "off"  # private by convention
+        self.__secret_code = 1234    # name-mangled
+
+car = Car()
+print(car.color)          # red (public)
+print(car._engine_status) # off (works, but discouraged)
+# print(car.__secret_code)  # ❌ AttributeError
+print(car._Car__secret_code) # ✅ 1234 (name-mangled access)
+```
+
+🔑 **Rule:** Use a single underscore for private attributes. Avoid double underscores unless you specifically want name-mangling.
+
+---
+
+## 2. Properties
+
+Properties let you **control attribute access** (read/write) with getters and setters.
+
+```python
+class Coordinate:
+    def __init__(self, lat, lon):
+        self.latitude = lat
+        self.longitude = lon
+
+    @property
+    def latitude(self):
+        return self._lat
+
+    @latitude.setter
+    def latitude(self, value):
+        if not -90 <= value <= 90:
+            raise ValueError("Invalid latitude")
+        self._lat = value
+
+    @property
+    def longitude(self):
+        return round(self._lon, 4)
+
+    @longitude.setter
+    def longitude(self, value):
+        if not -180 <= value <= 180:
+            raise ValueError("Invalid longitude")
+        self._lon = value
+```
+
+Usage:
+
+```python
+c = Coordinate(10, 20.123456)
+print(c.latitude)      # 10 (getter runs)
+print(c.longitude)     # 20.1235 (rounded)
+
+c.latitude = 95        # ❌ Error → setter validation failed
+```
+
+🔑 **Explanation:** Assigning `c.latitude = 95` automatically calls the setter. The setter checks if the value is valid; if not, it raises a `ValueError`.
+
+---
+
+## 3. Types of Methods
+
+Python classes support **three main types of methods**:
+
+### a) Instance Methods
+
+* Default type of methods.
+* First parameter is `self` (the object instance).
+* Work on **one object**.
+
+```python
+class Example:
+    def greet(self):
+        return f"Hello from {self.__class__.__name__}"
+
+obj = Example()
+print(obj.greet())  # Hello from Example
+```
+
+---
+
+### b) Class Methods
+
+* Declared with `@classmethod`.
+* First parameter is `cls` (the class itself).
+* Work on the **class as a whole**.
+
+```python
+class Example:
+    counter = 0
+
+    @classmethod
+    def increment(cls):
+        cls.counter += 1
+        return cls.counter
+
+print(Example.increment())  # 1
+print(Example.increment())  # 2
+```
+
+---
+
+### c) Static Methods
+
+* Declared with `@staticmethod`.
+* Take no `self` or `cls`.
+* Behave like plain functions inside the class.
+
+```python
+class Example:
+    @staticmethod
+    def add(a, b):
+        return a + b
+
+print(Example.add(2, 3))  # 5
+```
+
+---
+
+## 4. Combined Example
+
+```python
+class User:
+    all_users = []  # class-level attribute
+
+    def __init__(self, name, email):
+        self.name = name
+        self._email = None
+        self.email = email   # triggers property setter
+        User.all_users.append(self)
+
+    # Property for email
+    @property
+    def email(self):
+        return self._email
+
+    @email.setter
+    def email(self, value):
+        if "@" not in value:
+            raise ValueError("Invalid email")
+        self._email = value
+
+    # Instance method
+    def greet(self):
+        return f"Hi, I'm {self.name}"
+
+    # Class method
+    @classmethod
+    def count(cls):
+        return len(cls.all_users)
+
+    # Static method
+    @staticmethod
+    def is_valid_name(name):
+        return name.isalpha()
+
+
+# Usage
+u1 = User("Alice", "alice@example.com")
+u2 = User("Bob", "bob@example.com")
+
+print(u1.greet())                  # Instance method → Hi, I'm Alice
+print(User.count())                # Class method → 2
+print(User.is_valid_name("Bob"))   # Static method → True
+
+print(u1.email)                    # Property getter
+u1.email = "new@site.com"          # Property setter with validation
+```
+
+---
+
+## 5. Key Takeaways
+
+* **`attr`** = public, **`_attr`** = internal, **`__attr`** = name-mangled.
+* **Properties** = control how attributes are read/written (validation, formatting).
+* **Instance methods** = work on one object (`self`).
+* **Class methods** = work on the class (`cls`).
+* **Static methods** = independent helpers inside the class.
+* Prefer clarity: use underscores by convention, and properties when you need extra control.
+
+
+
+
+
 **A context manager = automatic setup and cleanup around a block of code.**
