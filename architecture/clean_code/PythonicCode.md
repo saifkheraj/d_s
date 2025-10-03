@@ -826,3 +826,132 @@ This is the classic **memory vs speed trade-off**.
 
 👉 Rule of thumb: prefer **iterables (generators)** for large data, and **sequences** when you need indexing support.
 
+
+# Other Properties, Attributes, and Methods in Python
+
+In this guide, we’ll cover three powerful object-oriented features in Python:
+
+* **Container objects** (`__contains__`)
+* **Dynamic attributes** (`__getattr__`)
+* **Callable objects** (`__call__`)
+
+Each of these relies on Python’s **magic methods** to give objects special behaviors.
+
+---
+
+## 1. Container Objects (`__contains__`)
+
+A **container object** is one that can answer the question: *Does this object contain X?*
+This is what allows the use of the `in` keyword.
+
+```python
+class Boundaries:
+    def __init__(self, x_min, x_max, y_min, y_max):
+        self.x_min = x_min
+        self.x_max = x_max
+        self.y_min = y_min
+        self.y_max = y_max
+
+    def __contains__(self, coord):
+        x, y = coord
+        return self.x_min <= x <= self.x_max and self.y_min <= y <= self.y_max
+
+class Grid:
+    def __init__(self, limits):
+        self.limits = limits
+
+    def __contains__(self, coord):
+        return coord in self.limits
+
+# Example usage
+grid = Grid(Boundaries(0, 10, 0, 10))
+print((5, 5) in grid)   # ✅ True
+print((15, 5) in grid)  # ❌ False
+```
+
+✨ This makes the code more **Pythonic** and expressive:
+
+```python
+if coord in grid:
+    print("Inside the grid!")
+```
+
+Instead of writing a long conditional manually.
+
+---
+
+## 2. Dynamic Attributes (`__getattr__`)
+
+Python lets you control what happens when an attribute is accessed but not found. This is done with `__getattr__`.
+
+```python
+class DynamicAttributes:
+    def __init__(self):
+        self.existing = "I exist!"
+
+    def __getattr__(self, name):
+        if name.startswith("fallback_"):
+            return f"Generated attribute for {name}"
+        raise AttributeError(f"{name} not found")
+
+obj = DynamicAttributes()
+print(obj.existing)           # ✅ "I exist!"
+print(obj.fallback_test)      # ✅ "Generated attribute for fallback_test"
+# print(obj.unknown)          # ❌ Raises AttributeError
+```
+
+🔑 Key points:
+
+* If an attribute is **already defined**, `__getattr__` is not called.
+* If it’s missing, Python calls `__getattr__` with the attribute name.
+* Always raise **AttributeError** for missing cases — this keeps Python consistent with built-ins like `getattr(obj, "missing", default)`.
+
+📌 **Use cases:**
+
+* Delegating calls in wrappers/proxies
+* Avoiding boilerplate for repeated attributes
+* On-demand attribute generation
+
+⚠️ **Warning:** Overusing `__getattr__` can make code confusing because attributes may “appear magically.” Use with caution.
+
+---
+
+## 3. Callable Objects (`__call__`)
+
+In Python, even objects can behave like functions. This is possible with the `__call__` magic method.
+
+```python
+class CallCount:
+    def __init__(self):
+        self.counts = {}
+
+    def __call__(self, value):
+        self.counts[value] = self.counts.get(value, 0) + 1
+        return self.counts[value]
+
+counter = CallCount()
+print(counter("apple"))   # 1
+print(counter("apple"))   # 2
+print(counter("banana"))  # 1
+print(counter("apple"))   # 3
+```
+
+Here, `counter("apple")` calls `counter.__call__("apple")`.
+Each call updates the internal state.
+
+📌 **Use cases:**
+
+* **Memoization** (caching results)
+* **Decorators** (wrapping functions)
+* **Objects as functions** with internal state
+
+---
+
+## Summary
+
+* `__contains__`: Makes objects usable with `in` for clean membership checks.
+* `__getattr__`: Lets objects handle missing attributes dynamically.
+* `__call__`: Allows objects to behave like functions and hold state across calls.
+
+Together, these magic methods let you design objects that are **expressive, flexible, and Pythonic**.
+
