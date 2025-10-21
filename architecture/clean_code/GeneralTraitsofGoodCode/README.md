@@ -52,4 +52,64 @@ def main():
     except Exception:
         pass
 
+
+## 🧠 Using Assertions vs. Try/Except in Python
+
+### 🔹 Key Points
+
+* **Assertions** are for detecting *programming mistakes* or *impossible situations* that should never happen.
+* **Exceptions (try/except)** are for handling *expected errors* — things that can go wrong due to user input or environment.
+* **Do not wrap `assert` in try/except** to suppress it. Let it fail fast — it signals a logic bug.
+* **You may catch AssertionError** only to log or debug internally, not to continue execution.
+* **`assert` should not be used for input validation** — always use `raise` for that.
+* **Assertions can be disabled** with `python -O`, so don’t rely on them for business logic.
+
+---
+
+### ✅ Example Code
+
+```python
+def divide(a, b):
+    # Logic-level check (programmer mistake if b == 0)
+    assert b != 0, "b should never be zero (check your logic)"
+    return a / b
+
+
+def safe_division(a, b):
+    # User-level error handling using try/except
+    try:
+        result = divide(a, b)
+        print(f"Result: {result}")
+    except AssertionError as e:
+        print(f"⚠️ Developer bug detected: {e}")  # For internal logs only
+    except ZeroDivisionError:
+        print("❌ User error: Division by zero!")
+
+
+# --- Test Calls ---
+safe_division(10, 2)   # Works fine
+safe_division(10, 0)   # AssertionError (developer bug)
+```
+
+---
+
+### 🧾 Output
+
+```
+Result: 5.0
+⚠️ Developer bug detected: b should never be zero (check your logic)
+```
+
+---
+
+### 💡 Summary
+
+* Use **`assert`** to check that internal assumptions are correct.
+* Use **`raise` + try/except** for expected user or runtime errors.
+* Never silence assertion failures — they mean the code logic is broken.
+* Fail fast → Fix logic → Deploy cleaner code ✅
+
+
+
 main()
+
