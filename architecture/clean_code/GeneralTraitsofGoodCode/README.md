@@ -51,7 +51,7 @@ def main():
         pass  # ✅ Avoid empty except block
     except Exception:
         pass
-
+```
 
 ## 🧠 Using Assertions vs. Try/Except in Python
 
@@ -112,4 +112,5 @@ Result: 5.0
 
 
 main()
+
 
