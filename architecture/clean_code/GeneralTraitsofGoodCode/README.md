@@ -6,3 +6,47 @@
 * **Catch specific exceptions:** Use targeted exceptions like `KeyError` or `ValueError` instead of a broad `Exception`.
 * **Include the original exception:** When re-raising, use `raise NewError(...) from e` to preserve context for debugging.
 * **Use `contextlib.suppress()`** explicitly if you need to ignore certain exceptions intentionally.
+
+
+
+from contextlib import suppress
+
+class CustomError(Exception):
+    pass
+
+def connect():
+    raise ConnectionError("Failed to connect")
+
+def decode():
+    raise ValueError("Bad data format")
+
+def main():
+    try:
+        connect()
+    except ConnectionError as e:
+        print("Retrying connection...")   # ✅ Right level of abstraction
+
+    try:
+        decode()
+    except ValueError as e:
+        print("Something went wrong")     # ✅ Generic message, no traceback
+
+    try:
+        raise KeyError("Missing key")
+    except KeyError as e:
+        print(f"Handled specific: {e}")   # ✅ Catch specific exception
+
+    try:
+        raise TypeError("Wrong type")
+    except TypeError as e:
+        raise CustomError("Custom wrapper") from e   # ✅ Include original exception
+
+    with suppress(ZeroDivisionError):               # ✅ Explicitly ignore
+        1 / 0
+
+    try:
+        pass  # no empty except ✅ Avoid empty block
+    except Exception:
+        pass
+
+main()
