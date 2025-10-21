@@ -7,8 +7,11 @@
 * **Include the original exception:** When re-raising, use `raise NewError(...) from e` to preserve context for debugging.
 * **Use `contextlib.suppress()`** explicitly if you need to ignore certain exceptions intentionally.
 
+##  Best Practices for Exception Handling — Python Example
 
+This example covers all 6 best practices:
 
+```python
 from contextlib import suppress
 
 class CustomError(Exception):
@@ -24,12 +27,12 @@ def main():
     try:
         connect()
     except ConnectionError as e:
-        print("Retrying connection...")   # ✅ Right level of abstraction
+        print("Retrying connection...")   # ✅ Handle exception at correct level
 
     try:
         decode()
-    except ValueError as e:
-        print("Something went wrong")     # ✅ Generic message, no traceback
+    except ValueError:
+        print("Something went wrong")     # ✅ Generic message, no traceback exposed
 
     try:
         raise KeyError("Missing key")
@@ -41,11 +44,11 @@ def main():
     except TypeError as e:
         raise CustomError("Custom wrapper") from e   # ✅ Include original exception
 
-    with suppress(ZeroDivisionError):               # ✅ Explicitly ignore
+    with suppress(ZeroDivisionError):               # ✅ Explicitly ignore with suppress()
         1 / 0
 
     try:
-        pass  # no empty except ✅ Avoid empty block
+        pass  # ✅ Avoid empty except block
     except Exception:
         pass
 
