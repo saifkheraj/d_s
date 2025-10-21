@@ -1,4 +1,4 @@
-**Best Practices for Exception Handling (Summary)**
+**1. Best Practices for Exception Handling (Summary)**
 
 * **Handle exceptions at the right level:** Keep exception handling consistent with the function’s responsibility. For example, `ConnectionError` should be handled inside the connection logic, not where data is decoded.
 * **Do not expose tracebacks to users:** Log detailed errors internally, but show generic error messages like “Something went wrong” to prevent security risks.
@@ -53,7 +53,7 @@ def main():
         pass
 ```
 
-## 🧠 Using Assertions vs. Try/Except in Python
+## 2. Using Assertions vs. Try/Except in Python
 
 ### 🔹 Key Points
 
@@ -110,7 +110,7 @@ Result: 5.0
 * Fail fast → Fix logic → Deploy cleaner code ✅
 
 
-## 🧩 Simple Explanation of Namespace Example
+### 🧩 Simple Explanation of Namespace Example
 
 Let’s break down the `SimpleNamespace` part clearly 👇
 
@@ -179,6 +179,7 @@ Dubai
 
 
 main()
+
 
 
 
