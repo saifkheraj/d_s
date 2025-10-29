@@ -259,7 +259,7 @@ Then, you can run **optimization** (using Linear or Quadratic Programming) to re
 
 ---
 
-## 🧭 Summary Table
+## Summary Table
 
 | Step | What you do                              | Why                                   |
 | ---- | ---------------------------------------- | ------------------------------------- |
