@@ -13,19 +13,16 @@ Marketing Mix Modeling (MMM) helps quantify **how advertising spend drives sales
 
 Together, they create a realistic model of how advertising works:
 
-[
-\text{Adstock}*t = X_t + \beta \times \text{Adstock}*{t-1}
-]
-[
-\text{Response}_t = (\text{Adstock}_t)^{\alpha}
-]
+$$\text{Adstock}_t = X_t + \beta \times \text{Adstock}_{t-1}$$
+
+$$\text{Response}_t = (\text{Adstock}_t)^{\alpha}$$
 
 Where:
 
-* (X_t): Current week's spend
-* (\beta): Decay rate (0 < β < 1)
-* (\alpha): Saturation factor (0 < α ≤ 1)
-* (\text{Response}_t): Effective impact on sales
+* $X_t$: Current week's spend
+* $\beta$: Decay rate (0 < β < 1)
+* $\alpha$: Saturation factor (0 < α ≤ 1)
+* $\text{Response}_t$: Effective impact on sales
 
 ---
 
@@ -40,15 +37,14 @@ Where:
 
 **Formula breakdown:**
 
-* Week 1 → (A_1 = 100)
-* Week 2 → (A_2 = 100 + 0.5 × 100 = 150)
-* Week 3 → (A_3 = 100 + 0.5 × 150 = 175)
-* Week 4 → (A_4 = 0 + 0.5 × 175 = 87.5)
+* Week 1 → $A_1 = 100$
+* Week 2 → $A_2 = 100 + 0.5 \times 100 = 150$
+* Week 3 → $A_3 = 100 + 0.5 \times 150 = 175$
+* Week 4 → $A_4 = 0 + 0.5 \times 175 = 87.5$
 
 Then applying diminishing returns:
-[
-\text{Response}_t = (\text{Adstock}_t)^{0.7}
-]
+
+$$\text{Response}_t = (\text{Adstock}_t)^{0.7}$$
 
 ---
 
@@ -70,8 +66,8 @@ Then applying diminishing returns:
 | **Time (Memory)** | β             | People still remember the Ramadan meal offer even after ads stop.        |
 | **Spend (Reach)** | α             | Showing the ad again reaches fewer *new* people – same audience overlap. |
 
-* **β →** “How long the applause continues after the show.”
-* **α →** “How crowded the theater already is.”
+* **β →** "How long the applause continues after the show."
+* **α →** "How crowded the theater already is."
 
 ---
 
@@ -90,9 +86,7 @@ Then applying diminishing returns:
 
 Once we include both α and β, the full sales model becomes:
 
-[
-\text{Sales}*t = \text{Base Sales} + \theta × (X_t + \beta × X*{t-1} + \beta^2 × X_{t-2} + …)^{\alpha}
-]
+$$\text{Sales}_t = \text{Base Sales} + \theta \times (X_t + \beta \times X_{t-1} + \beta^2 \times X_{t-2} + \ldots)^{\alpha}$$
 
 This means:
 
@@ -120,19 +114,22 @@ This means:
 | **β (Beta)**  | Memory           | Time    | How long people remember ads after seeing them.     |
 | **α (Alpha)** | Reach Efficiency | Spend   | How quickly new spending stops bringing new buyers. |
 
->  Example: During Ramadan, McDonald’s ads keep working (β), but extra airtime adds fewer new buyers (α).
+>  Example: During Ramadan, McDonald's ads keep working (β), but extra airtime adds fewer new buyers (α).
 
+---
 
+### Important Notes on Parameters
 
-- Beta (adstock/memory decay) is about timing, not individuals. It's saying: "A marketing exposure in week 1 still has some effect in week 2, week 3, etc." It doesn't matter if it's the same person seeing the ad again or a new person—beta is modeling the aggregate carryover effect of the campaign dollars spent. It's purely about how long the impact of that spend lingers.
+- **Beta (adstock/memory decay)** is about timing, not individuals. It's saying: "A marketing exposure in week 1 still has some effect in week 2, week 3, etc." It doesn't matter if it's the same person seeing the ad again or a new person—beta is modeling the aggregate carryover effect of the campaign dollars spent. It's purely about how long the impact of that spend lingers.
 
-- Alpha (diminishing returns) is about scale/saturation, also not tied to unique vs. repeat individuals specifically. It's saying: "When I increase my total spend in a given period, each incremental dollar is less efficient." This happens for many reasons—you might be reaching the same people repeatedly, you might be hitting less relevant audience segments, ad fatigue, etc. But alpha is an aggregate effect across your entire audience and spending level in that period.
+- **Alpha (diminishing returns)** is about scale/saturation, also not tied to unique vs. repeat individuals specifically. It's saying: "When I increase my total spend in a given period, each incremental dollar is less efficient." This happens for many reasons—you might be reaching the same people repeatedly, you might be hitting less relevant audience segments, ad fatigue, etc. But alpha is an aggregate effect across your entire audience and spending level in that period.
 
 So neither parameter is explicitly modeling "unique individuals" in the way you're thinking. Both are aggregate effects:
 
 - Beta = carryover of spend effects across time periods
 - Alpha = efficiency loss as you increase spend in a single period
 
+---
 
 #  Modeling Multiple Media Channels in Marketing Mix Models (MMM)
 
@@ -148,20 +145,17 @@ The goal is to estimate how much each channel contributes to sales, accounting f
 
 ## Step 1: Transform Spend Data for Each Channel
 
-For each medium ( i ):
+For each medium $i$:
 
-[
-\text{Adstock}*{i,t} = X*{i,t} + \beta_i × \text{Adstock}*{i,t-1}
-]
-[
-\text{Response}*{i,t} = (\text{Adstock}_{i,t})^{\alpha_i}
-]
+$$\text{Adstock}_{i,t} = X_{i,t} + \beta_i \times \text{Adstock}_{i,t-1}$$
+
+$$\text{Response}_{i,t} = (\text{Adstock}_{i,t})^{\alpha_i}$$
 
 Where:
 
-* ( X_{i,t} ) = spend for medium *i* in week *t*
-* ( \beta_i ) = memory (carryover) rate for that medium
-* ( \alpha_i ) = diminishing return factor for that medium
+* $X_{i,t}$ = spend for medium *i* in week *t*
+* $\beta_i$ = memory (carryover) rate for that medium
+* $\alpha_i$ = diminishing return factor for that medium
 
  Example:
 
@@ -176,15 +170,13 @@ Where:
 
 ##  Step 2: Create Regression-ready Variables
 
-After transformation, each channel’s **Response variable** represents its *effective advertising pressure*.
+After transformation, each channel's **Response variable** represents its *effective advertising pressure*.
 
 Then we build a regression model:
 
-[
-\text{Sales}_t = b_0 + b_1(\text{TV}_t) + b_2(\text{Radio}_t) + b_3(\text{Billboards}_t) + b_4(\text{Social}_t) + ε_t
-]
+$$\text{Sales}_t = b_0 + b_1(\text{TV}_t) + b_2(\text{Radio}_t) + b_3(\text{Billboards}_t) + b_4(\text{Social}_t) + \epsilon_t$$
 
-Each term (e.g., TVₜ) is the *adstock-transformed* and *α-adjusted* spend for that channel.
+Each term (e.g., $\text{TV}_t$) is the *adstock-transformed* and *α-adjusted* spend for that channel.
 
 ---
 
@@ -230,7 +222,7 @@ model = sm.OLS(y, X).fit()
 print(model.summary())
 ```
 
-The coefficients (b₁–b₄) show the *incremental sales impact* per unit of transformed ad pressure.
+The coefficients ($b_1$–$b_4$) show the *incremental sales impact* per unit of transformed ad pressure.
 
 ---
 
@@ -243,7 +235,7 @@ The coefficients (b₁–b₄) show the *incremental sales impact* per unit of t
 | **b₃ (Billboards)** | Incremental sales from 1 unit of Billboard exposure       |
 | **b₄ (Social)**     | Incremental sales from 1 unit of Social media activity    |
 
-The larger the coefficient, the more powerful that channel’s influence on sales (after accounting for memory and saturation).
+The larger the coefficient, the more powerful that channel's influence on sales (after accounting for memory and saturation).
 
 ---
 
@@ -251,15 +243,13 @@ The larger the coefficient, the more powerful that channel’s influence on sale
 
 Once you have coefficients, you can compute ROI per channel:
 
-[
-ROI_i = \frac{b_i × \text{mean(Response)}_i}{\text{mean(Spend)}_i}
-]
+$$\text{ROI}_i = \frac{b_i \times \text{mean(Response)}_i}{\text{mean(Spend)}_i}$$
 
 Then, you can run **optimization** (using Linear or Quadratic Programming) to reallocate budgets toward higher-ROI channels.
 
 ---
 
-## Summary Table
+## 🧭 Summary Table
 
 | Step | What you do                              | Why                                   |
 | ---- | ---------------------------------------- | ------------------------------------- |
@@ -279,7 +269,3 @@ Then, you can run **optimization** (using Linear or Quadratic Programming) to re
 > * **Social Media** gives instant peaks but dies quickly.
 
 By modeling each channel with its own β and α, you capture *real marketing dynamics* in one unified regression model.
-
-
-
-
