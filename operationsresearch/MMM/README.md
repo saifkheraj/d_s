@@ -1,8 +1,8 @@
-# 📊 Understanding Adstock (β) and Diminishing Returns (α) in Marketing Mix Models
+#  Understanding Adstock (β) and Diminishing Returns (α) in Marketing Mix Models
 
 ---
 
-## 🧠 Overview
+##  Overview
 
 Marketing Mix Modeling (MMM) helps quantify **how advertising spend drives sales** over time. Two key parameters — **Adstock (β)** and **Diminishing Returns (α)** — capture memory and saturation effects in consumer behavior.
 
@@ -29,14 +29,14 @@ Where:
 
 ---
 
-## 🍔 Real-world Example: McDonald's Ramadan Campaign (Dubai)
+## Real-world Example: McDonald's Ramadan Campaign (Dubai)
 
 | Week | Ad Spend (AED '000) | Adstock (β = 0.5) | Response (α = 0.7) | What Happens                              |
 | ---- | ------------------- | ----------------- | ------------------ | ----------------------------------------- |
-| 1    | 100                 | 100               | 25                 | First exposure – everyone sees it 🚀      |
-| 2    | 100                 | 150               | 32                 | More exposure, but many already saw it 🧠 |
-| 3    | 100                 | 175               | 35                 | Almost flat – market saturation 😐        |
-| 4    | 0                   | 87                | 19                 | Ads stop, but memory continues ☁️         |
+| 1    | 100                 | 100               | 25                 | First exposure – everyone sees it       |
+| 2    | 100                 | 150               | 32                 | More exposure, but many already saw it  |
+| 3    | 100                 | 175               | 35                 | Almost flat – market saturation         |
+| 4    | 0                   | 87                | 19                 | Ads stop, but memory continues          |
 
 **Formula breakdown:**
 
@@ -52,7 +52,7 @@ Then applying diminishing returns:
 
 ---
 
-## ⚙️ Scenario Analysis
+##  Scenario Analysis
 
 | Scenario                      | β (Memory) | α (Saturation) | Description                                                  |
 | ----------------------------- | ---------- | -------------- | ------------------------------------------------------------ |
@@ -63,7 +63,7 @@ Then applying diminishing returns:
 
 ---
 
-## 👥 Intuition
+##  Intuition
 
 | Dimension         | Controlled by | Example                                                                  |
 | ----------------- | ------------- | ------------------------------------------------------------------------ |
@@ -75,7 +75,7 @@ Then applying diminishing returns:
 
 ---
 
-## 🚗 Product-level Intuition
+##  Product-level Intuition
 
 | Product       | α (Reach Saturation) | β (Memory) | Explanation                                           |
 | ------------- | -------------------- | ---------- | ----------------------------------------------------- |
@@ -86,7 +86,7 @@ Then applying diminishing returns:
 
 ---
 
-## 🧩 Full Model in Practice
+##  Full Model in Practice
 
 Once we include both α and β, the full sales model becomes:
 
@@ -101,7 +101,7 @@ This means:
 
 ---
 
-## ✅ Key Takeaways
+##  Key Takeaways
 
 | Question              | Answer                                          |
 | --------------------- | ----------------------------------------------- |
@@ -113,14 +113,14 @@ This means:
 
 ---
 
-## 🧭 TL;DR
+##  TL;DR
 
 | Parameter     | Think of it as   | Acts On | Real-world Meaning                                  |
 | ------------- | ---------------- | ------- | --------------------------------------------------- |
 | **β (Beta)**  | Memory           | Time    | How long people remember ads after seeing them.     |
 | **α (Alpha)** | Reach Efficiency | Spend   | How quickly new spending stops bringing new buyers. |
 
-> 📘 Example: During Ramadan, McDonald’s ads keep working (β), but extra airtime adds fewer new buyers (α).
+>  Example: During Ramadan, McDonald’s ads keep working (β), but extra airtime adds fewer new buyers (α).
 
 
 
@@ -134,11 +134,11 @@ So neither parameter is explicitly modeling "unique individuals" in the way you'
 - Alpha = efficiency loss as you increase spend in a single period
 
 
-# 📊 Modeling Multiple Media Channels in Marketing Mix Models (MMM)
+#  Modeling Multiple Media Channels in Marketing Mix Models (MMM)
 
 ---
 
-## 🎯 Objective
+##  Objective
 
 When you have **multiple advertising channels** (e.g., TV, Radio, Billboards, Social Media), you can extend the Adstock–α model for **each channel separately** and combine them in a **multiple regression framework**.
 
@@ -146,7 +146,7 @@ The goal is to estimate how much each channel contributes to sales, accounting f
 
 ---
 
-## 🧩 Step 1: Transform Spend Data for Each Channel
+## Step 1: Transform Spend Data for Each Channel
 
 For each medium ( i ):
 
@@ -163,7 +163,7 @@ Where:
 * ( \beta_i ) = memory (carryover) rate for that medium
 * ( \alpha_i ) = diminishing return factor for that medium
 
-📘 Example:
+ Example:
 
 | Medium           | Typical β | Typical α | Explanation                           |
 | ---------------- | --------- | --------- | ------------------------------------- |
@@ -174,7 +174,7 @@ Where:
 
 ---
 
-## ⚙️ Step 2: Create Regression-ready Variables
+##  Step 2: Create Regression-ready Variables
 
 After transformation, each channel’s **Response variable** represents its *effective advertising pressure*.
 
@@ -188,7 +188,7 @@ Each term (e.g., TVₜ) is the *adstock-transformed* and *α-adjusted* spend for
 
 ---
 
-## 🧮 Step 3: Example Data
+##  Step 3: Example Data
 
 | Week | Sales | TV Spend | Radio Spend | Billboard Spend | Social Spend |
 | ---- | ----- | -------- | ----------- | --------------- | ------------ |
@@ -214,7 +214,7 @@ Repeat this for each channel and feed them into the regression.
 
 ---
 
-## 📈 Step 4: Run the Regression
+##  Step 4: Run the Regression
 
 In Python (example):
 
@@ -234,7 +234,7 @@ The coefficients (b₁–b₄) show the *incremental sales impact* per unit of t
 
 ---
 
-## 🧠 Step 5: Interpretation
+##  Step 5: Interpretation
 
 | Coefficient         | Meaning                                                   |
 | ------------------- | --------------------------------------------------------- |
@@ -247,7 +247,7 @@ The larger the coefficient, the more powerful that channel’s influence on sale
 
 ---
 
-## 🔍 Step 6: Channel ROI & Optimization
+##  Step 6: Channel ROI & Optimization
 
 Once you have coefficients, you can compute ROI per channel:
 
@@ -271,7 +271,7 @@ Then, you can run **optimization** (using Linear or Quadratic Programming) to re
 
 ---
 
-### ✅ Example Intuition
+###  Example Intuition
 
 > * **TV** builds slowly, stays long (high β, low α).
 > * **Radio** fades fast (low β), but every new ad reaches different people (higher α).
