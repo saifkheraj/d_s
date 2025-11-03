@@ -6,6 +6,8 @@ Vector embeddings represent data as points in multi-dimensional space. We use di
 
 **What it measures:** The straight-line distance between two points in space.
 
+![alt text](<Screenshot 2025-11-02 at 5.43.58 PM.png>)
+
 **Formula:**
 
 $$d(u, v) = \sqrt{\sum_{i=1}^{n} (u_i - v_i)^2}$$
@@ -23,6 +25,8 @@ $$d(u, v) = \sqrt{\sum_{i=1}^{n} (u_i - v_i)^2}$$
 ## Cosine Similarity
 
 **What it measures:** The angle between two vectors, regardless of their length.
+
+![alt text](<Screenshot 2025-11-02 at 5.51.43 PM.png>)
 
 **Formula:**
 
@@ -43,6 +47,34 @@ $$\text{similarity}(u, v) = \cos(\theta) = \frac{u \cdot v}{\|u\| \times \|v\|} 
 ## Dot Product
 
 **What it measures:** Both the direction and magnitude of vectors combined.
+
+![alt text](<Screenshot 2025-11-02 at 6.05.41 PM.png>)
+
+The diagram shows:
+
+- Vector u (black arrow)
+
+- Vector v (black arrow)
+
+- Projection of u onto v (shorter arrow on v)
+
+- The dashed line dropping u onto v
+
+- Angle  between u and v
+
+This projection represents how much of u points along v.
+
+**Dot Product Formula**
+
+
+
+Where:
+
+|u| = magnitude of u
+
+|v| = magnitude of v
+
+θ = directional alignment
 
 **Formula:**
 

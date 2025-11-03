@@ -617,3 +617,4 @@ This architecture provides high availability, automatic recovery, and automatic 
 │Images│ │Def  │ │er   │
 └──────┘ └─────┘ └─────┘
 ```
+
