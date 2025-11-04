@@ -563,7 +563,6 @@ Auto-recovery + Auto-scaling happen automatically
 
 ---
 
-## Interview Answer (2 minutes)
 
 **Q: Explain your deployment architecture for the fraud detection model**
 
