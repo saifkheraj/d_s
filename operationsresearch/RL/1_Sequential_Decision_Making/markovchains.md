@@ -88,18 +88,40 @@ A robot collects cans and must manage its battery:
 ### What Happens When We Take Actions?
 
 ```mermaid
-flowchart LR
-    HIGH((HIGH))
-    LOW((LOW))
-
-    HIGH -->|Search 30%<br>Reward +10| LOW
-    HIGH -->|Search 70%<br>Reward +10| HIGH
-    HIGH -->|Wait 100%<br>Reward +1| HIGH
-
-    LOW -->|Search 40%<br>Reward +10| LOW
-    LOW -->|Search 60%<br>Reward -20| HIGH
-    LOW -->|Wait 100%<br>Reward +1| LOW
-    LOW -->|Recharge 100%<br>Reward 0| HIGH
+graph TB
+    subgraph scenario1["SCENARIO 1: Battery is HIGH"]
+        H1([Current State: HIGH])
+        H1_search_high([Next State: HIGH<br/>Prob: 70%<br/>Reward: +10])
+        H1_search_low([Next State: LOW<br/>Prob: 30%<br/>Reward: +10])
+        H1_wait([Next State: HIGH<br/>Prob: 100%<br/>Reward: +1])
+        
+        H1 -->|Action: SEARCH| H1_search_high
+        H1 -->|Action: SEARCH| H1_search_low
+        H1 -->|Action: WAIT| H1_wait
+    end
+    
+    subgraph scenario2["SCENARIO 2: Battery is LOW"]
+        L1([Current State: LOW])
+        L1_search_low([Next State: LOW<br/>Prob: 40%<br/>Reward: +10])
+        L1_search_high([Next State: HIGH<br/>Prob: 60%<br/>Reward: -20])
+        L1_wait([Next State: LOW<br/>Prob: 100%<br/>Reward: +1])
+        L1_recharge([Next State: HIGH<br/>Prob: 100%<br/>Reward: 0])
+        
+        L1 -->|Action: SEARCH| L1_search_low
+        L1 -->|Action: SEARCH| L1_search_high
+        L1 -->|Action: WAIT| L1_wait
+        L1 -->|Action: RECHARGE| L1_recharge
+    end
+    
+    style H1 fill:#90EE90
+    style L1 fill:#FFB6C6
+    style H1_search_high fill:#E8F5E9
+    style H1_search_low fill:#FFEBEE
+    style H1_wait fill:#E8F5E9
+    style L1_search_low fill:#FFEBEE
+    style L1_search_high fill:#E8F5E9
+    style L1_wait fill:#FFEBEE
+    style L1_recharge fill:#E8F5E9
 
 
 ```
