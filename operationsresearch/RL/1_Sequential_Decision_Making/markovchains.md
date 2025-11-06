@@ -89,6 +89,7 @@ A robot collects cans and must manage its battery:
 
 ```mermaid
 stateDiagram-v2
+    [*] --> HIGH
     HIGH --> HIGH: Search (70%)<br/>Reward: +10
     HIGH --> LOW: Search (30%)<br/>Reward: +10
     HIGH --> HIGH: Wait (100%)<br/>Reward: +1
