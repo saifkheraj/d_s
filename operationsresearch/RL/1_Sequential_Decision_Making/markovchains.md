@@ -88,15 +88,19 @@ A robot collects cans and must manage its battery:
 ### What Happens When We Take Actions?
 
 ```mermaid
-stateDiagram-v2
-    [*] --> HIGH
-    HIGH --> HIGH: Search 70% Reward +10
-    HIGH --> LOW: Search 30% Reward +10
-    HIGH --> HIGH: Wait 100% Reward +1
-    LOW --> LOW: Search 40% Reward +10
-    LOW --> HIGH: Search 60% Reward -20
-    LOW --> LOW: Wait 100% Reward +1
-    LOW --> HIGH: Recharge 100% Reward 0
+flowchart LR
+    HIGH((HIGH))
+    LOW((LOW))
+
+    HIGH -->|Search 30%<br>Reward +10| LOW
+    HIGH -->|Search 70%<br>Reward +10| HIGH
+    HIGH -->|Wait 100%<br>Reward +1| HIGH
+
+    LOW -->|Search 40%<br>Reward +10| LOW
+    LOW -->|Search 60%<br>Reward -20| HIGH
+    LOW -->|Wait 100%<br>Reward +1| LOW
+    LOW -->|Recharge 100%<br>Reward 0| HIGH
+
 
 ```
 
