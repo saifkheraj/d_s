@@ -43,9 +43,28 @@ Image Embedding
 
 ### Process - Step by Step
 
+
+
 **Step 1: Load Pretrained Model**
 - Use ResNet-18 trained on ImageNet (large image dataset)
 - Model already understands visual patterns from pretraining
+
+
+```
+import os
+import torch
+import torchvision.transforms as transforms
+import torchvision.models as models
+from PIL import Image
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Load pretrained ResNet model
+resnet_model = models.resnet18(pretrained=True)
+# Remove the final fully connected layer
+resnet_model = torch.nn.Sequential(*(list(resnet_model.children())[:-1]))
+# Set the model to evaluation mode
+resnet_model.eval()
+```
 
 **Step 2: Preprocess Image**
 - Resize to 224×224 pixels (what ResNet expects)
@@ -53,13 +72,42 @@ Image Embedding
 - Normalize pixel values
 
 ```python
-# Brief example
-image = PIL.Image.open("pen.jpg")
-image = transforms.Compose([
-    transforms.Resize(256),
-    transforms.CenterCrop(224)
-])(image)
+# Preprocess image
+def preprocess_image(image_path):
+    image = Image.open(image_path)
+    # Define transformations to be applied to the image
+    preprocess = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ])
+    # Apply transformations
+    image_tensor = preprocess(image)
+    # Add batch dimension
+    image_tensor = image_tensor.unsqueeze(0)
+    return image_tensor
+
+
 ```
+
+**preprocess_image** prepares a raw image so it can be passed into a ResNet model.
+
+1. **Resize (256×256)**  
+   Gives the image a consistent size.
+
+2. **CenterCrop (224×224)**  
+   Matches the input size ResNet expects.
+
+3. **ToTensor**  
+   Converts the image to a PyTorch tensor shaped **[C, H, W]**.
+
+4. **Normalize**  
+   Scales pixel values using the ImageNet mean and std so the input matches the model’s training distribution.
+
+5. **Unsqueeze (add batch dimension)**  
+   Changes the shape from **[C, H, W]** to **[1, C, H, W]**, since PyTorch models require a batch dimension.
+
 
 **Step 3: Extract Features**
 - Pass image through all 18 layers
