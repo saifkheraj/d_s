@@ -471,8 +471,11 @@ Current: 1A + 1B = $350
 
 **The Reduced Cost formula captures this automatically:**
 
-$$\text{Reduced Cost}(A) = 400 - 50 = 350 \quad \text{(BEST)}$$
-$$\text{Reduced Cost}(B) = 400 - 300 = 100 \quad \text{(WORSE)}$$
+**Reduced Cost Calculations:**
+```
+Reduced Cost(A) = 400 - 50 = 350  ← BEST!
+Reduced Cost(B) = 400 - 300 = 100 ← WORSE
+```
 
 ---
 
@@ -480,7 +483,10 @@ $$\text{Reduced Cost}(B) = 400 - 300 = 100 \quad \text{(WORSE)}$$
 
 **The reduced cost formula is:**
 
-$$\text{Net Benefit} = C_{\text{new service}} - C_{\text{removed service}}$$
+**Net Benefit Formula:**
+```
+Net Benefit = C_new_service - C_removed_service
+```
 
 **This formula considers:**
 - ✓ Revenue of new service ($400)
@@ -552,7 +558,10 @@ Remove Both?
 
 **The formula does this for you:**
 
-$$\text{Which service to remove?} = \arg\max(\text{Reduced Cost})$$
+**Decision Rule:**
+```
+Which service to remove? = The one with MAXIMUM Reduced Cost
+```
 
 **In plain English:** Remove whichever service gives you the biggest net profit improvement!
 
@@ -801,18 +810,25 @@ Z      | 0   | 0   | ?   | 100 | 100 | 600
 Maximize: $Z = 100X_1 + 200X_2 + 400X_3$
 
 Subject to:
-$$1 \cdot X_1 + 1 \cdot X_2 + 0 \cdot X_3 \leq 4 \quad \text{(Doctors)}$$
-$$1 \cdot X_1 + 2 \cdot X_2 + 1 \cdot X_3 \leq 6 \quad \text{(Beds)}$$
+**Constraints:**
+```
+1·X₁ + 1·X₂ + 0·X₃ ≤ 4  (Doctors)
+1·X₁ + 2·X₂ + 1·X₃ ≤ 6  (Beds)
+```
 
 **Extract data for X₃:**
 
-$$C_3 = 400 \quad \text{(Revenue from one OR patient)}$$
+**C₃ = 400** (Revenue from one OR patient)
 
-$$A_3 = \begin{bmatrix} 0 \\ 1 \end{bmatrix} \quad \text{(Resources needed: 0 doctors, 1 bed)}$$
+**A₃ = Resources needed by X₃:**
+```
+| 0 |  ← 0 doctors needed
+| 1 |  ← 1 bed needed
+```
 
 **What do these mean?**
 - $C_3 = 400$: Each Observation Room patient brings $400 in revenue
-- $A_3 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$: Each OR patient needs 0 doctor hours and 1 bed hour
+- **A₃ = [0, 1]ᵀ**: Each OR patient needs 0 doctor hours and 1 bed hour
 
 ---
 
@@ -833,8 +849,11 @@ A basis matrix contains the **coefficients of the current basic variables** from
 
 **The constraints from the original problem:**
 
-$$1 \cdot X_1 + 1 \cdot X_2 + 0 \cdot X_3 \leq 4 \quad \text{(Doctors constraint)}$$
-$$1 \cdot X_1 + 2 \cdot X_2 + 1 \cdot X_3 \leq 6 \quad \text{(Beds constraint)}$$
+**Constraint equations:**
+```
+1·X₁ + 1·X₂ + 0·X₃ ≤ 4  (Doctors constraint)
+1·X₁ + 2·X₂ + 1·X₃ ≤ 6  (Beds constraint)
+```
 
 **Which variables are currently basic?**
 
@@ -851,7 +870,14 @@ From our optimal solution:
 
 Write out the full constraint matrix A (all variables):
 
-$$A = \begin{bmatrix} 1 & 1 & 0 \\ 1 & 2 & 1 \end{bmatrix}$$
+**Constraint Matrix A:**
+```
+     X₁  X₂  X₃
+   ┌─────────────┐
+   │  1   1   0 │  ← Doctors constraint
+   │  1   2   1 │  ← Beds constraint  
+   └─────────────┘
+```
 
 **Reading this matrix:**
 - Row 1 (Doctors): Coefficients are [1, 1, 0] for [X₁, X₂, X₃]
@@ -861,7 +887,14 @@ $$A = \begin{bmatrix} 1 & 1 & 0 \\ 1 & 2 & 1 \end{bmatrix}$$
 
 Basic variables are X₁ and X₂, so we take columns 1 and 2:
 
-$$B = \begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix}$$
+**Basis Matrix B (for basic variables X₁, X₂):**
+```
+     X₁  X₂
+   ┌───────┐
+   │  1   1 │  ← Doctors constraint coefficients
+   │  1   2 │  ← Beds constraint coefficients
+   └───────┘
+```
 
 **That's it! This is the Basis Matrix!**
 
@@ -911,7 +944,13 @@ The basic variables form an "identity" pattern in the optimal tableau, which is 
 **The basis matrix B tells us:**
 "With the 4 doctors and 6 beds currently used, how much does X₁ and X₂ consume them?"
 
-$$\begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix} \begin{bmatrix} X_1 \\ X_2 \end{bmatrix} = \begin{bmatrix} 4 \\ 6 \end{bmatrix}$$
+**Matrix equation: B × X_B = b**
+```
+┌───────┐   ┌────┐   ┌───┐
+│ 1   1 │ × │ X₁ │ = │ 4 │
+│ 1   2 │   │ X₂ │   │ 6 │
+└───────┘   └────┘   └───┘
+```
 
 This says:
 - Doctors: $1 \cdot X_1 + 1 \cdot X_2 = 4$
@@ -923,7 +962,10 @@ And we know $X_1 = 2, X_2 = 2$ satisfies this perfectly!
 
 **Formula notation:**
 
-$$B \cdot X_B = b$$
+**Matrix equation:**
+```
+B × X_B = b
+```
 
 Where:
 - $B$ = Basis matrix (coefficients of basic variables)
@@ -942,11 +984,23 @@ Why do we invert B?
 
 **This gives us:** What values should basic variables have given the resources?
 
-$$B^{-1} = \begin{bmatrix} 2 & -1 \\ -1 & 1 \end{bmatrix}$$
+**Inverse Matrix B⁻¹:**
+```
+┌────────┐
+│  2  -1 │
+│ -1   1 │
+└────────┘
+```
 
 **Verify it works:**
 
-$$\begin{bmatrix} 2 & -1 \\ -1 & 1 \end{bmatrix} \begin{bmatrix} 4 \\ 6 \end{bmatrix} = \begin{bmatrix} 2(4) + (-1)(6) \\ (-1)(4) + 1(6) \end{bmatrix} = \begin{bmatrix} 8-6 \\ -4+6 \end{bmatrix} = \begin{bmatrix} 2 \\ 2 \end{bmatrix}$$
+**Verification: B⁻¹ × b = X_B**
+```
+┌────────┐   ┌───┐   ┌─────────────────┐   ┌─────┐   ┌───┐
+│  2  -1 │ × │ 4 │ = │ 2(4) + (-1)(6) │ = │ 8-6 │ = │ 2 │
+│ -1   1 │   │ 6 │   │(-1)(4) + 1(6)  │   │-4+6 │   │ 2 │
+└────────┘   └───┘   └─────────────────┘   └─────┘   └───┘
+```
 
 **Perfect!** We get $X_1 = 2, X_2 = 2$ ✓
 
@@ -979,9 +1033,23 @@ If the solution was: $X_1 = 0, X_2 = 1, X_3 = 2$
 
 Then basic matrix would be (columns 2 and 3 only):
 
-$$A = \begin{bmatrix} 1 & 1 & 0 \\ 1 & 2 & 1 \end{bmatrix}$$
+**Constraint Matrix A:**
+```
+     X₁  X₂  X₃
+   ┌─────────────┐
+   │  1   1   0 │
+   │  1   2   1 │
+   └─────────────┘
+```
 
-$$B = \begin{bmatrix} 1 & 0 \\ 2 & 1 \end{bmatrix} \quad \text{(columns for X₂ and X₃)}$$
+**Basis Matrix B (columns for X₂ and X₃):**
+```
+     X₂  X₃
+   ┌───────┐
+   │  1   0 │
+   │  2   1 │
+   └───────┘
+```
 
 **Different basis = Different B matrix!**
 
@@ -998,15 +1066,36 @@ $$B = \begin{bmatrix} 1 & 0 \\ 2 & 1 \end{bmatrix} \quad \text{(columns for X₂
 
 **Calculate $B^{-1}$ (inverse of matrix B):**
 
-For a 2×2 matrix $\begin{bmatrix} a & b \\ c & d \end{bmatrix}$, the inverse formula is:
+For a 2×2 matrix:
+```
+┌───────┐
+│ a   b │
+│ c   d │
+└───────┘
+```
 
-$$B^{-1} = \frac{1}{ad-bc} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
+The inverse formula is:
+```
+B⁻¹ = (1/(ad-bc)) × ┌────────┐
+                      │  d  -b │
+                      │ -c   a │
+                      └────────┘
+```
 
 **Our calculation:**
 
-$$\text{Determinant} = (1)(2) - (1)(1) = 2 - 1 = 1$$
+**Determinant calculation:**
+```
+Determinant = (1)(2) - (1)(1) = 2 - 1 = 1
+```
 
-$$B^{-1} = \frac{1}{1} \begin{bmatrix} 2 & -1 \\ -1 & 1 \end{bmatrix} = \begin{bmatrix} 2 & -1 \\ -1 & 1 \end{bmatrix}$$
+**Our calculation:**
+```
+B⁻¹ = (1/1) × ┌────────┐ = ┌────────┐
+              │  2  -1 │   │  2  -1 │
+              │ -1   1 │   │ -1   1 │
+              └────────┘   └────────┘
+```
 
 ---
 
@@ -1014,7 +1103,10 @@ $$B^{-1} = \frac{1}{1} \begin{bmatrix} 2 & -1 \\ -1 & 1 \end{bmatrix} = \begin{b
 
 **IMPORTANT RULE:** 
 
-$$\boxed{\text{We ALWAYS check } B^{-1} \times A_j \text{ where } j = \text{NON-BASIC variable}}$$
+**📝 IMPORTANT RULE:**
+```
+We ALWAYS check B⁻¹ × A_j where j = NON-BASIC variable
+```
 
 **NOT always A₃!** The subscript changes based on which variable is non-basic.
 
@@ -1025,18 +1117,39 @@ $$\boxed{\text{We ALWAYS check } B^{-1} \times A_j \text{ where } j = \text{NON-
 Therefore, check: $B^{-1} \times A_3$ (because X₃ is non-basic)
 
 **Formula:**
-$$\text{Impact of X}_3 \text{ entering} = B^{-1} \times A_3$$
+**Impact formula:**
+```
+Impact of X₃ entering = B⁻¹ × A₃
+```
 
 **Calculation:**
 
-$$B^{-1} \times A_3 = \begin{bmatrix} 2 & -1 \\ -1 & 1 \end{bmatrix} \times \begin{bmatrix} 0 \\ 1 \end{bmatrix}$$
+**Matrix multiplication: B⁻¹ × A₃**
+```
+┌────────┐   ┌───┐
+│  2  -1 │ × │ 0 │
+│ -1   1 │   │ 1 │
+└────────┘   └───┘
+```
 
 **Matrix multiplication (2×2 × 2×1 = 2×1):**
 
-$$\begin{bmatrix} 2 & -1 \\ -1 & 1 \end{bmatrix} \times \begin{bmatrix} 0 \\ 1 \end{bmatrix} = \begin{bmatrix} (2)(0) + (-1)(1) \\ (-1)(0) + (1)(1) \end{bmatrix} = \begin{bmatrix} 0 - 1 \\ 0 + 1 \end{bmatrix} = \begin{bmatrix} -1 \\ 1 \end{bmatrix}$$
+**Step-by-step calculation:**
+```
+┌────────┐   ┌───┐   ┌───────────────────┐   ┌───────┐   ┌────┐
+│  2  -1 │ × │ 0 │ = │ (2)(0) + (-1)(1) │ = │ 0 - 1 │ = │ -1 │
+│ -1   1 │   │ 1 │   │(-1)(0) + (1)(1)  │   │ 0 + 1 │   │  1 │
+└────────┘   └───┘   └───────────────────┘   └───────┘   └────┘
+```
 
 **Result:**
-$$\text{X}_3 \text{ column in tableau} = \begin{bmatrix} -1 \\ 1 \end{bmatrix}$$
+**Result - X₃ column in tableau:**
+```
+┌────┐
+│ -1 │  ← Effect on X₁
+│  1 │  ← Effect on X₂
+└────┘
+```
 
 **Interpretation:**
 - When we increase $X_3$ by 1 unit, $X_1$ changes by -1 (decreases by 1)
@@ -1075,35 +1188,71 @@ Iteration 3: Basic = {X₁,X₃}  Non-basic = {X₂}  → Check: B_new2⁻¹ × 
 
 **Define $C_B$** (the objective coefficients of basic variables):
 
-$$C_B = \begin{bmatrix} C_1 \\ C_2 \end{bmatrix} = \begin{bmatrix} 100 \\ 200 \end{bmatrix}$$
+**C_B (objective coefficients of basic variables):**
+```
+┌──────┐
+│ C₁ │   ┌─────┐
+│ C₂ │ = │ 100 │
+└──────┘   │ 200 │
+           └─────┘
+```
 
 **The Reduced Cost Formula:**
-
-$$\text{Reduced Cost}(X_3) = C_B^T \times B^{-1} \times A_3 - C_3$$
+```
+Reduced Cost(X₃) = C_B^T × B⁻¹ × A₃ - C₃
+```
 
 **Breaking down each operation:**
 
 **Step 4a:** Transpose $C_B$ to get $C_B^T$ (convert column vector to row vector)
 
-$$C_B^T = \begin{bmatrix} 100 & 200 \end{bmatrix} \quad \text{(now a row vector)}$$
+**C_B^T (transposed to row vector):**
+```
+┌─────────────┐
+│ 100   200 │
+└─────────────┘
+```
 
 **Step 4b:** Calculate $C_B^T \times B^{-1}$ (row × matrix)
 
-$$C_B^T \times B^{-1} = \begin{bmatrix} 100 & 200 \end{bmatrix} \times \begin{bmatrix} 2 & -1 \\ -1 & 1 \end{bmatrix}$$
+**Step 4b: C_B^T × B⁻¹**
+```
+┌─────────────┐   ┌────────┐
+│ 100   200 │ × │  2  -1 │
+└─────────────┘   │ -1   1 │
+                └────────┘
+```
 
-$$= \begin{bmatrix} (100)(2) + (200)(-1) & (100)(-1) + (200)(1) \end{bmatrix}$$
+**Calculation:**
+```
+= ┌───────────────────────────────────────────────────────────┐
+  │ (100)(2) + (200)(-1)     (100)(-1) + (200)(1) │
+  └───────────────────────────────────────────────────────────┘
+```
 
-$$= \begin{bmatrix} 200 - 200 & -100 + 200 \end{bmatrix} = \begin{bmatrix} 0 & 100 \end{bmatrix}$$
+**Result:**
+```
+= ┌─────────────────────────────┐ = ┌─────────────┐
+  │ 200-200   -100+200 │   │  0    100 │
+  └─────────────────────────────┘   └─────────────┘
+```
 
-**Step 4c:** Multiply the result by $A_3$ (row × column)
+**Step 4c:** Multiply the result by A₃ (row × column)
 
-$$C_B^T \times B^{-1} \times A_3 = \begin{bmatrix} 0 & 100 \end{bmatrix} \times \begin{bmatrix} 0 \\ 1 \end{bmatrix}$$
-
-$$= (0)(0) + (100)(1) = 100$$
+**Final multiplication:**
+```
+┌─────────────┐   ┌───┐
+│  0    100 │ × │ 0 │ = (0)(0) + (100)(1) = 100
+└─────────────┘   │ 1 │
+                └───┘
+```
 
 **Step 4d:** Subtract $C_3$ to get reduced cost
 
-$$\text{Reduced Cost}(X_3) = 100 - 400 = -300$$
+**Final calculation:**
+```
+Reduced Cost(X₃) = 100 - 400 = -300
+```
 
 ---
 
@@ -1116,7 +1265,10 @@ $$\text{Reduced Cost}(X_3) = 100 - 400 = -300$$
 
 **In our case:**
 
-$$\text{Reduced Cost}(X_3) = -300 < 0 \implies \boxed{\text{X}_3 \text{ SHOULD ENTER}}$$
+**Decision:**
+```
+Reduced Cost(X₃) = -300 < 0  ⇒  X₃ SHOULD ENTER! ✓
+```
 
 **Interpretation:**
 - For every 1 unit of $X_3$ we add, profit increases by 300
@@ -1130,12 +1282,12 @@ $$\text{Reduced Cost}(X_3) = -300 < 0 \implies \boxed{\text{X}_3 \text{ SHOULD E
 
 | Formula | Calculation | Meaning |
 |---------|------------|---------|
-| $A_3 = \begin{bmatrix} 0 \\ 1 \end{bmatrix}$ | From problem | Resource needs of X₃ |
-| $C_3 = 400$ | From problem | Revenue coefficient of X₃ |
-| $B = \begin{bmatrix} 1 & 1 \\ 1 & 2 \end{bmatrix}$ | Basis matrix | Current basic variables' coefficients |
-| $B^{-1} = \begin{bmatrix} 2 & -1 \\ -1 & 1 \end{bmatrix}$ | Matrix inversion | How to transform variables |
-| $B^{-1} \times A_3 = \begin{bmatrix} -1 \\ 1 \end{bmatrix}$ | Matrix multiply | X₃'s effect on current basis |
-| $C_B^T \times B^{-1} \times A_3 - C_3 = -300$ | Full formula | Net benefit per unit X₃ |
+| **A₃ = [0, 1]ᵀ** | From problem | Resource needs of X₃ |
+| **C₃ = 400** | From problem | Revenue coefficient of X₃ |
+| **B = [[1,1], [1,2]]** | Basis matrix | Current basic variables' coefficients |
+| **B⁻¹ = [[2,-1], [-1,1]]** | Matrix inversion | How to transform variables |
+| **B⁻¹ × A₃ = [-1, 1]ᵀ** | Matrix multiply | X₃'s effect on current basis |
+| **C_B^T × B⁻¹ × A₃ - C₃ = -300** | Full formula | Net benefit per unit X₃ |
 
 ---
 
