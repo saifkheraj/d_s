@@ -425,7 +425,9 @@ Subject to:
 
 The constraint matrix is:
 
-$$A = \begin{bmatrix} 2 & 3 \end{bmatrix}$$
+```
+A = [ 2   3 ]
+```
 
 **Solving this LP:** The solution is $x_1 = 5, x_2 = 0$ or $x_1 = 0, x_2 = 3.33$ or $x_1 = 2.5, x_2 = 1.67$, etc.
 
@@ -444,7 +446,12 @@ Subject to (flow balance):
 
 The constraint matrix is:
 
-$$A = \begin{bmatrix} 1 & 1 \\ -1 & 0 \\ 0 & -1 \end{bmatrix}$$
+```
+    x₁₂  x₁₃
+A = [ 1    1 ]  (Node 1)
+    [-1    0 ]  (Node 2)
+    [ 0   -1 ]  (Node 3)
+```
 
 **Solving this LP:** The solution is automatically $x_{12} = 2, x_{13} = 3$ (all integers!)
 
@@ -454,7 +461,12 @@ Even without asking for integers, the LP solver gives you integers!
 
 Look at the constraint matrix:
 
-$$A = \begin{bmatrix} 1 & 1 \\ -1 & 0 \\ 0 & -1 \end{bmatrix}$$
+```
+    x₁₂  x₁₃
+A = [ 1    1 ]  (Node 1)
+    [-1    0 ]  (Node 2)
+    [ 0   -1 ]  (Node 3)
+```
 
 **The special structure:**
 - Column 1 ($x_{12}$): has a $+1$ in row 1 and $-1$ in row 2, zeros elsewhere
@@ -482,7 +494,10 @@ If the determinant of $A$ is $\pm 1$, then $A^{-1}$ has nice integer properties,
 
 **Example 1: Simple $2 \times 2$ matrix**
 
-$$M = \begin{bmatrix} 2 & 3 \\ 1 & 4 \end{bmatrix}$$
+```
+M = [ 2  3 ]
+    [ 1  4 ]
+```
 
 $\det(M) = 2 \cdot 4 - 3 \cdot 1 = 8 - 3 = 5$
 
@@ -490,7 +505,10 @@ Not unimodular! (Determinant is 5, not $\pm 1$)
 
 **Example 2: Network flow $2 \times 2$ matrix**
 
-$$M = \begin{bmatrix} 1 & 1 \\ -1 & 0 \end{bmatrix}$$
+```
+M = [ 1   1 ]
+    [-1   0 ]
+```
 
 $\det(M) = 1 \cdot 0 - 1 \cdot (-1) = 0 + 1 = 1$
 
@@ -508,13 +526,19 @@ $$A^{-1} = \frac{1}{\det(A)} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
 
 **When $\det(A) = 1$:**
 
-$$A^{-1} = \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
+```
+A⁻¹ = [ d  -b ]
+      [-c   a ]
+```
 
 All entries are integers! So if $b$ is integer, then $x = A^{-1} b$ is also integer.
 
 **When $\det(A) = 5$:**
 
-$$A^{-1} = \frac{1}{5} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
+```
+A⁻¹ = (1/5) [ d  -b ]
+            [-c   a ]
+```
 
 Now you divide by 5, getting fractions. So $x$ can be fractional.
 
