@@ -486,9 +486,10 @@ This special structure is what makes the matrix "totally unimodular."
 **Totally Unimodular:** Every square piece of the matrix is unimodular
 
 
-# Understanding Total Unimodularity (TU) — Proper, Simplex-Accurate Explanation
+# Understanding Total Unimodularity (TU)
+## Proper, Simplex-Accurate Explanation
 
-This explanation avoids the common but incorrect shortcut (x = A^{-1}b) and instead uses the **correct simplex interpretation**. It shows why **total unimodularity guarantees integer solutions** for linear programs with integer right-hand sides.
+This explanation avoids the common but incorrect shortcut ($x = A^{-1}b$) and instead uses the correct simplex interpretation. It shows why total unimodularity guarantees integer solutions for linear programs with integer right-hand sides.
 
 ---
 
@@ -496,28 +497,23 @@ This explanation avoids the common but incorrect shortcut (x = A^{-1}b) and inst
 
 In a linear program of the form:
 
-[
-Ax = b, \quad x \ge 0,
-]
+$$Ax = b, \quad x \geq 0$$
 
-simplex does **not** compute (x = A^{-1}b). Instead, it works by selecting a **basis**.
+Simplex **does not** compute $x = A^{-1}b$. Instead, it works by **selecting a basis**.
 
-### A basis is:
+**A basis is:**
+- A set of $m$ columns of $A$ (where $A$ has $m$ constraints)
+- Forming a square, invertible matrix $B$
 
-* A set of (m) columns of (A) (where (A) has (m) constraints)
-* Forming a square, invertible matrix (B)
+**Simplex computes:**
 
-### Simplex computes:
+$$x_B = B^{-1}b, \quad x_N = 0$$
 
-[
-x_B = B^{-1} b, \qquad x_N = 0.
-]
 Where:
+- $x_B$ are the **basic variables** (one per column in the basis)
+- $x_N$ are **nonbasic variables**, set to zero
 
-* (x_B) are the **basic variables** (one per column in the basis)
-* (x_N) are **nonbasic variables**, set to zero
-
-This is how every basic feasible solution is obtained.
+This is how every **basic feasible solution** is obtained.
 
 ---
 
@@ -525,54 +521,41 @@ This is how every basic feasible solution is obtained.
 
 Now consider a basis matrix:
 
-[
-B = \begin{bmatrix} a & b \ c & d \end{bmatrix}.
-]
+$$B = \begin{bmatrix} a & b \\ c & d \end{bmatrix}$$
 
 Its inverse is:
 
-[
-B^{-1} = \frac{1}{\det(B)}
-\begin{bmatrix}
-d & -b \
--c & a
-\end{bmatrix}.
-]
+$$B^{-1} = \frac{1}{\det(B)} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
 
-### Two key observations:
+**Two key observations:**
 
-1. **The numerator is always an integer matrix** (because it contains only sums and products of the entries of (B))
-2. **All fractions come only from the denominator** — the determinant
+1. The numerator is always an **integer matrix** (because it contains only sums and products of the entries of $B$)
+2. All fractions come **only from the denominator** — the determinant
 
-So:
-
-* If (\det(B) = \pm 1), then (B^{-1}) is an **integer matrix**
-* If (b) is integer, then (x_B = B^{-1}b) is also integer
-* If (\det(B) = 2, 3, 4, 5, \dots**, fractions appear
+**Therefore:**
+- If $\det(B) = \pm 1$, then $B^{-1}$ is an integer matrix
+- If $b$ is integer, then $x_B = B^{-1}b$ is also integer
+- If $\det(B) = 2, 3, 4, 5, \ldots$ fractions appear
 
 ---
 
 ## 3. What "Totally Unimodular" Actually Means
 
-A matrix (A) is **totally unimodular (TU)** if **every square submatrix** (including every possible basis matrix (B)) has determinant:
+A matrix $A$ is **totally unimodular (TU)** if every square submatrix (including every possible basis matrix $B$) has determinant:
 
-[
-\det(B) \in {-1, 0, +1}.
-]
+$$\det(B) \in \{-1, 0, +1\}$$
 
-### Why this matters:
+**Why this matters:**
 
-If every basis matrix satisfies (\det(B) = \pm 1), then:
-
-* Every (B^{-1}) is an **integer matrix**
-* Every basic feasible solution (x_B = B^{-1}b) is **integer (when b is integer)**
-* Therefore, **the LP has an integer optimal solution without needing integer programming**
+If every basis matrix satisfies $\det(B) = \pm 1$, then:
+- Every $B^{-1}$ is an **integer matrix**
+- Every basic feasible solution $x_B = B^{-1}b$ is **integer** (when $b$ is integer)
+- Therefore, the LP has an **integer optimal solution** without needing integer programming
 
 This is the core reason behind integrality in:
-
-* Network flow problems
-* Matching problems
-* Transportation problems
+- Network flow problems
+- Matching problems
+- Transportation problems
 
 These models have TU matrices by structure.
 
@@ -580,52 +563,50 @@ These models have TU matrices by structure.
 
 ## 4. Example: Determinant = 1 vs Determinant = 5
 
-### If (\det(B) = 1):
+**If $\det(B) = 1$:**
 
-[
-B^{-1} =
-\begin{bmatrix}
-d & -b \
--c & a
-\end{bmatrix}
-]
+$$B^{-1} = \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
+
 All integer entries.
 
-### If (\det(B) = 5):
+**If $\det(B) = 5$:**
 
-[
-B^{-1} =
-\frac{1}{5}
-\begin{bmatrix}
-d & -b \
--c & a
-\end{bmatrix}
-]
-Fractions appear → (x_B) may be fractional even if (b) is integer.
+$$B^{-1} = \frac{1}{5} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
 
-This small 2×2 example demonstrates the general principle.
+Fractions appear → $x_B$ may be fractional even if $b$ is integer.
+
+This small $2 \times 2$ example demonstrates the general principle.
 
 ---
 
 ## 5. Final Summary (Simplex-Correct)
 
-| Concept          | Meaning                               |
-| ---------------- | ------------------------------------- |
-| Simplex computes | (x_B = B^{-1} b), not (A^{-1}b)       |
-| TU matrix        | Every basis has determinant ±1        |
-| Determinant ±1   | Basis inverse is integer              |
-| Integer (b)      | Produces integer basic solutions      |
-| Result           | The LP solution is guaranteed integer |
-
-Total unimodularity is therefore a **structural guarantee** of integrality, derived directly from how simplex computes basic feasible solutions using basis inverses.
-
-If every basis keeps you in the integer lattice, the entire LP stays integer.
+| Concept | Meaning |
+|---------|---------|
+| **Simplex computes** | $x_B = B^{-1}b$, not $A^{-1}b$ |
+| **TU matrix** | Every basis has determinant $\pm 1$ |
+| **Determinant $\pm 1$** | Basis inverse is integer |
+| **Integer $b$** | Produces integer basic solutions |
+| **Result** | The LP solution is guaranteed integer |
 
 ---
 
-If you'd like, I can also create a **visual diagram**, a **geometric interpretation**, or a **PhD-level explanation** of TU and integrality.
+## Key Insight
 
+**Total unimodularity is therefore a structural guarantee of integrality, derived directly from how simplex computes basic feasible solutions using basis inverses.**
 
+$$\boxed{\text{If every basis keeps you in the integer lattice, the entire LP stays integer.}}$$
+
+---
+
+## Further Extensions
+
+This explanation can be extended with:
+- Visual diagrams of basis selection and simplex iterations
+- Geometric interpretation of integer vertices in polytopes
+- PhD-level analysis of TU matrices and their algebraic properties
+- Characterization theorems (e.g., Ghouila-Houri, Seymour)
+- Applications to combinatorial optimization problems
 
 
 **Why does this matter?** When solving linear programs with simplex, we compute:
