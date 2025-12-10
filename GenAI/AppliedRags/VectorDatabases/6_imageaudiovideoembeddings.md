@@ -243,6 +243,16 @@ Collapse to 1D (audio embedding)
 Audio Embedding
 ```
 
+1. Load audio
+2. Mel Spectrogram
+    - STFT (Fourier Transform)      ← THIS IS WHERE FOURIER HAPPENS
+    - Mel scaling
+    - Spectrogram (image)
+3. Prepare image for model
+4. ResNet → embedding
+5. Compare embeddings
+
+
 ### Process - Step by Step
 
 **Step 1: Load Audio**
