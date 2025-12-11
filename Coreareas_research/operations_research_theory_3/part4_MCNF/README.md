@@ -520,27 +520,58 @@ In the simplex method, the solution is computed as:
 
 $$x = A^{-1} b$$
 
-For a $2 \times 2$ matrix:
+**What does this mean?** You take the inverse of matrix $A$, multiply by the right-hand side vector $b$, and get your answer $x$.
 
-$$A^{-1} = \frac{1}{\det(A)} \begin{bmatrix} d & -b \\ -c & a \end{bmatrix}$$
-
-**When $\det(A) = 1$:**
+**For a $2 \times 2$ matrix**, the inverse formula is:
 
 ```
-A⁻¹ = [ d  -b ]
-      [-c   a ]
+If A = [ a  b ]
+       [ c  d ]
+
+Then A⁻¹ = (1/det(A)) [  d  -b ]
+                       [ -c   a ]
 ```
 
-All entries are integers! So if $b$ is integer, then $x = A^{-1} b$ is also integer.
+**The KEY insight:** Look at the denominator: we divide by $\det(A)$.
 
-**When $\det(A) = 5$:**
+---
+
+**Example 1: When $\det(A) = 1$ (Totally Unimodular)**
 
 ```
-A⁻¹ = (1/5) [ d  -b ]
-            [-c   a ]
+A⁻¹ = (1/1) [  d  -b ]   =  [  d  -b ]
+            [ -c   a ]       [ -c   a ]
 ```
 
-Now you divide by 5, getting fractions. So $x$ can be fractional.
+**Notice:** No division! The entries are all integers (if $a, b, c, d$ are integers).
+
+So if we compute $x = A^{-1} b$ with integer $b$:
+$$x = \begin{bmatrix} d & -b \\ -c & a \end{bmatrix} \times b = \text{integer vector}$$
+
+✓ **Integers everywhere!**
+
+---
+
+**Example 2: When $\det(A) = 5$ (NOT Totally Unimodular)**
+
+```
+A⁻¹ = (1/5) [  d  -b ]   =  [ d/5  -b/5 ]
+            [ -c   a ]       [-c/5   a/5 ]
+```
+
+**Notice:** We're dividing by 5! Now the entries become fractions.
+
+So if we compute $x = A^{-1} b$ with integer $b$:
+$$x = \begin{bmatrix} d/5 & -b/5 \\ -c/5 & a/5 \end{bmatrix} \times b = \text{FRACTIONAL vector}$$
+
+❌ **Fractional entries appear!**
+
+---
+
+**The Lesson:**
+- **$\det(A) = \pm 1$**: Divide by 1 → integers stay integers ✓
+- **$\det(A) = 5$**: Divide by 5 → integers become fractions ✗
+- **Network flow**: $\det(A) = \pm 1$ always → get integers for free!
 
 ### Why Network Flow Matrices Are Always Totally Unimodular
 
