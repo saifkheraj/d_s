@@ -26,7 +26,7 @@
 ### 🎯 **Key Variables**
 
 | **Variable** | **Meaning** | **Example** | **Range** |
-|--------------|-------------|-------------|-----------||
+|--------------|-------------|-------------|-----------|
 | $d_{ij}$ | Distance/time on arc $(i,j)$ | $d_{12} = 5$ means "5 units from node 1 to node 2" | $\geq 0$ |
 | $X_{ij}$ | Binary: 1 if arc $(i,j)$ is in shortest path, 0 otherwise | $X_{23} = 1$ means "path uses arc 2→3" | $\{0, 1\}$ |
 | $s$ | Source node (starting point) | Node where journey begins | Single node |
