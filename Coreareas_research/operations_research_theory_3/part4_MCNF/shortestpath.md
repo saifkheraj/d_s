@@ -366,9 +366,9 @@ actual_time = 5 * 2.5 * 1.2 = 15  # minutes
 ```
 
 #### Mathematical Formulation
-$$\text{Minimize } \sum_{(i,j) \in \text{route}} \text{travel\_time}_{ij}(t) \cdot X_{ij}$$
+$$\text{Minimize } \sum_{(i,j) \in \text{route}} \text{travel time}_{ij}(t) \cdot X_{ij}$$
 
-Where $\text{travel\_time}_{ij}(t)$ depends on current time $t$ and traffic conditions.
+Where $\text{travel time}_{ij}(t)$ depends on current time $t$ and traffic conditions.
 
 ### 2. 🌐 Internet Packet Routing
 
