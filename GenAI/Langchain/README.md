@@ -1,5 +1,8 @@
 # LangChain Overview
 
+
+Article Published: https://saifalikheraj.medium.com/a-real-world-langchain-guide-and-playbook-6254830cdb4b
+
 ## 1. Introduction
 
 LangChain provides an environment to build and integrate large language model (LLM) applications with external data sources and workflows. It simplifies connecting models like GPT-4 into natural language processing (NLP) solutions for developers.
@@ -69,4 +72,8 @@ Agents in LangChain can call external tools (search engines, databases, APIs) ba
 
 ---
 
+
+
+
 *This README summarizes LangChain’s architecture and prompt engineering practices for building robust LLM applications.*
+
