@@ -1,3 +1,5 @@
+Full Article: https://saifalikheraj.medium.com/network-flow-optimization-from-portland-roastery-to-emergency-how-to-power-network-flow-183e2d22bb49
+
 # Network Flow in Integer Programming
 
 ## Overview
