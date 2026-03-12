@@ -22,18 +22,25 @@ How to adapt and align LLMs.
 | **Finetuning/** | Transfer learning, PEFT (LoRA, QLoRA, adapters) |
 | **RLHF/** | Instruction tuning, reward modeling, PPO |
 
-### 3_RAG/
-Everything retrieval-augmented generation — unified from multiple sources.
+### 3_Prompting/
+How to communicate effectively with LLMs — applies to everything.
 
 | Folder | Contents |
 |--------|----------|
-| **Core/** | RAG from scratch (PyTorch, HuggingFace implementations) |
-| **Pipeline/** | Document loaders, text splitters, vector databases, embeddings, retrievers |
-| **Advanced/** | Pre-retrieval query optimization, indexing optimization, post-retrieval techniques |
-| **Prompting/** | In-context learning, prompt templates, document summarization |
+| **PromptEngineering.md** | Techniques: zero-shot, few-shot, chain-of-thought, self-consistency, role-based |
+| **InContextLearningandPromptTemplates/** | LangChain prompt templates, in-context learning |
+| **DocumentSummarization/** | Summarization techniques and notebooks |
+
+### 4_RAG/
+Retrieval-augmented generation — theory, optimization, and working apps.
+
+| Folder | Contents |
+|--------|----------|
+| **Theory/** | RAG from scratch (PyTorch, HuggingFace), document loaders, text splitters, vector databases, embeddings, retrievers |
+| **Advanced/** | Pre-retrieval query/indexing optimization, post-retrieval techniques |
 | **Apps/** | Gradio apps, Streamlit project, AI-powered apps |
 
-### 4_Agents/
+### 5_Agents/
 Autonomous LLM systems.
 
 | Folder | Contents |
@@ -42,7 +49,7 @@ Autonomous LLM systems.
 | **LangchainAgent/** | Langchain-based agent patterns |
 | **MCP/** | Model Context Protocol |
 
-### 5_Production/
+### 6_Production/
 Deploying and scaling LLM systems.
 
 | Folder | Contents |
